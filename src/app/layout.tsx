@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from 'next/script'
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -24,8 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* <Script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></Script> */}
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}
       >
         {children}
       </body>
