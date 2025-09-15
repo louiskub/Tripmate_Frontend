@@ -1,11 +1,11 @@
 "use client"
 import { MenuButton, Button } from '@/components/buttons';
-import { PageOptionDropdown } from './navbar-button';
+import { PageOptionDropdown } from '../navbar-button';
 import { SubBody, ButtonText, SmallTag } from '@/components/TextStyles';
 import { paths } from '@/config/paths.config'
 import { useBoolean } from '@/hooks/use-boolean'
 
-import { ProfileDropdown } from '@/components/navbar/variants/user-navbar'
+import { ProfileDropdown } from '@/components/navbar/default-nav-variants/user-navbar'
 
 import ProfileIcon from '@/assets/icons/profile.svg'
 import AccountIcon from '@/assets/icons/person.svg'

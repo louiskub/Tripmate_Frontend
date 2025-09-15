@@ -6,7 +6,7 @@ import BellIcon from '@/assets/icons/bell.svg'
 
 export default function AdminNavbar() {
     return (
-        <nav className="w-full h-14 px-7 relative bg-white border-b border-light-gray inline-flex justify-between items-center">
+        <nav className="w-full h-14 px-7 fixed bg-white border-b border-light-gray inline-flex justify-between items-center">
             <a href={paths.home} className="flex items-center gap-[3px]">
                 <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>

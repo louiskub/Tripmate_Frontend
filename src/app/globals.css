@@ -25,7 +25,8 @@
     --color-transparent-white: #FFFFFF33;
     --color-transparent-black: #00000033;
 
-    --bg-authen: url('/assets/wave2.jpg');
+    /* --bg-authen: url('/images/wave2.jpg'); */
+    
 
     --boxshadow-lifted: 0px 0px 5px 0px rgba(0,0,0,0.20);
 }

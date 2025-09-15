@@ -1,9 +1,9 @@
 import DefaultPage from '@/components/layout/default-layout';
 
-export default function Home() {
+export default function ReviewHistory() {
   return (
     <DefaultPage>
-      Home
+      Review History
     </DefaultPage>
   );
 }

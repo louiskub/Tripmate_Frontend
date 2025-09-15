@@ -3,11 +3,11 @@
 import { usePathname } from 'next/navigation'
 import { paths } from '@/config/paths.config'
 
-import AuthNavbar from './variants/auth-navbar'
-import AdminNavbar from './variants/admin-navbar'
-import GuestNavbar from './variants/guest-navbar'
-import UserNavbar from './variants/user-navbar'
-import BookNavbar from './variants/book-navbar'
+import AuthNavbar from './default-nav-variants/auth-navbar'
+import AdminNavbar from './default-nav-variants/admin-navbar'
+import GuestNavbar from './default-nav-variants/guest-navbar'
+import UserNavbar from './default-nav-variants/user-navbar'
+import BookNavbar from './default-nav-variants/book-navbar'
 
 const Navbar = () => {
   const isAuthenticated: boolean = true;
@@ -20,9 +20,9 @@ const Navbar = () => {
     return <AuthNavbar />
   case paths.admin:
     return <AdminNavbar />
-  case paths.book.hotel:
+  case paths.hotel.book:
     return <BookNavbar book_state={1}/>
-  case paths.book.restaurant:
+  case paths.restaurant.book:
     return <BookNavbar book_state={1} restaurant/>
   default:
     return isAuthenticated ? 
