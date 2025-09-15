@@ -4,7 +4,7 @@ import { paths } from '@/config/paths.config';
 
 export default function AuthNavbar() {
     return (
-        <nav className="w-full h-14 px-7 relative bg-white border-b border-light-gray inline-flex justify-between items-center overflow-hidden">
+        <nav className="w-full h-14 px-7 fixed bg-white border-b border-light-gray inline-flex justify-between items-center overflow-hidden">
             <a href={paths.home} className="flex items-center gap-[3px]">
                 <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
@@ -15,8 +15,8 @@ export default function AuthNavbar() {
                 </a>
             </div>
             <div className="-translate-x-1/2 left-1/2 absolute flex justify-center items-center gap-2.5">
-                <MenuButton text='Trip' href={paths.trip.all_trip}></MenuButton>
-                <MenuButton text='Group' href={paths.group.all_group}></MenuButton>
+                <MenuButton text='Trip' href={paths.trip.all}></MenuButton>
+                <MenuButton text='Group' href={paths.group.all}></MenuButton>
             </div>
         </nav>
     )

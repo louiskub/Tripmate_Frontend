@@ -1,6 +1,6 @@
 "use client"
 import { MenuButton, Button } from '@/components/buttons';
-import { PageOptionDropdown } from './navbar-button';
+import { PageOptionDropdown } from '../navbar-button';
 import { SubBody, ButtonText } from '@/components/TextStyles';
 import { paths } from '@/config/paths.config'
 import { useBoolean } from '@/hooks/use-boolean'
@@ -53,8 +53,8 @@ export default function UserNavbar() {
                 </Button>
             </div>
             <div className="-translate-x-1/2 left-1/2 absolute flex justify-center items-center gap-2.5">
-                <MenuButton text='Trip' href={paths.trip.all_trip}></MenuButton>
-                <MenuButton text='Group' href={paths.group.all_group} />
+                <MenuButton text='Trip' href={paths.trip.all}></MenuButton>
+                <MenuButton text='Group' href={paths.group.all} />
             </div>
             {showDropdown.value && <ProfileDropdown />}
         </nav>
