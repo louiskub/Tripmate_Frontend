@@ -1,10 +1,11 @@
 ### TripMate Website
  A tarveling website, for booking hotel, rental car, guide, restaurant and planning trips.
 
-- [Getting Started](##Getting-Started)
-- [Project Structure](##Project-Structure)
-- [Learn More](##Learn-More)
-- [Deploy on Vercel](##Deploy-on-Vercel)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Learn More](#learn-more)
+- [Deploy on Vercel](#deploy-on-vercel)
+  
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
