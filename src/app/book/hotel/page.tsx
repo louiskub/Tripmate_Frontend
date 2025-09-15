@@ -4,7 +4,7 @@ export default function LoginPage() {
     return (
         <div>
             <Navbar />
-            <h1>Login</h1>
+            <h1>Book Hotel</h1>
         </div>
     )
 }
