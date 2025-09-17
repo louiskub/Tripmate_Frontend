@@ -4,7 +4,8 @@ export const paths = {
   auth: {
     register: '/auth/register',
     login: '/auth/login',
-    provider: '/auth/register-provider'
+    provider: '/auth/register-provider',
+    forgot_password: '/auth/forgot-password'
   },
   account: {
     profile: '/account/profile',

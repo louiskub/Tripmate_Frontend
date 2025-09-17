@@ -1,69 +1,66 @@
-import Navbar from '@/components/navbar/navbar'
+"use client"
+
+import Navbar from '@/components/navbar/navbar';
+import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/textStyles'
+import { FieldInput, PasswordInput } from '@/components/inputs'
+import { Button, TextButton } from '@/components/buttons';
+import { useState } from 'react';
+import { paths } from '@/config/paths.config';
+import PasswordValidate from '@/components/password-validate';
+
+
 
 export default function RegisterPage() {
-  return (
-    <div className="flex bg-[url('/images/wave2.jpg')] shadow-[var(--boxshadow-lifted)] h-[100vh] bg-cover bg-center">
-      <Navbar />
-      <div className="-translate-1/2 left-1/2 top-1/2 w-[600px] h-[586px] relative bg-gradient-to-br from-translucent-white/50 to-transparent-white/20 rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)] shadow-[inset_0px_0px_20px_0px_rgba(255,255,255,0.20)] outline outline-2 outline-offset-[-2px] outline-translucent-white/50 backdrop-blur-lg">
-        <div className="w-96 h-[480px] pb-16 left-[80px] top-[106px] absolute inline-flex flex-col justify-between items-center">
-          <div className="self-stretch flex flex-col justify-start items-start gap-2.5">
-              <div className="self-stretch flex flex-col justify-start items-start">
-                  <div className="text-center justify-start text-black/20 text-base font-bold font-['Manrope']">Username</div>
-                  <div data-property-1="Default" data-show-blinking-cursor="true" data-show-icon="false" data-show-placeholder="false" data-show-text="true" className="w-96 h-9 min-w-24 p-2.5 bg-dark-white rounded-[10px] shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] inline-flex justify-start items-center gap-1" />
-              </div>
-              <div className="self-stretch flex flex-col justify-start items-start">
-                  <div className="text-center justify-start text-black/20 text-base font-bold font-['Manrope']">Email</div>
-                  <div data-property-1="Default" data-show-blinking-cursor="true" data-show-icon="false" data-show-placeholder="false" data-show-text="true" className="w-96 h-9 min-w-24 p-2.5 bg-dark-white rounded-[10px] shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] inline-flex justify-start items-center gap-1" />
-              </div>
-              <div className="self-stretch flex flex-col justify-start items-start">
-                  <div className="text-center justify-start text-black/20 text-base font-bold font-['Manrope']">Password</div>
-                  <div data-property-1="Variant3" data-show-blinking-cursor="true" data-show-icon="false" data-show-placeholder="true" data-show-text="true" className="self-stretch h-9 min-w-24 px-2.5 bg-dark-white rounded-[10px] shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] inline-flex justify-between items-center overflow-hidden">
-                      <div className="text-center justify-start text-black/20 text-[10px] font-normal font-['Manrope']">⬤⬤⬤⬤⬤⬤⬤⬤⬤⬤⬤</div>
-                      <div data-property-1="hide button" className="w-4 h-4 relative overflow-hidden">
-                          <div className="w-4 h-4 left-[0.56px] top-[1.12px] absolute bg-stone-900" />
-                      </div>
-                  </div>
-                  <div className="self-stretch px-2.5 pt-[5px] flex flex-col justify-start items-start">
-                      <div className="inline-flex justify-start items-center">
-                          <div className="w-5 h-5 relative overflow-hidden">
-                              <div className="w-3.5 h-3.5 left-[2.50px] top-[2.50px] absolute bg-dark-blue" />
-                          </div>
-                          <div className="text-center justify-start text-dark-blue text-sm font-medium font-['Manrope']">Minimum 8 characters</div>
-                      </div>
-                      <div className="inline-flex justify-start items-center">
-                          <div className="w-5 h-5 relative overflow-hidden">
-                              <div className="w-3.5 h-3.5 left-[2.50px] top-[2.50px] absolute bg-black/20" />
-                          </div>
-                          <div className="text-center justify-start text-black/20 text-sm font-medium font-['Manrope']">Number</div>
-                      </div>
-                      <div className="inline-flex justify-start items-center">
-                          <div className="w-5 h-5 relative overflow-hidden">
-                              <div className="w-3.5 h-3.5 left-[2.50px] top-[2.50px] absolute bg-dark-blue" />
-                          </div>
-                          <div className="text-center justify-start text-dark-blue text-sm font-medium font-['Manrope']">Lowercase</div>
-                      </div>
-                      <div className="inline-flex justify-start items-center">
-                          <div className="w-5 h-5 relative overflow-hidden">
-                              <div className="w-3.5 h-3.5 left-[2.50px] top-[2.50px] absolute bg-dark-blue" />
-                          </div>
-                          <div className="text-center justify-start text-dark-blue text-sm font-medium font-['Manrope']">Uppercase</div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          <div className="self-stretch flex flex-col justify-start items-center gap-2.5">
-              <div data-property-1="Default" className="w-96 h-9 min-w-24 px-5 py-3 rounded-[10px] outline outline-2 outline-offset-[-2px] outline-stone-900 inline-flex justify-center items-center gap-2.5 overflow-hidden">
-                  <div className="text-center justify-start text-stone-900 text-base font-bold font-['Manrope']">Register</div>
-              </div>
-              <div className="inline-flex justify-center items-center gap-[5px]">
-                  <div className="text-center justify-start text-stone-900 text-base font-medium font-['Manrope']">Already have an account?</div>
-                  <div className="text-center justify-start text-dark-blue text-base font-bold font-['Manrope'] underline">Login</div>
-              </div>
-          </div>
-      </div>
-      <div className="left-[250px] top-[23px] absolute text-center justify-start text-stone-900 text-2xl font-extrabold font-['Manrope']">Register</div>
-  </div>
-  </div>
-  )
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [email, setEmail] = useState("")
 
+    const [isPasswordValid, setIsPasswordValid] = useState(false)
+
+    const handleRegister = () => [
+        console.log("register")
+    ]
+
+    return (
+        <div className="bg-[url('/images/wave2.jpg')] shadow-[var(--boxshadow-lifted)] h-[100vh] bg-cover bg-center">
+            <Navbar />
+            <div className="flex flex-col relative -translate-1/2 left-1/2 top-1/2 w-[600px] bg-gradient-to-br from-translucent-white to-transparent-white rounded-2xl shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)]  border-2 border-translucent-white backdrop-blur-lg">
+                <PageTitle className='text-center mt-6 mb-14'>Register</PageTitle>
+                <div className="flex-1 w-full items-center flex flex-col px-20 justify-between">
+
+                    <div className='w-full flex flex-col gap-3.5'>
+                        <div className="flex flex-col w-full">
+                            <Body className='text-custom-gray'>Username</Body>
+                            <FieldInput value={username} onChange={(e) => setUsername(e.target.value)}></FieldInput>
+                        </div>
+                        <div className="flex flex-col w-full">
+                            <Body className='text-custom-gray'>Email</Body>
+                            <FieldInput value={email} onChange={(e) => setEmail(e.target.value)}></FieldInput>
+                        </div>
+                        <div className="flex flex-col w-full">
+                            <Body className='text-custom-gray'>password</Body>
+                            <PasswordInput type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                            <PasswordValidate password={password}
+                            onValidationChange={(valid) => setIsPasswordValid(valid)}/>
+                        </div>
+                    </div>
+                    
+                    <div className='flex flex-col gap-1 w-full mb-14 mt-12'>
+                        <Button 
+                        className='w-full border-2 rounded-[10px] border-custom-black' 
+                        text='Register'
+                        onClick={handleRegister}
+                        disabled={!isPasswordValid} />
+                    
+                        <div className="self-stretch flex flex-col justify-start items-center gap-2.5">
+                            <span className='flex items-center'>
+                                <Body>Already have an account?</Body>
+                                <TextButton as='a' href={paths.auth.login} text='Login' className='px-2 underline text-dark-blue'/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }

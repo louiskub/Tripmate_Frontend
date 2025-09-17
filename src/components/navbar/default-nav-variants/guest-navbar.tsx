@@ -1,5 +1,5 @@
 import { MenuButton, Button } from '@/components/buttons';
-import { SubBody } from '@/components/TextStyles';
+import { SubBody } from '@/components/textStyles';
 import { paths } from '@/config/paths.config'
 
 

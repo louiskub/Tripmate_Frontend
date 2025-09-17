@@ -10,13 +10,15 @@ import UserNavbar from './default-nav-variants/user-navbar'
 import BookNavbar from './default-nav-variants/book-navbar'
 
 const Navbar = () => {
-  const isAuthenticated: boolean = true;
+  const isAuthenticated: boolean = false;
   const pathname = usePathname()
 
   switch (pathname) {
   case paths.auth.login:
     return <AuthNavbar />
   case paths.auth.register:
+    return <AuthNavbar />
+  case paths.auth.forgot_password:
     return <AuthNavbar />
   case paths.admin:
     return <AdminNavbar />

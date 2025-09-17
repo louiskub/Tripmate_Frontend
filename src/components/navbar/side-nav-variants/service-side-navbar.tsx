@@ -10,28 +10,28 @@ import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import MapIcon from '@/assets/icons/map.svg'
 
 
-export default function AuthNavbar() {
+export default function ServiceNavbar(current: string) {
     return (
         <div className='w-56 h-full border-r-light-gray self-stretch bg-custom-white border border-pale-blue flex flex-col gap-4'>
             <div>
-                <PageOptionSide text='Hotels' href={paths.hotel.all}>
+                <PageOptionSide text='Hotels' href={paths.hotel.all} active={current === 'hotel'}>
                     <HotelIcon />
                 </PageOptionSide>
-                <PageOptionSide text='Restaurants' href={paths.restaurant.all}>
+                <PageOptionSide text='Restaurants' href={paths.restaurant.all} active={current === 'restaurant'}>
                     <RestaurantIcon />
                 </PageOptionSide>
-                <PageOptionSide text='Rental Cars' href={paths.rental_car.all}>
+                <PageOptionSide text='Rental Cars' href={paths.rental_car.all} active={current === 'rental_car'}>
                     <CarIcon />
                 </PageOptionSide>
-                <PageOptionSide text='Guides' href={paths.guide.all}>
+                <PageOptionSide text='Guides' href={paths.guide.all} active={current === 'guide'}>
                     <GuideIcon />
                 </PageOptionSide>
-                <PageOptionSide text='Tourist Attractions' href={paths.attraction.all}>
+                <PageOptionSide text='Tourist Attractions' href={paths.attraction.all} active={current === 'attraction'}>
                     <LocationIcon />
                 </PageOptionSide>
             </div>
             <div>
-                <PageOptionSide text='Map' href={paths.map}>
+                <PageOptionSide text='Map' href={paths.map}  active={current === 'map'}>
                     <MapIcon />
                 </PageOptionSide>
             </div>

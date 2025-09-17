@@ -10,7 +10,8 @@ import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import MapIcon from '@/assets/icons/map.svg'
 
 
-export default function AuthNavbar() {
+
+export default function Admin() {
     return (
         <div className='w-56 h-full border-r-light-gray self-stretch bg-custom-white border border-pale-blue flex flex-col gap-2'>
             <div>
