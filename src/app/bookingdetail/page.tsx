@@ -59,9 +59,12 @@ export default function BookingDetail() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-6 flex justify-center">
-            <button className="h-10 px-5 bg-blue-500 text-white font-bold rounded-lg shadow-md hover:bg-blue-700">
+          <div className="self-stretch px-6 py-4 bg-custom-white rounded-[10px] inline-flex flex-col justify-center items-center gap-2.5">
+            <button className="h-10 w-50 px-5 bg-blue-500 text-white font-bold rounded-2xl shadow-md hover:bg-blue-700">
               View your bookings
+            </button>
+            <button className="h-10 w-50 px-5 bg-red-500 text-white font-bold rounded-2xl shadow-md hover:bg-red-600">
+              Cancel Booking
             </button>
           </div>
         </main>
