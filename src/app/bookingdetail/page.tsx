@@ -1,8 +1,5 @@
 import Navbar from '@/components/navbar/nav'
-import { RiHotelBedFill } from "react-icons/ri";
-import { IoRestaurant } from "react-icons/io5";
-import { FaCarSide, FaMapMarkerAlt, FaMapMarkedAlt } from "react-icons/fa";
-import { BsSendFill } from "react-icons/bs";
+import SideNav from '@/components/navbar/sidenav'
 
 export default function BookingDetail() {
   return (
@@ -10,14 +7,7 @@ export default function BookingDetail() {
     <Navbar />
 
       <div className="flex h-[calc(100%-56px)]">
-        <aside className="w-56 h-screen bg-white border-r border-gray-200 flex flex-col gap-4 p-3 gap-y-2">
-            {logos.map((item) => (
-                <button key={item.name} className="flex items-center gap-3 h-10 px-4 rounded-md text-gray-800 hover:bg-blue-50">
-                <span className="w-5 h-5 mt-1">{item.icon}</span>
-                <span className="text-base font-medium">{item.name}</span>
-                </button>
-            ))}
-        </aside>
+        <SideNav />
 
         <main className="flex-1 p-7 flex flex-col gap-5 overflow-auto">
           <div className="bg-white rounded-lg p-5 flex flex-col gap-5">
@@ -79,12 +69,3 @@ export default function BookingDetail() {
     </div>
   );
 }
-
-const logos = [
-            { name: "Hotels", icon: <RiHotelBedFill /> },
-            { name: "Restaurants", icon: <IoRestaurant /> },
-            { name: "Rental Cars", icon: <FaCarSide /> },
-            { name: "Guides", icon: <BsSendFill /> },
-            { name: "Tourist Attractions", icon: <FaMapMarkerAlt /> },
-            { name: "Map", icon: <FaMapMarkedAlt /> },
-            ];
