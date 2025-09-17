@@ -1,4 +1,4 @@
-import {ButtonText, SubBody, Subtitle, Body} from '@/components/TextStyles'
+import {ButtonText, Subtitle} from '@/components/textStyles';
 import React, { FC, ReactNode } from "react";
 
 type ButtonProps = {
@@ -6,15 +6,36 @@ type ButtonProps = {
     href?: string;
     text?: string;
     onClick?: () => void;
+    disabled?: boolean;
     className?: string;
     children?: React.ReactNode;
 };
 
-export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, className, href} : ButtonProps) => {
+export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href} : ButtonProps) => {
     const Comp = as;
     return (
         <Comp 
-            className={`flex justify-center items-center gap-1 ${text ? 'min-w-24 px-5' : 'aspect-square'} hover:cursor-pointer rounded-2xl  h-9 ${className || 'hover:text-dark-blue'}`}
+            className={`inline-flex justify-center items-center gap-1 hover:cursor-pointer rounded-2xl h-9 select-none
+                ${(text) ? 'px-5' : 'aspect-square'} 
+                ${className || 'hover:text-dark-blue'}
+                ${disabled && 'pointer-events-none opacity-50'}`}
+            href={as === "a" ? href : undefined}
+            onClick={as === "button" ? onClick : undefined}
+        >
+            {children}
+
+            {text && <ButtonText>{text}</ButtonText>}
+        </Comp>
+    );
+};
+
+export const TextButton: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href} : ButtonProps) => {
+    const Comp = as;
+    return (
+        <Comp 
+            className={`inline-flex justify-center items-center gap-1 hover:cursor-pointer rounded-2xl py-2 select-none
+                ${className}
+                ${disabled && 'pointer-events-none opacity-50'}`}
             href={as === "a" ? href : undefined}
             onClick={as === "button" ? onClick : undefined}
         >
@@ -44,7 +65,7 @@ export const MenuButton: FC<MenuButtonProps> = ({text, href, className} : MenuBu
             className={`flex justify-center items-center px-5 h-10 min-w-24 hover:cursor-pointer hover:text-dark-blue active:translate-y-0.5 rounded-2xl ${className || 'text-custom-black'}`}
             href={href}
         >
-            {text && <Subtitle>{text}</Subtitle>}
+            {text && <Subtitle className={className}>{text}</Subtitle>}
         </a>
     );
 };
