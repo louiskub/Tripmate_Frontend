@@ -1,4 +1,4 @@
-import Navbar from '@/components/navbar/default'
+import Navbar from '@/components/navbar/nav'
 
 export default function LoginPage() {
     return (

@@ -1,4 +1,4 @@
-import Navbar from '@/components/navbar/default'
+import Navbar from '@/components/navbar/nav'
 import { RiHotelBedFill } from "react-icons/ri";
 import { IoRestaurant } from "react-icons/io5";
 import { FaCarSide, FaMapMarkerAlt, FaMapMarkedAlt } from "react-icons/fa";
