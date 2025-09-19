@@ -1,4 +1,4 @@
-import {ButtonText, Subtitle} from '@/components/textStyles';
+import {ButtonText, Subtitle} from '@/components/TextStyles';
 import React, { FC, ReactNode } from "react";
 
 type ButtonProps = {

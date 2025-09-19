@@ -1,4 +1,4 @@
-import {ButtonText, SubBody, Subtitle, Body} from '@/components/textStyles'
+import {ButtonText, SubBody, Subtitle, Body} from '@/components/TextStyles'
 import React, { FC, ReactNode } from "react";
 
 type PageOptionProps = {
