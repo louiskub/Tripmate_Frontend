@@ -13,7 +13,7 @@
 
     --color-dark-red: #950606;
     --color-red: #FF2121;
-    --color-light-red: #FF8480;
+    --color-light-red: #E55D58;
 
     --color-custom-white: #FFFFFF;
     --color-dark-white: #F7F7F9;
@@ -28,8 +28,8 @@
 
     /* --bg-authen: url('/images/wave2.jpg'); */
     
-
     --boxshadow-lifted: 0px 0px 5px 0px rgba(0,0,0,0.20);
+    --light-shadow: 0px 0px 4px 0px rgba(0,0,0,0.10);
 }
 
 * {
@@ -48,4 +48,14 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 0px 1000px transparent inset !important;
   -webkit-text-fill-color: inherit !important; /* keep text color */
   transition: background-color 5000s ease-in-out 0s !important;
+}
+
+@keyframes beatingHeart {
+  0%, 40%, 90% { transform: scale(1); }
+  20%, 60% { transform: scale(1.2); }
+  80% { transform: scale(1.1); }
+}
+
+.filled-heart {
+  animation: beatingHeart 1s ease-in-out;
 }

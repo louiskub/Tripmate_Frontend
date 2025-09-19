@@ -9,8 +9,11 @@ import GuideIcon from '@/assets/icons/guide.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import MapIcon from '@/assets/icons/map.svg'
 
+type SideNavBarProps = {
+    current?: string
+}
 
-export default function ServiceNavbar(current: string) {
+export default function ServiceNavbar({ current }: SideNavBarProps) {
     return (
         <div className='w-56 h-full border-r-light-gray self-stretch bg-custom-white border border-pale-blue flex flex-col gap-4'>
             <div>

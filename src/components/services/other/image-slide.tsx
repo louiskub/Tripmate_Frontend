@@ -1,0 +1,88 @@
+import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
+import { Button, TextButton } from '@/components/buttons/buttons'
+import { useState, ReactNode } from 'react';
+import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
+
+type ImageSlideProps = {
+    pictures: Array<string>
+    children: ReactNode
+}
+
+const ImageSlide = ({ pictures, children }: ImageSlideProps) => {
+    const [index, setIndex] = useState(1);
+    const [transition, setTransition] = useState(true);
+    
+    const slides = [pictures[pictures.length - 1], ...pictures, pictures[0]];
+
+    const next = () => {
+        setIndex(prev => prev + 1);
+        setTransition(true);
+    };
+
+    const prev = () => {
+        setIndex(prev => prev - 1);
+        setTransition(true);
+    };
+
+    const handleTransitionEnd = () => {
+        if (index === slides.length - 1) {
+            setTransition(false);
+            setIndex(1);
+        }
+        if (index === 0) {
+            setTransition(false);
+            setIndex(slides.length - 2);
+        }
+    };
+
+    return (
+        <div className="w-44 aspect-square relative rounded-[10px] overflow-hidden group">            
+            <div
+                className={`flex z-100 ${transition ? 'transition-transform duration-300' : ''}`}
+                style={{ transform: `translateX(-${index * 100}%)` }}
+                onTransitionEnd={handleTransitionEnd}
+            >
+                {slides.map((pic, i) => (
+                <img key={i} className="w-44 flex-shrink-0 aspect-square" src={pic} />
+                ))}
+            </div>
+
+            <div className={`absolute z-10 inset-0 flex justify-between px-0.5 items-center pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 transition-all`}>
+                <Button
+                    onClick={prev}
+                    className='w-4 bg-translucent-white'>
+                    <ArrowIcon width='10' className=' -scale-100'/>
+                </Button>
+
+                <Button
+                    onClick={next}
+                    className='w-4 bg-translucent-white'>
+                    <ArrowIcon width='10'/>
+                </Button>
+            </div>
+
+            <div className="w-full h-full left-0 top-0 absolute bg-gradient-to-b from-white/0 to-black/30 z-2" />
+
+            <div className="absolute z-2 bottom-1 w-full flex gap-1 justify-center items-end">
+            {pictures.map((_, i) => {
+                const realIndex = (index - 1 + pictures.length) % pictures.length;
+                return (
+                <div
+                    key={i}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    realIndex === i
+                        ? 'bg-custom-white/90'
+                        : 'bg-translucent-white'
+                    }`}
+                />
+                );
+            })}
+            </div>
+
+            {children}
+
+        </div>
+    )
+}
+
+export default ImageSlide

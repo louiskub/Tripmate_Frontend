@@ -15,7 +15,7 @@ export const Title: FC<TextProps> = ({ children, className }) => (
 );
 
 export const Subtitle: FC<TextProps> = ({ children, className }) => (
-    <h3 className={`text-lg font-semibold tracking-wide ${className || ""}`}>{children}</h3>
+    <h3 className={`text-lg font-semibold ${className || ""}`}>{children}</h3>
 );
 
 export const Body: FC<TextProps> = ({ children, className }) => (

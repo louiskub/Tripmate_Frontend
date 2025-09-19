@@ -95,7 +95,6 @@ export const Dropdown: FC<DropdownProps> = ({
 };
 
 export const PasswordInput: FC<FieldInputProps> = ({
-    type = "text",
     children,
     className,
     value,
@@ -104,6 +103,6 @@ export const PasswordInput: FC<FieldInputProps> = ({
     }) => (
     <div className={`flex items-center gap-2 px-2 text-custom-black bg-custom-white rounded-[10px] h-9 shadow-[var(--boxshadow-lifted)] ${className}`}>
         {children}
-        <input className="h-full w-full focus:outline-0 appearance-none bg-transparent" type={type} value={value} placeholder={placeholder} onChange={onChange} />
+        <input className="h-full w-full focus:outline-0 appearance-none bg-transparent" type='password' value={value} placeholder={placeholder} onChange={onChange} />
     </div>
 );

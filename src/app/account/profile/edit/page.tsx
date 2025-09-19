@@ -44,7 +44,7 @@ export default function EditProfile(profile: ProfileData) {
             as='a'
             href={paths.account.profile}
             icon_after text='Cancel'
-            className='!px-3 shadow-[var(--boxshadow-lifted)] bg-custom-white'
+            className='!px-3 border bg-custom-white'
             >
         </Button>
         <Button 

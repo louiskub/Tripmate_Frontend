@@ -4,7 +4,7 @@ import React, { Children, FC, ReactNode } from "react";
 
 type DefaultPageProps = {
     children: ReactNode;
-    current_tab: string
+    current_tab?: string
 };
 
 const ProfilePageLayout: FC<DefaultPageProps> = ({ children, current_tab }) => {
