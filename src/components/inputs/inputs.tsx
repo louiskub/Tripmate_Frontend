@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, ChangeEvent, useState, Children } from "react";
-import { ButtonText, Body } from '@/components/textStyles'
+import { ButtonText, Body } from '@/components/text-styles/textStyles'
 import DropdownIcon from '@/assets/icons/pagination-arrow.svg'
 
 type FieldInputProps = {

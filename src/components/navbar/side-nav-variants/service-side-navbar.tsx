@@ -1,4 +1,4 @@
-import { MenuButton, Button } from '@/components/buttons';
+import { MenuButton, Button } from '@/components/buttons/buttons';
 import { PageOptionSide} from '../navbar-button';
 import { paths } from '@/config/paths.config'
 

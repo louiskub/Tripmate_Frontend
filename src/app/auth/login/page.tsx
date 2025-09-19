@@ -1,9 +1,9 @@
 "use client"
 
 import Navbar from '@/components/navbar/navbar';
-import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/textStyles'
-import { FieldInput, PasswordInput } from '@/components/inputs'
-import { Button, TextButton } from '@/components/buttons'
+import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
+import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
+import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState } from 'react';
 import { paths } from '@/config/paths.config'
 

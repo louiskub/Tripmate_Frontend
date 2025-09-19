@@ -1,7 +1,7 @@
 "use client"
-import { MenuButton, Button } from '@/components/buttons';
+import { MenuButton, Button } from '@/components/buttons/buttons';
 import { PageOptionDropdown } from '../navbar-button';
-import { SubBody, ButtonText } from '@/components/textStyles';
+import { SubBody, ButtonText } from '@/components/text-styles/textStyles';
 import { paths } from '@/config/paths.config'
 import { useBoolean } from '@/hooks/use-boolean'
 

@@ -1,4 +1,4 @@
-import {ButtonText, SubBody, Subtitle, Body} from '@/components/textStyles'
+import {ButtonText, SubBody, Subtitle, Body} from '@/components/text-styles/textStyles'
 import React, { FC, ReactNode } from "react";
 
 type PageOptionProps = {
@@ -28,7 +28,7 @@ export const PageOptionDropdown: FC<PageOptionProps> = ({children, text, classNa
 export const PageOptionSide: FC<PageOptionProps> = ({children, text, className, href, active = false} : PageOptionProps) => {
     return (
         <a 
-            className={`w-full px-5 flex items-center gap-2.5 hover:cursor-pointer h-10 ${className } ${active ? 'text-dark-blue' : 'hover:text-dark-blue'}`}
+            className={`w-full px-5 flex items-center gap-2.5 hover:cursor-pointer h-10 ${className } ${active ? ' bg-pale-blue' : 'hover:text-dark-blue'}`}
             href={href}
         >   
             <span className='flex items-center justify-center w-5 h-5'>

@@ -1,4 +1,4 @@
-import {ButtonText, Subtitle} from '@/components/textStyles';
+import {ButtonText, Subtitle} from '@/components/text-styles/textStyles';
 import React, { FC, ReactNode } from "react";
 
 type ButtonProps = {
@@ -9,22 +9,25 @@ type ButtonProps = {
     disabled?: boolean;
     className?: string;
     children?: React.ReactNode;
+    icon_after?: boolean
 };
 
-export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href} : ButtonProps) => {
+export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href, icon_after=false} : ButtonProps) => {
     const Comp = as;
     return (
         <Comp 
-            className={`inline-flex justify-center items-center gap-1 hover:cursor-pointer rounded-2xl h-9 select-none
+            className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-2xl h-9 select-none
                 ${(text) ? 'px-5' : 'aspect-square'} 
                 ${className || 'hover:text-dark-blue'}
                 ${disabled && 'pointer-events-none opacity-50'}`}
             href={as === "a" ? href : undefined}
             onClick={as === "button" ? onClick : undefined}
         >
-            {children}
+            {!icon_after && children}
 
             {text && <ButtonText>{text}</ButtonText>}
+
+            {icon_after && children}
         </Comp>
     );
 };
