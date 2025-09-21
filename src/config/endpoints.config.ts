@@ -1,19 +1,8 @@
-export const paths = {
-  roots: '/',
-  auth: {
-    register: '/register',
-    login: '/login',
-  },
-  account: {
-    root: '/account',
-    edit: '/account/edit',
-    'change-password': '/account/change-password',
-    manage: '/account/manage',
-  },
-  plan: {
-    root: '/plan',
-  },
-  visualize: {
-    root: '/visualize',
-  },
+export const endpoints = {
+  baseURL: "http://blabla",
+  hotel: {
+    all: "/hotel/all",
+    detail: (hotel_id: string) => `/hotel/${hotel_id}`,
+    book: (hotel_id: string) => `/hotel/book/${hotel_id}`,
+  }
 }

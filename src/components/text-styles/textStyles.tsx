@@ -23,7 +23,7 @@ export const Body: FC<TextProps> = ({ children, className }) => (
 );
 
 export const ButtonText: FC<TextProps> = ({ children, className }) => (
-    <span className={`text-base font-semibold h-content tracking-wide ${className || ""}`}>{children}</span>
+    <span className={`text-base font-bold h-content tracking-wide ${className || ""}`}>{children}</span>
 );
 
 export const SubBody: FC<TextProps> = ({ children, className }) => (
@@ -31,7 +31,7 @@ export const SubBody: FC<TextProps> = ({ children, className }) => (
 );
 
 export const SmallTag: FC<TextProps> = ({ children, className }) => (
-    <span className={`text-xs font-medium ${className || ""}`}>{children}</span>
+    <span className={`text-xs font-semibold ${className || ""}`}>{children}</span>
 );
 
 

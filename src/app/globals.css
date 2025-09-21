@@ -59,3 +59,26 @@ input:-webkit-autofill:active {
 .filled-heart {
   animation: beatingHeart 1s ease-in-out;
 }
+
+.custom-scroll-bar::-webkit-scrollbar {
+  width: 5px;               /* scrollbar width */
+  height: 6px;              /* scrollbar height (for horizontal) */
+}
+
+.custom-scroll-bar::-webkit-scrollbar-track {
+  background: var(--color-dark-white);  /* track background */
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb {
+  background-color: var(--color-light-blue);
+  border-radius: 100px;
+  border: 2px solid transparent; 
+}
+
+.custom-scroll-bar::-webkit-scrollbar-button {
+  display: none;
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-dark-blue); /* darker on hover */
+}

@@ -5,10 +5,11 @@ import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
 
 type ImageSlideProps = {
     pictures: Array<string>
-    children: ReactNode
+    children?: ReactNode
+    className?: string
 }
 
-const ImageSlide = ({ pictures, children }: ImageSlideProps) => {
+const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
     const [index, setIndex] = useState(1);
     const [transition, setTransition] = useState(true);
     
@@ -36,14 +37,16 @@ const ImageSlide = ({ pictures, children }: ImageSlideProps) => {
     };
 
     return (
-        <div className="w-44 aspect-square relative rounded-[10px] overflow-hidden group">            
+        <div className={`relative rounded-[10px] overflow-hidden group ${className ? className: 'w-44 aspect-square'}`}>            
             <div
-                className={`flex z-100 ${transition ? 'transition-transform duration-300' : ''}`}
+                className={`w-full h-full flex z-100 ${transition ? 'transition-transform duration-300' : ''}`}
                 style={{ transform: `translateX(-${index * 100}%)` }}
                 onTransitionEnd={handleTransitionEnd}
             >
                 {slides.map((pic, i) => (
-                <img key={i} className="w-44 flex-shrink-0 aspect-square" src={pic} />
+                <img key={i} 
+                    className="flex-shrink-0 w-full h-full object-cover"
+                    src={pic} />
                 ))}
             </div>
 

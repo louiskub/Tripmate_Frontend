@@ -19,34 +19,34 @@ export const paths = {
     trip: '/account/my-trip',
   },
   trip: {
-    all: '/trip',
+    all: '/trip/all',
   },
   group: {
-    all: '/group',
+    all: '/group/all',
   },
   hotel: {
-    all: '/hotel',
-    detail: 'hotel/detail',
+    all: '/hotel/all',
+    detail: '/hotel/1',
     book: '/hotel/book',
   },
   restaurant: {
-    all: '/restaurant',
-    detail: 'restaurant/detail',
+    all: '/restaurant/all',
+    detail: 'restaurant/',
     book: '/restaurant/book',
   },
   rental_car: {
-    all: '/rental-car',
-    detail: 'rental-car/detail',
+    all: '/rental-car/all',
+    detail: 'rental-car/',
     book: '/rental-car/book',
   },
   guide: {
-    all: '/guide',
-    detail: 'guide/detail',
+    all: '/guide/all',
+    detail: 'guide/',
     book: '/guide/book',
   },
   attraction: {
-    all: '/attraction',
-    detail: 'attraction/detail',
+    all: '/attraction/all',
+    detail: 'attraction/',
   },
   map: '/map',
 }

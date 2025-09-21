@@ -25,7 +25,7 @@ type BookNavbarProps = {
 export default function BookNavbar({restaurant = false, book_state}: BookNavbarProps) {
     const showDropdown = useBoolean(false);
     return (
-        <nav className="w-full h-14 px-7 relative bg-white border-b border-light-gray inline-flex justify-between items-center">
+        <nav className="w-full h-14 px-7 sticky top-0 z-10 bg-white border-b border-light-gray inline-flex justify-between items-center">
             <a href={paths.home} className="flex items-center gap-[3px]">
                 <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>

@@ -15,7 +15,7 @@ type SideNavBarProps = {
 
 export default function ServiceNavbar({ current }: SideNavBarProps) {
     return (
-        <div className='w-56 h-full border-r-light-gray self-stretch bg-custom-white border border-pale-blue flex flex-col gap-4'>
+        <div className='min-w-56 sticky top-14 z-10 h-[calc(100vh-56px)] border-r-light-gray bg-custom-white border border-pale-blue flex flex-col gap-4'>
             <div>
                 <PageOptionSide text='Hotels' href={paths.hotel.all} active={current === 'hotel'}>
                     <HotelIcon />

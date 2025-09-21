@@ -16,7 +16,7 @@ export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick,
     const Comp = as;
     return (
         <Comp 
-            className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-2xl select-none
+            className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-[10px] select-none
                 ${(text) ? 'px-5 h-9' : 'aspect-square'} 
                 ${className || 'hover:text-dark-blue'}
                 ${disabled && 'pointer-events-none opacity-50'}`}

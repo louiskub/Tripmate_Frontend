@@ -1,13 +1,3 @@
-import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
-import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
-import { FemaleGender, GenderInput, MaleGender, OtherGender } from '@/components/inputs/gender-input'
-import { Button, TextButton } from '@/components/buttons/buttons'
-import { useState } from 'react';
-import { paths } from '@/config/paths.config'
-import ProfilePageLayout from '@/components/layout/profile-page-layout';
-import EditIcon from '@/assets/icons/edit.svg'
-import PasswordValidate from '@/components/other/password-validate';
-import { useBoolean } from '@/hooks/use-boolean'
 
 const ServiceFilter = () => {
     return (

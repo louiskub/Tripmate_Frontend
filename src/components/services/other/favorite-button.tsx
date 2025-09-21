@@ -1,7 +1,6 @@
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState } from 'react';
-import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
 import HeartIcon from '@/assets/icons/heart.svg'
 import HeartFilledIcon from '@/assets/icons/heart-filled.svg'
 import { useBoolean } from '@/hooks/use-boolean';

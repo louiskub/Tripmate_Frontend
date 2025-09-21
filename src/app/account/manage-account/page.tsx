@@ -68,7 +68,7 @@ const ChangePasswordPopup = ( { Close }: PopupProps ) => {
     }
 
     return (
-    <div className='fixed top-0 left-0 bg-transparent-black w-full h-full flex justify-center items-center'>
+    <div className='fixed top-0 left-0 bg-transparent-black w-full h-full flex justify-center items-center z-10'>
     <div className="relative w-[480px] px-12 py-5 bg-white rounded-[20px] shadow-[var(--boxshadow-lifted)] flex flex-col gap-5">
         <div className="self-stretch flex flex-col justify-center items-center">
             <ButtonText>Change Password</ButtonText>
