@@ -18,14 +18,14 @@ import UploadIcon from '@/assets/icons/upload.svg'
 export function UploadImg() {
     console.log("UploadImg component rendered");
         return (
-      <div className="flex flex-col items-center justify-center w-[300px] h-64 border-2 border-dashed border-blue-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+      <div className="flex flex-col items-center justify-center w-[300px] h-64 border-2 border-dashed border-blue-300 rounded-lg bg-custom-white hover:bg-light-gray transition-colors">
         <div className="text-center">
-          <p className="text-2xl font-semibold text-gray-600">Upload Image</p>
-          <p className="mt-1 text-gray-400">Restaurant photo</p>
+          <p className="text-2xl font-semibold text-[#7C7676]">Upload Image</p>
+          <p className="mt-1 text-[#ccc]">Restaurant photo</p>
           <div className="mt-6">
             <label
               htmlFor="file-upload"
-              className="cursor-pointer rounded-md bg-white px-4 py-2 text-sm font-medium text-blue-500 border border-blue-500 hover:bg-blue-50 transition-all"
+              className="cursor-pointer rounded-md bg-white px-4 py-2 text-sm font-medium text-[#3AADFF] border border-[#3AADFF] hover:bg-blue-50 transition-all"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +41,7 @@ export function UploadImg() {
               </svg>
               <span>Choose File</span>
             </label>
-            <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+            <input id="file-upload" name="file-upload" type="file" className="sr-only" accept='image/*'/>
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@ export function UploadImg() {
 const NavItem = ({ label, active }: { label: string; active?: boolean }) => (
   <div
     className={`px-4 py-2 rounded-md cursor-pointer ${
-      active ? "bg-blue-100 font-semibold" : "hover:bg-gray-100"
+      active ? "bg-light-blue font-semibold" : "hover:bg-pale-blue"
     }`}
   >
     {label}
@@ -61,7 +61,7 @@ const NavItem = ({ label, active }: { label: string; active?: boolean }) => (
 
 export function AccountNav() {
   return (
-    <aside className="w-48 bg-white border-r border-gray-200 flex flex-col gap-2 p-2">
+    <div className="w-48 bg-custom-white flex flex-col gap-2 p-2">
       <NavItem label="Total Cars" active />
       <NavItem label="Available Cars" />
       <NavItem label="Active Rentals" />
@@ -70,7 +70,7 @@ export function AccountNav() {
         <NavItem label="Add New Car" />
         <NavItem label="Remove Car" />
       </div>
-    </aside>
+    </div>
   );
 };
 

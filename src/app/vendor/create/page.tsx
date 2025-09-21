@@ -68,7 +68,7 @@ const RentalForm = () => {
   };
 
   return (
-    <form className="flex flex-col gap-3 bg-white p-6 rounded-lg border border-blue-300 flex-1">
+    <form className="flex flex-col gap-3 bg-custom-white p-6 rounded-lg border border-blue-300 flex-1">
       <h2 className="text-2xl font-bold">Rental Car Details</h2>
 
       <Input label="Rental Car Title" />
@@ -119,8 +119,16 @@ const Page = () => {
             {/* <AccountNav /> */}
             <h1 className="text-2xl font-extrabold mb-4">Create Rental Car</h1>
             <div className='flex flex-row gap-5'>
+              <div className='flex flex-col gap-5 items-center'>
                 <UploadImg /> 
-                <RentalForm />
+                <div className="flex justify-center items-center mt-5 w-64 h-8 bg-sky-400 rounded-md border-[1.50px] border-sky-400">
+                  Create Hotel
+                </div>
+                <div className="flex justify-center items-center w-64 h-8 bg-custom-white rounded-md border-[1.50px] border-blue-100">
+                  Cancel
+                </div>
+              </div>
+              <RentalForm />
             </div>
                 
         </VendorPageLayout>
