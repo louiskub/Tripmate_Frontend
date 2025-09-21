@@ -5,6 +5,7 @@
     --color-dark-blue: #3883F8;
     --color-light-blue: #B9DCFF;
     --color-pale-blue: #E0F0FF;
+    --color-toggle-blue: #466592;
     --color-cyan: #87D2F9;
 
     --color-light-green: #9BD779;
@@ -33,12 +34,12 @@
     --boxshadow-lifted: 0px 0px 5px 0px rgba(0,0,0,0.20);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+.dark {
     --color-darker-blue: #FFFFFF;
     --color-dark-blue: #5EA9FF;
     --color-light-blue: #1D2E47;
     --color-pale-blue: #303B53;
+    --color-toggle-blue: #3372d0;
     --color-cyan: #87D2F9;
 
     --color-light-green: #B8D779;
@@ -50,7 +51,6 @@
     --color-red: #FFFFFF;
     --color-light-red: #FFFFFF;
 
-    --color-white: #38383A;
     --color-custom-white: #38383A;
     --color-dark-white: #2B2B2E;
 
@@ -63,7 +63,6 @@
     --color-translucent-white: #2B2B2E80;
     --color-transparent-white: #2B2B2E33;
     --color-transparent-black: #FFFFFF33;
-  }
 }
 
 * {
@@ -82,4 +81,8 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 0px 1000px transparent inset !important;
   -webkit-text-fill-color: inherit !important; /* keep text color */
   transition: background-color 5000s ease-in-out 0s !important;
+}
+
+body {
+  @apply bg-dark-white;
 }
