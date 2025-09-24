@@ -1,10 +1,10 @@
-import ProfilePageLayout from '@/components/layout/default-layout';
+import DefaultPage from '@/components/layout/default-layout';
 import Searchicon from '@/assets/icons/search.svg'
 import Groupicon from '@/assets/icons/group.svg'
 
 export default function BookingHistory() {
   return (
-    <ProfilePageLayout>
+    <DefaultPage>
     <main className="flex-1">
       <div className="px-6 py-4 border-b border-gray-100">
         <div className="flex items-center space-x-4">
@@ -43,6 +43,6 @@ export default function BookingHistory() {
         <h3 className="relative text-2xl font-bold text-gray-700 text-center bottom-10">No groups were found for this view</h3>
       </div>
     </main>
-    </ProfilePageLayout>
+    </DefaultPage>
   );
 }
