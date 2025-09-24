@@ -1,5 +1,4 @@
 import React from "react";
-import StateNav from '@/components/navbar/statenav'
 
 const formRows = [
   ["First name*", "Last name*"],
