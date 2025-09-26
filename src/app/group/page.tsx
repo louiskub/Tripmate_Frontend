@@ -1,8 +1,19 @@
+"use client"
+
+import { useState } from "react"
+import { Search, Users } from "lucide-react"
+import CreateGroupModal from "@/components/create-group-popup"
 import DefaultPage from '@/components/layout/default-layout';
 import Searchicon from '@/assets/icons/search.svg'
 import Groupicon from '@/assets/icons/group.svg'
 
 export default function BookingHistory() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleCreateGroup = (data: { name: string; description: string; image?: File }) => {
+    console.log("Creating group:", data)
+  }
+
   return (
     <DefaultPage>
     <main className="flex-1">
@@ -15,8 +26,8 @@ export default function BookingHistory() {
               className="pl-12 w-full h-12 bg-white border-2 border-gray-300 rounded-lg"
             />
           </div>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white h-12 px-6 rounded-lg whitespace-nowrap">
-            Create Group
+          <button onClick={() => setIsModalOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white h-12 px-6 rounded-lg whitespace-nowrap">
+              Create Group
           </button>
         </div>
       </div>
@@ -42,6 +53,8 @@ export default function BookingHistory() {
         </div>
         <h3 className="relative text-2xl font-bold text-gray-700 text-center bottom-10">No groups were found for this view</h3>
       </div>
+
+      <CreateGroupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleCreateGroup} />
     </main>
     </DefaultPage>
   );
