@@ -5,7 +5,7 @@ import { BsSendFill } from "react-icons/bs";
 
 export default function SideNav() {
     return (
-        <aside className="w-56 h-screen bg-white border-r border-gray-200 flex flex-col gap-4 p-3 gap-y-2">
+        <aside className="min-w-max h-screen bg-white border-r border-gray-200 flex flex-col gap-4 p-3 gap-y-2">
             {logos.map((item) => (
                 <button key={item.name} className="flex items-center gap-3 h-10 px-4 rounded-md text-gray-800 hover:bg-blue-50">
                 <span className="w-5 h-5 mt-1">{item.icon}</span>
