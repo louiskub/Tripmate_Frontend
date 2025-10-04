@@ -1,14 +1,14 @@
 "use client"
 
 import Navbar from '@/components/navbar/navbar';
-import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/TextStyles'
-import { FieldInput, PasswordInput } from '@/components/inputs'
-import { Button, TextButton } from '@/components/buttons';
+import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
+import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
+import { Button, TextButton } from '@/components/buttons/buttons';
 import { useState } from 'react';
 import { paths } from '@/config/paths.config';
 
-import PasswordValidate from '@/components/password-validate';
-import { Dropdown, DropdownOptionProps } from '@/components/inputs';
+import PasswordValidate from '@/components/other/password-validate';
+import { Dropdown, DropdownOptionProps } from '@/components/inputs/inputs';
 
 
 
@@ -30,13 +30,13 @@ export default function RegisterPage() {
     ]
 
     return (
-        <div className="bg-[url('/images/wave2.jpg')] shadow-[var(--boxshadow-lifted)] h-[100vh] bg-cover bg-center">
+        <div className="bg-[url('/images/wave2.jpg')] shadow-[var(--boxshadow-lifted)] min-h-screen bg-cover bg-center relative">
             <Navbar />
-            <div className="flex flex-col relative -translate-1/2 left-1/2 top-1/2 w-[600px] bg-gradient-to-br from-translucent-white to-transparent-white rounded-2xl shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)]  border-2 border-translucent-white backdrop-blur-lg">
-                <PageTitle className='text-center mt-6 mb-14'>Register Business Account</PageTitle>
+            <div className="flex flex-col absolute -translate-x-1/2 left-1/2 top-20 w-[600px] bg-gradient-to-br from-translucent-white to-transparent-white rounded-2xl shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)]  border-2 border-translucent-white backdrop-blur-lg">
+                <PageTitle className='text-center mt-6 mb-12'>Register Business Account</PageTitle>
                 <div className="flex-1 w-full items-center flex flex-col px-20 justify-between">
 
-                    <div className='w-full flex flex-col gap-3.5'>
+                    <div className='w-full flex flex-col gap-3'>
                         <div className="flex flex-col w-full">
                             <Body className='text-custom-gray'>Username</Body>
                             <FieldInput value={username} onChange={(e) => setUsername(e.target.value)}/>
@@ -57,7 +57,7 @@ export default function RegisterPage() {
                         </div>
                     </div>
                     
-                    <div className='flex flex-col gap-1 w-full mb-14 mt-12'>
+                    <div className='flex flex-col gap-1 w-full mb-12 mt-10'>
                         <Button 
                         className='w-full border-2 rounded-[10px] border-custom-black' 
                         text='Register'

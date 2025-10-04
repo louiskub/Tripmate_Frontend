@@ -1,5 +1,5 @@
-import { MenuButton, Button } from '@/components/buttons';
-import { SubBody } from '@/components/TextStyles';
+import { MenuButton, Button } from '@/components/buttons/buttons';
+import { SubBody } from '@/components/text-styles/textStyles';
 import { paths } from '@/config/paths.config';
 
 export default function AuthNavbar() {

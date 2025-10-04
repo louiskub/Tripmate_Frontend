@@ -1,0 +1,24 @@
+import {ButtonText, Subtitle, SmallTag} from '@/components/text-styles/textStyles';
+import React, { FC, ReactNode } from "react";
+
+type TagProps = {
+    text?: string;
+    className?: string;
+    children?: React.ReactNode;
+    icon_after?: boolean
+};
+
+export const Tag: FC<TagProps> = ({ children, text, className, icon_after=false} : TagProps) => {
+    return (
+        <span 
+            className={`inline-flex justify-center items-center gap-1 rounded-2xl select-none px-2 h-5
+                ${className || 'bg-pale-blue text-dark-blue'}`}
+        >
+            {!icon_after && children}
+
+            {text && <SmallTag>{text}</SmallTag>}
+
+            {icon_after && children}
+        </span>
+    );
+};
