@@ -5,7 +5,7 @@ type ButtonProps = {
     as?: "button" | "a";
     href?: string;
     text?: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     disabled?: boolean;
     className?: string;
     children?: React.ReactNode;
@@ -14,14 +14,20 @@ type ButtonProps = {
 
 export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href, icon_after=false} : ButtonProps) => {
     const Comp = as;
+
+    const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation(); // ✅ prevent bubbling to parent
+        if (onClick) onClick(e);
+    };
+
     return (
         <Comp 
             className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-[10px] select-none
-                ${(text) ? 'px-5 h-9' : 'aspect-square'} 
+                ${(text) ? 'px-5 h-9' : 'aspect-square rounded-full'} 
                 ${className || 'hover:text-dark-blue'}
                 ${disabled && 'pointer-events-none opacity-50'}`}
             href={as === "a" ? href : undefined}
-            onClick={as === "button" ? onClick : undefined}
+            onClick={as === "button" ? handleClick : undefined}
         >
             {!icon_after && children}
 

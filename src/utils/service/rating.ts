@@ -8,7 +8,7 @@ export function ratingText(rating: number): string {
     return "Very Poor";
 }
 
-type ratingMeta = {
+export type ratingMeta = {
     key: string
     label: string
 }
@@ -20,4 +20,12 @@ export const hotelRatingMeta: ratingMeta[] = [
     { key: 'location', label: 'Location' },
     { key: 'service', label: 'Service' },
     { key: 'facilities', label: 'Facilities' },
+]
+
+export const restaurantRatingMeta: ratingMeta[] = [
+    { key: 'cleanliness', label: 'Cleanliness' },
+    { key: 'delicacy', label: 'Delicacy' },
+    { key: 'service', label: 'Service' },
+    { key: 'location', label: 'Location' },
+    { key: 'vibe', label: 'Vibe' },
 ]

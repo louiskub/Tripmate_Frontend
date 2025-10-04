@@ -7,7 +7,7 @@ type TextProps = {
 
 // Variants as separate components
 export const PageTitle: FC<TextProps> = ({ children, className }) => (
-    <h1 className={`text-2xl font-extrabold tracking-wider ${className || ""}`}>{children}</h1>
+    <h1 className={`text-2xl font-extrabold tracking-wide ${className || ""}`}>{children}</h1>
 );
 
 export const Title: FC<TextProps> = ({ children, className }) => (

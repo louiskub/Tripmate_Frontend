@@ -1,4 +1,4 @@
-import HotelDetail from "@/models/service/detail/hotel"
+import HotelDetail from "@/models/service/detail/hotel-detail"
 
 export const mockHotel1: HotelDetail = 
 {

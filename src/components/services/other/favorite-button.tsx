@@ -43,7 +43,7 @@ const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
     return (
         <Button 
             onClick={handleFavoriteHotel}
-            className='absolute z-10 right-1.5 top-1.5 w-6 bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue'>
+            className='absolute z-10 right-1.5 top-1.5 w-6 bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full'>
             { isFavorite.value ? 
                 <HeartFilledIcon 
                     className={`${ animate ? 'filled-heart' : ''}`} 

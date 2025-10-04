@@ -1,7 +1,7 @@
 import {ButtonText, Caption, SubBody, Title} from '@/components/text-styles/textStyles'
 import { Tag } from '@/components/services/other/Tag'
 
-import { HotelSubtopicRating } from '@/models/service/detail/hotel'
+import { HotelSubtopicRating } from '@/models/service/detail/hotel-detail'
 
 import ArrowIcon from '@/assets/icons/arrow.svg'
 import LocationIcon from '@/assets/icons/location.svg'

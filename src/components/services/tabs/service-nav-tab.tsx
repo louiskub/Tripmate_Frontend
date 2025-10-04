@@ -15,18 +15,10 @@ type tab = {
 type HotelNavTabProps = {
     current_tab: string;
     onSelect: (tab_id: string) => void;
+    tabs: tab[]
 }
 
-const HotelNavTab = ({current_tab, onSelect}: HotelNavTabProps) => {
-    const tabs: tab[] = [
-        {label: 'Overview', id: 'overview'},
-        {label: 'Rooms', id: 'room'},
-        {label: 'Facilities', id: 'facility'},
-        {label: 'Reviews', id: 'review'},
-        {label: 'Location', id: 'location'},
-        {label: 'Policy', id: 'policy'},
-    ]
-
+const ServiceNavTab = ({current_tab, onSelect, tabs}: HotelNavTabProps) => {
     return (
         <div className='sticky top-15 z-10 flex gap-2.5 px-2 text-custom-gray items-center bg-custom-white mt-2 h-9.5 rounded-lg shadow-[var(--boxshadow-lifted)]'>
             {tabs.map((tab) => (
@@ -48,4 +40,4 @@ const HotelNavTab = ({current_tab, onSelect}: HotelNavTabProps) => {
     )
 }
 
-export default HotelNavTab
+export default ServiceNavTab

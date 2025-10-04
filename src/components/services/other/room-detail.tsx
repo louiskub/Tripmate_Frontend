@@ -3,7 +3,7 @@ import { useBoolean } from '@/hooks/use-boolean'
 import {ButtonText, Caption, SubBody, Title, Subtitle, Body, SubCaption} from '@/components/text-styles/textStyles'
 import { Tag } from '@/components/services/other/Tag'
 
-import { HotelSubtopicRating } from '@/models/service/detail/hotel'
+import { HotelSubtopicRating } from '@/models/service/detail/hotel-detail'
 
 import BedIcon from '@/assets/icons/bed.svg'
 import HeartIcon from '@/assets/icons/heart.svg'
@@ -11,7 +11,7 @@ import PersonIcon from '@/assets/icons/person.svg'
 import XIcon from '@/assets/icons/X.svg'
 
 import { Button, TextButton } from '@/components/buttons/buttons'
-import { Room } from '@/models/service/detail/hotel'
+import { Room } from '@/models/service/detail/hotel-detail'
 import ImageSlide from '@/components/services/other/image-slide'
 import { useState } from 'react'
 

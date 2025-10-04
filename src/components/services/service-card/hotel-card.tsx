@@ -5,12 +5,17 @@ import { Button, TextButton } from '@/components/buttons/buttons'
 import { Tag } from '@/components/services/other/Tag'
 import { useState } from 'react';
 import { paths } from '@/config/paths.config'
+import { endpoints } from '@/config/endpoints.config'
 import ImageSlide from '@/components/services/other/image-slide';
 import StarIcon from '@/assets/icons/star-filled.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import { useBoolean } from '@/hooks/use-boolean'
 
+import {ratingText} from '@/utils/service/rating'
+
 import FavoriteButton from '@/components/services/other/favorite-button'
+
+import Link from "next/link";
 
 type HotelCardProps = {
     name: string
@@ -26,17 +31,9 @@ type HotelCardProps = {
 }
 
 const HotelCard = (hotel: HotelCardProps) => {
-    function ratingText(rating: number): string {
-        if (rating >= 9.0) return "Excellent";
-        if (rating >= 8.0) return "Very Good";
-        if (rating >= 7.0) return "Good";
-        if (rating >= 6.0) return "Pleasant";
-        if (rating >= 5.0) return "Average";
-        if (rating >= 4.0) return "Poor";
-        return "Very Poor";
-    }
 
     return (
+        // <Link href={endpoints.hotel.detail()}>
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5">
             <ImageSlide pictures={hotel.pictures}>
                 <FavoriteButton favorite={hotel.favorite} hotel_id={hotel.hotel_id}/>
@@ -58,7 +55,7 @@ const HotelCard = (hotel: HotelCardProps) => {
                         <Tag text={(hotel.rating).toString()} />
                         <Caption className='text-dark-blue'>{ratingText(hotel.rating)}</Caption>
                     </div>
-                    <div className="inline-flex items-center gap-[3px]">
+                    <div className="inline-flex items-center gap-[3px] pl-1">
                         <LocationIcon width='12'/>
                         <Caption>{hotel.location}</Caption>
                     </div>
@@ -75,6 +72,7 @@ const HotelCard = (hotel: HotelCardProps) => {
                 </div>
             </div>
         </div>
+        // </Link>
     )
 }
 

@@ -2,7 +2,7 @@
 
 import DefaultPage from '@/components/layout/default-layout';
 import SearchServiceInput from '@/components/inputs/search-service-input'
-import ServiceNavTab from '@/components/services/tabs/service-nav-tab'
+import HotelNavTab from '@/components/services/tabs/service-nav-tab'
 import { useState, useEffect, ReactNode } from 'react';
 
 import {Title, Caption, SubBody, Subtitle, Body, ButtonText, SmallTag} from '@/components/text-styles/textStyles'
@@ -22,7 +22,6 @@ import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import ClockIcon from '@/assets/icons/Clock.svg'
 
 import { mockHotel1 } from '@/mocks/hotels'
-import { hotelRatingMeta } from '@/utils/service/rating';
 
 export default function AllHotel() {
   const [currentTab, setCurrentTab] = useState("overview");
@@ -40,7 +39,7 @@ type tab = {
         {label: 'Location', id: 'location'},
         {label: 'Policy', id: 'policy'},
   ]
-  
+
   type facility = {
     label: string
     id: 'internet' | 'food' | 'health' | 'accessibility' | 'transportation' | 'services'
@@ -119,7 +118,7 @@ type tab = {
   return (
     <DefaultPage current_tab='hotel'>
       <SearchServiceInput/>
-      <ServiceNavTab current_tab={currentTab} onSelect={setCurrentTab} tabs={tabs}/>
+      <HotelNavTab current_tab={currentTab} onSelect={setCurrentTab} />
       <div className="p-2 flex justify-between items-center">
         <Body> 
           {`Hotel > ${hotel.location} > `} 
@@ -178,7 +177,6 @@ type tab = {
               rating_count={hotel.rating_count} 
               subtopic_ratings={hotel.subtopic_ratings} 
               comment={first_comment} 
-              rating_meta={hotelRatingMeta}
             />
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px]'>
@@ -249,8 +247,7 @@ type tab = {
           rating={hotel.rating}
           rating_count={hotel.rating_count}
           subtopic_ratings={hotel.subtopic_ratings}
-          reviews={hotel.review}
-          rating_meta={hotelRatingMeta} />
+          reviews={hotel.review} />
       </section>
 
       <section id='location' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>

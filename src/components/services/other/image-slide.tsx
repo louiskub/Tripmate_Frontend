@@ -15,12 +15,14 @@ const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
     
     const slides = [pictures[pictures.length - 1], ...pictures, pictures[0]];
 
-    const next = () => {
+    const next = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
         setIndex(prev => prev + 1);
         setTransition(true);
     };
 
-    const prev = () => {
+    const prev = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
         setIndex(prev => prev - 1);
         setTransition(true);
     };
@@ -52,15 +54,15 @@ const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
 
             <div className={`absolute z-10 inset-0 flex justify-between px-0.5 items-center pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 transition-all`}>
                 <Button
-                    onClick={prev}
-                    className='w-4 bg-translucent-white'>
-                    <ArrowIcon width='10' className=' -scale-100'/>
+                    onClick= {prev}
+                    className='w-1/10 max-w-8 bg-translucent-white'>
+                    <ArrowIcon className='w-2/3 -scale-100'/>
                 </Button>
 
                 <Button
                     onClick={next}
-                    className='w-4 bg-translucent-white'>
-                    <ArrowIcon width='10'/>
+                    className='w-1/10 max-w-8 bg-translucent-white'>
+                    <ArrowIcon className='w-2/3'/>
                 </Button>
             </div>
 

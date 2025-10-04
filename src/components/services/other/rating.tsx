@@ -1,23 +1,25 @@
 import {Body, ButtonText, Caption, SmallTag, SubBody, SubCaption, Title} from '@/components/text-styles/textStyles'
 import { Tag } from '@/components/services/other/Tag'
 
-import { HotelSubtopicRating } from '@/models/service/detail/hotel'
+import { HotelSubtopicRating } from '@/models/service/detail/hotel-detail'
 import Reviews from '@/models/service/reviews';
 
-import {ratingText, hotelRatingMeta} from '@/utils/service/rating'
+import {ratingText, ratingMeta} from '@/utils/service/rating'
 
 import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
 import ProfileIcon from '@/assets/icons/profile.svg'
+import { RestaurantSubtopicRating } from '@/models/service/detail/restaurant-detail';
 
 type RatingOverviewProps = {
     rating: number
     rating_count: number
-    subtopic_ratings: HotelSubtopicRating
+    subtopic_ratings: HotelSubtopicRating | RestaurantSubtopicRating
     comment?: string
     className?: string
+    rating_meta: ratingMeta[]
 }
 
-export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment, className}: RatingOverviewProps) => {
+export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment, className, rating_meta}: RatingOverviewProps) => {
 
     return (
         <div className={`flex flex-col justify-between p-2.5 border border-light-gray rounded-[10px] ${className}`}>
@@ -40,18 +42,18 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
             </div>
 
             <ul className='flex flex-wrap'>
-                {hotelRatingMeta.map((meta) => (
+                {rating_meta.map((meta) => (
                     <li
                         key={meta.key}
                     >
-                        <Tag text={`${meta.label} ${subtopic_ratings[meta.key as keyof HotelSubtopicRating]}`} />
+                        <Tag text={`${meta.label} ${subtopic_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}`} />
                     </li>
                 ))}
             </ul>
 
-            {comment && <div className='flex flex-col gap-2'>
+            {comment && <div className='flex flex-col gap-2 basis-1/2'>
                 <Caption className='text-dark-gray'>What guest says</Caption>
-                <Caption className='max-h-16 p-2 border border-light-blue rounded-lg overflow-auto custom-scroll-bar'>
+                <Caption className='h-full max-h-full p-2 border border-light-blue rounded-lg overflow-auto custom-scroll-bar'>
                     {comment}
                 </Caption>
             </div>}
@@ -63,9 +65,10 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
 type RatingProps = {
     rating: number
     rating_count: number
-    subtopic_ratings: HotelSubtopicRating
+    subtopic_ratings: HotelSubtopicRating | RestaurantSubtopicRating
     reviews?: Reviews[]
     className?: string
+    rating_meta: ratingMeta[]
 }
 
 export const Rating = (rating: RatingProps) => {
@@ -92,19 +95,19 @@ export const Rating = (rating: RatingProps) => {
                 </div>
 
                 <ul className='flex flex-col gap-2.5'>
-                    {hotelRatingMeta.map((meta) => (
+                    {rating.rating_meta.map((meta) => (
                         <li
                             key={meta.key}
                         >
-                            <SubtopicRating topic={meta.label} rating={rating.subtopic_ratings[meta.key as keyof HotelSubtopicRating]}/>
+                            <SubtopicRating topic={meta.label} rating={rating.subtopic_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}/>
                         </li>
                     ))}
                 </ul>
             </div>
             <div className='flex flex-col row-start-2 col-span-2 gap-2'>
                 {
-                    rating.reviews?.map((review) => (
-                        <ReviewCard review={review} />
+                    rating.reviews?.map((review, i) => (
+                        <ReviewCard key={i} review={review} />
                     ))
                 }
             </div>

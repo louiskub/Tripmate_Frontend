@@ -5,7 +5,18 @@ import SearchServiceInput from '@/components/inputs/search-service-input'
 import HotelCard from '@/components/services/service-card/hotel-card'
 import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
-import HotelCardProps from '@/models/service/card/hotel-card';
+
+type HotelCardProps = {
+    name: string
+    star: number
+    rating: number
+    rating_count: number
+    location: string
+    price: number
+    type: string
+    pictures: string[]
+    favorite: boolean
+}
 
 const hotels: HotelCardProps[] = [
   {
@@ -21,8 +32,7 @@ const hotels: HotelCardProps[] = [
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-48dbaff76038a1598d6460554dd16bf2.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
       ],
-    favorite: true,
-    hotel_id: '1'
+    favorite: true
   },
   {
     name: 'Centre Point Prime Hotel Pattaya',
@@ -37,9 +47,8 @@ const hotels: HotelCardProps[] = [
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-48dbaff76038a1598d6460554dd16bf2.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
       ],
-    favorite: false,
-    hotel_id: '2'
-  }
+    favorite: false
+  },
 ]
 
 export default function AllHotel() {
