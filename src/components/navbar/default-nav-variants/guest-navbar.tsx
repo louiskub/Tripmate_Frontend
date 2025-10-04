@@ -1,6 +1,7 @@
 import { MenuButton, Button } from '@/components/buttons/buttons';
 import { SubBody } from '@/components/text-styles/textStyles';
 import { paths } from '@/config/paths.config'
+// import ThemeToggle from '@/components/navbar/toggle-theme';
 
 
 export default function GuestNavbar() {
@@ -11,6 +12,7 @@ export default function GuestNavbar() {
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
             </a>
             <div className="flex justify-end items-center gap-2.5">
+                {/* <ThemeToggle /> */}
                 <a className="text-dark-blue" href={paths.auth.provider}>
                     <SubBody>Post your business?</SubBody>
                 </a>

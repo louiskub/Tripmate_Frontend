@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-
 import CheckIcon from '@/assets/icons/check-round.svg'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 
