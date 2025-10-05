@@ -8,11 +8,11 @@ type DefaultPageProps = {
 
 const DefaultLayout: FC<DefaultPageProps> = ({ children }) => {
     return (
-        <div className="flex flex-col h-[100vh]">
+        <div className="flex flex-col h-screen">
             <Navbar />
-            <div className="h-full flex bg-dark-white">
+            <div className="flex flex-1 overflow-hidden bg-dark-white">
                 <SideNavBar />
-                <div className="flex-1 p-7.5">{children}</div>
+                <div className="flex-1 p-7.5 overflow-y-auto">{children}</div>
             </div>
         </div>
     );
