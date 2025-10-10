@@ -1,3 +1,5 @@
+"use client"
+
 import { MenuButton, Button } from '@/components/buttons';
 import { PageOptionSide} from '../navbar-button';
 import { paths } from '@/config/paths.config'
@@ -15,8 +17,12 @@ import PersonIcon from '@/assets/icons/person.svg'
 import ProfileIcon from '@/assets/icons/profile.svg'
 import UploadIcon from '@/assets/icons/upload.svg'
 
+import {useLocalStorage} from '@/hooks/use-storage'
+
 export function UploadImg() {
-    console.log("UploadImg component rendered");
+  const [vendorType, setVendorType] = useLocalStorage('vendorType', 'Car');
+
+  console.log("UploadImg component rendered");
         return (
       <div className="flex flex-col items-center justify-center w-[300px] h-64 border-2 border-dashed border-blue-300 rounded-lg bg-custom-white hover:bg-light-gray transition-colors">
         <div className="text-center">
@@ -60,24 +66,37 @@ const NavItem = ({ label, active }: { label: string; active?: boolean }) => (
 );
 
 export function AccountNav() {
+  const [vendorType, setVendorType] = useLocalStorage('vendorType', 'Car');
+  let navItems = [
+      <NavItem key="total" label={`Total ${vendorType}`} active />,
+      <NavItem key="available" label={`Available ${vendorType}`} />
+  ]
+
+  if (vendorType != "Car") {
+    navItems.push(
+      <NavItem key="unavailable" label={`Unavailable ${vendorType}`} />,
+      <NavItem key="full_booking" label={`Full booking ${vendorType}`} />
+    )
+  }
+  else {
+    navItems.push(
+      <NavItem key="active_rentals" label={`Active Rentals`} />,
+      <NavItem key="under_repair" label={`Under Repair`} />
+    )
+  }
+
+
   return (
     <div className="w-48 bg-custom-white flex flex-col gap-2 p-2">
-      <NavItem label="Total Cars" active />
-      <NavItem label="Available Cars" />
-      <NavItem label="Active Rentals" />
-      <NavItem label="Under Repair" />
-      <div className="mt-auto">
-        <NavItem label="Add New Car" />
-        <NavItem label="Remove Car" />
-      </div>
+      {navItems}
     </div>
   );
 };
 
 
 
-export default function VendorSideNavbar({ vendorType }: { vendorType: string }) {
-    console.log(vendorType);
+export default function VendorSideNavbar() {
+    const [vendorType] = useLocalStorage('vendorType', null);
     return (
         <div className='sticky top-0 w-56 h-[100vh] border-r-light-gray self-stretch bg-custom-white border border-pale-blue flex flex-col gap-4'>
             <div>
