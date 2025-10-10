@@ -1,136 +1,101 @@
 "use client";
-
-import ThemeToggle from '@/components/navbar/toggle-theme'
 import VendorPageLayout from '@/components/layout/vendor-layout'
-import VendorSideNavbar, {UploadImg}  from '@/components/navbar/side-nav-variants/vendor-side-navbar'
-import AdminNavbar from "@/components/navbar/default-nav-variants/admin-navbar";
-
-import PersonIcon from '@/assets/icons/person.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
-import UploadIcon from '@/assets/icons/upload.svg'
+import UploadImg from '@/components/vendor/upload-img';
+import { useLocalStorage } from '@/hooks/use-storage';
+import { useRef, useState } from 'react';
 
 
-// export default function CreateService() {
-//   return (
-//     <VendorPageLayout>
-//         <UploadImg />
-//     </VendorPageLayout>
-//   )
-// }
-// app/create-rental-car/page.tsx
-
-// app/create-rental-car/page.tsx
-
-import React, { useState } from "react";
-
-const Sidebar = () => {
-  return (
-    <aside className="w-56 bg-white border-r border-gray-200 flex flex-col gap-2 p-2">
-      <NavItem label="Dashboard" active />
-      <NavItem label="Rental Cars" />
-      <NavItem label="Booking History" />
-    </aside>
-  );
-};
-
-const AccountNav = () => {
-  return (
-    <aside className="w-48 bg-white border-r border-gray-200 flex flex-col gap-2 p-2">
-      <NavItem label="Total Cars" active />
-      <NavItem label="Available Cars" />
-      <NavItem label="Active Rentals" />
-      <NavItem label="Under Repair" />
-      <div className="mt-auto">
-        <NavItem label="Add New Car" />
-        <NavItem label="Remove Car" />
-      </div>
-    </aside>
-  );
-};
-
-const NavItem = ({ label, active }: { label: string; active?: boolean }) => (
-  <div
-    className={`px-4 py-2 rounded-md cursor-pointer ${
-      active ? "bg-blue-100 font-semibold" : "hover:bg-gray-100"
-    }`}
-  >
-    {label}
-  </div>
-);
-
-const RentalForm = () => {
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setPreview(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-
-  return (
-    <form className="flex flex-col gap-3 bg-custom-white p-6 rounded-lg border border-blue-300 flex-1">
-      <h2 className="text-2xl font-bold">Rental Car Details</h2>
-
-      <Input label="Rental Car Title" />
-      <Input label="Tags" />
-      <Input label="Price per day" type="number" />
-      <Input label="Google map link" />
-      <Textarea label="Description" />
-      <Input label="Policies" />
-
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          className="bg-sky-500 text-white px-4 py-2 rounded-md font-semibold"
-        >
-          Create Rental Car
-        </button>
-        <button
-          type="button"
-          className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-semibold"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  );
-};
-
-const Input = ({ label, type = "text" }: { label: string; type?: string }) => (
+const Input = ({ label, type = "text", id }: { label: string; type?: string; id: string }) => (
   <label className="flex flex-col gap-1">
     <span className="font-medium">{label}</span>
     <input
       type={type}
       className="border border-gray-300 rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-sky-400"
+      id={id}
     />
   </label>
 );
 
-const Textarea = ({ label }: { label: string }) => (
+const Textarea = ({ label, id }: { label: string; id: string }) => (
   <label className="flex flex-col gap-1">
     <span className="font-medium">{label}</span>
-    <textarea className="border border-gray-300 rounded-md p-1 h-15 focus:outline-none focus:ring-2 focus:ring-sky-400" />
+    <textarea id={id} className="border border-gray-300 rounded-md p-1 h-15 focus:outline-none focus:ring-2 focus:ring-sky-400" />
   </label>
 );
 
+const RentalForm = () => {
+  return (
+    <form className="flex flex-col flex-2 gap-3 bg-custom-white p-6 rounded-lg border border-blue-300">
+      <h2 className="text-2xl font-bold">Rental Car Details</h2>
+
+      <Input label="Rental Car Title" id="title"/>
+      <Input label="Tags" id="tags" />
+      <Input label="Price per day" type="number" id="price" />
+      <Input label="Google map link" id="google-map" />
+      <Textarea label="Description" id="description" />
+      <Input label="Policies" id="policies" />
+    </form>
+  );
+};
+
 const Page = () => {
+    const [vendorType] = useLocalStorage('vendorType', "Car");
+    const [coverImgInput, setCoverImgInput] = useState<File | null>(null);
+    const [menuImgInput, setMenuImgInput] = useState<File | null>(null);
+    
+    let labelText = vendorType
+    if (vendorType == "Car") {
+      labelText = "Rental Car";
+    }
+
+    const handleSubmit = async () => {
+      const form = document.querySelector('form');
+      const data = {
+        title: (form?.querySelector('#title') as HTMLInputElement)?.value,
+        tags: (form?.querySelector('#tags') as HTMLInputElement)?.value,
+        price: (form?.querySelector('#price') as HTMLInputElement)?.value,
+        googleMap: (form?.querySelector('#google-map') as HTMLInputElement)?.value,
+        description: (form?.querySelector('#description') as HTMLTextAreaElement)?.value,
+        policies: (form?.querySelector('#policies') as HTMLInputElement)?.value,
+      };
+
+      if (coverImgInput) {
+        const coverImgBlob = new Blob([await coverImgInput.arrayBuffer()], { type: coverImgInput.type });
+        console.log("coverImgBlob: ", coverImgBlob);
+      }
+    }
+
     return (
         <VendorPageLayout>
             {/* <AccountNav /> */}
-            <h1 className="text-2xl font-extrabold mb-4">Create Rental Car</h1>
+            <h1 className="text-2xl font-extrabold mb-4">Create {labelText}</h1>
             <div className='flex flex-row gap-5'>
-              <div className='flex flex-col gap-5 items-center'>
-                <UploadImg /> 
-                <div className="flex justify-center items-center mt-5 w-64 h-8 bg-sky-400 rounded-md border-[1.50px] border-sky-400">
-                  Create Hotel
-                </div>
-                <div className="flex justify-center items-center w-64 h-8 bg-custom-white rounded-md border-[1.50px] border-blue-100">
-                  Cancel
+              <div className='flex flex-col gap-5 items-center flex-1'>
+                <UploadImg text={`${vendorType} Img`} onFileChange={(file) => setCoverImgInput(file)} />
+                {
+                  vendorType == "Restaurant" ?
+                  <UploadImg text="Menu Img" onFileChange={(file) => setMenuImgInput(file)} />
+                  :
+                  null
+                }
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="bg-sky-500 text-white px-4 py-2 rounded-md font-semibold hover:cursor-pointer hover:bg-sky-600"
+                    onClick={handleSubmit}
+                  >
+                    Create Rental Car
+                  </button>
+                  <button
+                    type="button"
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-semibold hover:cursor-pointer"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
               <RentalForm />
             </div>
-                
         </VendorPageLayout>
     );
 };

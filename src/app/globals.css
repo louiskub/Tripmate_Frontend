@@ -86,3 +86,13 @@ input:-webkit-autofill:active {
 body {
   @apply bg-dark-white;
 }
+
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  cursor: pointer;
+  scale: 1.03;
+  @apply shadow-sm;
+}

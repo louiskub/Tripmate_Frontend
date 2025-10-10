@@ -21,7 +21,7 @@ const VendorPageLayout: FC<DefaultPageProps> = ({ children }) => {
                     <VendorSideNavbar />
                     <div className="flex flex-1 py-5 pl-5">
                         <AccountNav />
-                        <div className="flex-1 px-6 pt-2">{children}</div>  
+                        <div className="flex-1 px-6 pt-2 h-fit">{children}</div>  
                     </div>
                 </div>
             </div>
