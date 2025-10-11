@@ -1,74 +1,47 @@
-import React from 'react';
+import Statenav from "@/components/navbar/statenav"
 
-const STARS = Array.from({ length: 5 });
+const STARS = Array.from({ length: 5 })
 
-const priceMain = { label: '1 room (1 night)', amount: '4,412.00' };
+const priceMain = { label: "1 room (1 night)", amount: "4,412.00" }
 const priceBefore = [
-  { label: 'price before discount', amount: '5,786.74', discount: false },
-  { label: 'discount', amount: '1,374.74', discount: true },
-];
+  { label: "price before discount", amount: "5,786.74", discount: false },
+  { label: "discount", amount: "1,374.74", discount: true },
+]
 const taxesAndFees = [
-  { label: 'VAT', amount: '4,412.00' },
-  { label: 'Service charge', amount: '4,412.00', strong: true },
-];
+  { label: "VAT", amount: "4,412.00" },
+  { label: "Service charge", amount: "4,412.00", strong: true },
+]
 const special = [
-  { label: 'Room type', value: 'Non-smoking' },
-  { label: 'Bed size', value: 'Large bed' },
-];
+  { label: "Room type", value: "Non-smoking" },
+  { label: "Bed size", value: "Large bed" },
+]
 
 export default function CompletePage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="w-full bg-white border-b border-gray-200 px-7 h-14 grid grid-cols-[1fr_auto_1fr] items-center">
-        <div className="flex items-center gap-2 text-2xl font-extrabold">
-          <div>Logo</div>
-          <div className="text-sky-600">TripMate</div>
-        </div>
-
-        <div className="flex flex-col items-center gap-1">
-            <div className="w-64 flex items-center gap-2">
-                <button className="w-4 h-4 rounded-full bg-sky-600 text-white text-[10px] leading-none flex items-center justify-center transition-transform duration-200 ease-out hover:scale-120">1</button>
-                <div className="flex-1 h-px bg-gray-300" />
-                <button className="w-4 h-4 rounded-full bg-sky-600 text-white text-[10px] leading-none flex items-center justify-center transition-transform duration-200 ease-out hover:scale-120">2</button>
-                <div className="flex-1 h-px bg-gray-300" />
-                <button className="w-4 h-4 rounded-full bg-sky-600 text-white text-[10px] leading-none flex items-center justify-center transition-transform duration-200 ease-out hover:scale-120">3</button>
-            </div>
-            <div className="w-72 flex justify-between text-xs">
-                <span className="text-sky-600">Your data</span>
-                <span className="text-sky-600">Payment</span>
-                <span className="text-sky-600">Complete</span>
-            </div>
-        </div>
-
-        <div className="flex justify-end items-center gap-5">
-          <div className="w-7 h-7 bg-black/90 rounded" />
-          <div className="w-2.5 h-2.5 bg-black/90 rounded-full" />
-          <div className="w-7 h-7 bg-black/90 rounded" />
-        </div>
-      </header>
+      <Statenav />
 
       {/* Main */}
-      <main className="max-w-[1240px] mx-auto px-6 md:px-8 py-6 space-y-5">
-        <h1 className="text-gray-900 text-2xl font-extrabold">Hotel Booking</h1>
+      <main className="max-w-[1240px] mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 space-y-4 md:space-y-5">
+        <h1 className="text-gray-900 text-xl md:text-2xl font-extrabold">Hotel Booking</h1>
 
         {/* Big card */}
         <section className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4">
           {/* Title */}
           <div className="border-b border-gray-200 pb-2 space-y-1">
-            <div className="text-gray-900 text-xl font-bold">Your booking is complete.</div>
-            <div className="text-gray-500">Enjoy your stay!</div>
+            <div className="text-gray-900 text-lg md:text-xl font-bold">Your booking is complete.</div>
+            <div className="text-gray-500 text-sm md:text-base">Enjoy your stay!</div>
           </div>
 
           {/* Top row: Hotel + Guest name */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
             {/* Hotel card */}
             <div className="bg-white rounded-xl">
-              <div className="flex gap-3">
-                <div className="w-44 h-44 rounded-xl bg-gradient-to-b from-gray-200 to-gray-400" />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="w-full sm:w-36 md:w-44 h-36 sm:h-36 md:h-44 rounded-xl bg-gradient-to-b from-gray-200 to-gray-400 flex-shrink-0" />
 
                 <div className="flex-1 flex flex-col gap-1">
-                  <div className="text-gray-900 font-semibold">
+                  <div className="text-gray-900 font-semibold text-sm md:text-base">
                     Centara Grand Mirage Beach Resort Pattaya
                   </div>
 
@@ -81,9 +54,7 @@ export default function CompletePage() {
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium">
-                      10.0
-                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium">10.0</span>
                     <span className="text-sky-700 text-xs">Excellent</span>
                   </div>
 
@@ -99,11 +70,11 @@ export default function CompletePage() {
               </div>
 
               {/* Small booking box */}
-              <div className="mt-3 rounded-xl bg-gray-50 p-2 relative">
+              <div className="mt-3 rounded-xl bg-gray-50 p-2 md:p-3 relative">
                 <div className="flex gap-2">
-                  <div className="w-28 h-28 rounded-xl bg-gradient-to-b from-gray-200 to-gray-400" />
+                  <div className="w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-xl bg-gradient-to-b from-gray-200 to-gray-400 flex-shrink-0" />
                   <div className="flex flex-col justify-center">
-                    <div className="text-gray-900 text-sm font-medium">
+                    <div className="text-gray-900 text-xs sm:text-sm font-medium">
                       Mirage Premium Explorer King View,sea
                     </div>
                     <div className="pt-1.5 space-y-1 text-xs text-gray-700">
@@ -134,8 +105,8 @@ export default function CompletePage() {
 
             {/* Guest name */}
             <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="text-gray-900 font-semibold mb-2">Guest Name</div>
-              <div className="h-10 px-3 flex items-center rounded-md border border-gray-200">
+              <div className="text-gray-900 font-semibold mb-2 text-sm md:text-base">Guest Name</div>
+              <div className="h-10 px-3 flex items-center rounded-md border border-gray-200 text-sm md:text-base">
                 Emily Chow
               </div>
             </div>
@@ -143,20 +114,20 @@ export default function CompletePage() {
 
           {/* Pick-up / Drop-off */}
           <div className="flex flex-col lg:flex-row gap-3">
-            <div className="self-center rounded-xl border border-gray-200 p-4">
-              <div className="grid grid-cols-3 items-center">
+            <div className="self-center w-full lg:w-auto rounded-xl border border-gray-200 p-3 md:p-4">
+              <div className="grid grid-cols-3 items-center gap-2">
                 <div>
                   <div className="text-xs text-gray-500">Pick-up</div>
-                  <div className="text-sm text-gray-900">Sat, 25 Aug 2025</div>
+                  <div className="text-xs sm:text-sm text-gray-900">Sat, 25 Aug 2025</div>
                   <div className="text-xs text-gray-500">from 09.00</div>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="text-sm text-gray-900">2 days</div>
+                  <div className="text-xs sm:text-sm text-gray-900">2 days</div>
                   <div className="w-4 h-3 bg-gray-900" />
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-gray-500">Drop-off</div>
-                  <div className="text-sm text-gray-900">Mon, 27 Aug 2025</div>
+                  <div className="text-xs sm:text-sm text-gray-900">Mon, 27 Aug 2025</div>
                   <div className="text-xs text-gray-500">before 20.00</div>
                 </div>
               </div>
@@ -164,8 +135,8 @@ export default function CompletePage() {
           </div>
 
           {/* Price details */}
-          <div className="rounded-xl border border-gray-200 p-5 space-y-3">
-            <div className="text-gray-900 text-xl font-bold">Price Details</div>
+          <div className="rounded-xl border border-gray-200 p-4 md:p-5 space-y-3">
+            <div className="text-gray-900 text-lg md:text-xl font-bold">Price Details</div>
 
             <div className="space-y-1.5">
               <div className="flex items-start justify-between">
@@ -177,30 +148,12 @@ export default function CompletePage() {
               </div>
 
               {priceBefore.map((row) => (
-                <div key={row.label} className="pl-5 flex items-start justify-between">
-                  <div
-                    className={`text-xs ${
-                      row.discount ? 'text-red-500' : 'text-gray-500'
-                    }`}
-                  >
-                    {row.label}
-                  </div>
+                <div key={row.label} className="pl-3 md:pl-5 flex items-start justify-between">
+                  <div className={`text-xs ${row.discount ? "text-red-500" : "text-gray-500"}`}>{row.label}</div>
                   <div className="flex items-start gap-0.5">
                     {row.discount && <span className="text-red-500 text-xs">-</span>}
-                    <span
-                      className={`text-xs ${
-                        row.discount ? 'text-red-500' : 'text-gray-500'
-                      }`}
-                    >
-                      ฿
-                    </span>
-                    <span
-                      className={`text-xs ${
-                        row.discount ? 'text-red-500' : 'text-gray-500'
-                      }`}
-                    >
-                      {row.amount}
-                    </span>
+                    <span className={`text-xs ${row.discount ? "text-red-500" : "text-gray-500"}`}>฿</span>
+                    <span className={`text-xs ${row.discount ? "text-red-500" : "text-gray-500"}`}>{row.amount}</span>
                   </div>
                 </div>
               ))}
@@ -216,13 +169,11 @@ export default function CompletePage() {
               </div>
 
               {taxesAndFees.map((row) => (
-                <div key={row.label} className="pl-5 flex items-start justify-between">
+                <div key={row.label} className="pl-3 md:pl-5 flex items-start justify-between">
                   <div className="text-gray-500 text-xs">{row.label}</div>
                   <div className="flex items-start gap-0.5">
                     <span className="text-gray-500 text-xs">฿</span>
-                    <span className={`text-xs ${row.strong ? 'text-gray-900' : 'text-gray-500'}`}>
-                      {row.amount}
-                    </span>
+                    <span className={`text-xs ${row.strong ? "text-gray-900" : "text-gray-500"}`}>{row.amount}</span>
                   </div>
                 </div>
               ))}
@@ -240,12 +191,12 @@ export default function CompletePage() {
           </div>
 
           {/* Special Request summary */}
-          <div className="rounded-xl border border-gray-200 p-5 space-y-2">
-            <div className="text-gray-900 font-bold">Special Request</div>
+          <div className="rounded-xl border border-gray-200 p-4 md:p-5 space-y-2">
+            <div className="text-gray-900 font-bold text-sm md:text-base">Special Request</div>
             <div className="space-y-2">
               {special.map((s) => (
-                <div key={s.label} className="flex items-center gap-3">
-                  <div className="text-sm text-gray-900 font-medium w-24">{s.label}</div>
+                <div key={s.label} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                  <div className="text-sm text-gray-900 font-medium sm:w-24">{s.label}</div>
                   <div className="text-sm text-gray-500">{s.value}</div>
                 </div>
               ))}
@@ -256,7 +207,7 @@ export default function CompletePage() {
         {/* CTA */}
         <section className="bg-white border border-gray-200 rounded-xl p-4">
           <button
-            className="h-10 w-full rounded-[10px] bg-sky-600 text-white font-bold shadow
+            className="h-10 w-full rounded-[10px] bg-sky-600 text-white font-bold shadow text-sm md:text-base
                        transition-transform duration-500 ease-out hover:scale-[1.02] hover:bg-sky-700"
           >
             View your bookings
@@ -264,5 +215,5 @@ export default function CompletePage() {
         </section>
       </main>
     </div>
-  );
+  )
 }
