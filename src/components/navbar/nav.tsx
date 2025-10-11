@@ -19,7 +19,6 @@ export default function Navbar() {
                 <div className="w-2.5 h-2.5 bg-black/90 rounded-full" />
                 <div className="w-7 h-7 bg-black/90 rounded" />
                 </div>
-                
             </header>
         </div>
     )
