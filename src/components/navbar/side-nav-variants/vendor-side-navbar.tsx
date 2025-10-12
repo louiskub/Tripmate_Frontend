@@ -1,8 +1,11 @@
 "use client"
 
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import {paths} from "@/config/paths.config"
+
 // import { MenuButton, Button } from '@/components/buttons';
 import { PageOptionSide} from '../navbar-button';
-import { paths } from '@/config/paths.config'
 
 import HotelIcon from '@/assets/icons/hotel.svg'
 import RestaurantIcon from '@/assets/icons/restaurant.svg'
@@ -12,7 +15,6 @@ import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 // import MapIcon from '@/assets/icons/map.svg'
 import TouristAttractionIcon from '@/assets/icons/tourist-attracton.svg'
 import HomeIcon from '@/assets/icons/Home.svg'
-
 // import PersonIcon from '@/assets/icons/person.svg'
 // import ProfileIcon from '@/assets/icons/profile.svg'
 // import UploadIcon from '@/assets/icons/upload.svg'
@@ -20,40 +22,43 @@ import HomeIcon from '@/assets/icons/Home.svg'
 import {useLocalStorage} from '@/hooks/use-storage'
 
 
-const NavItem = ({ label, active }: { label: string; active?: boolean }) => (
-  <div
+const NavItem = ({ label, href, active }: { label: string; href: string; active?: boolean }) => (
+  <Link
     className={`px-4 py-2 rounded-md cursor-pointer ${
       active ? "bg-light-blue font-semibold" : "hover:bg-pale-blue"
     }`}
+    href={href}
   >
     {label}
-  </div>
+  </Link>
 );
 
 export function AccountNav() {
-  const [vendorType] = useLocalStorage('vendorType', 'Car');
+  const [vendorType] = useLocalStorage('vendorType', 'car');
+  const pathname = usePathname();
+  console.log("pathname: ", pathname);
   const  navItems = [
-      <NavItem key="total" label={`Total ${vendorType}`} active />,
-      <NavItem key="available" label={`Available ${vendorType}`} />
+      <NavItem key="total" label={`Total ${vendorType}`} href={paths.vendor.account.manage} />,
+      <NavItem key="available" label={`Available ${vendorType}`} href={paths.vendor.account.manage} />
   ]
 
-  if (vendorType != "Car") {
+  if (vendorType != "car") {
     navItems.push(
-      <NavItem key="unavailable" label={`Unavailable ${vendorType}`} />,
-      <NavItem key="full_booking" label={`Full booking ${vendorType}`} />
+      <NavItem key="unavailable" label={`Unavailable ${vendorType}`} href={paths.vendor.account.manage} />,
+      <NavItem key="full_booking" label={`Full booking ${vendorType}`} href={paths.vendor.account.manage} />
     )
   }
   else {
     navItems.push(
-      <NavItem key="active_rentals" label={`Active Rentals`} />,
-      <NavItem key="under_repair" label={`Under Repair`} />
+      <NavItem key="active_rentals" label={`Active Rentals`} href={paths.vendor.account.manage} />,
+      <NavItem key="under_repair" label={`Under Repair`} href={paths.vendor.account.manage} />
     )
   }
 
   navItems.push(
-    <div className="mt-auto" key="actions">
-      <NavItem label={`Add New ${vendorType}`} />
-      <NavItem label={`Remove ${vendorType}`} />
+    <div className="mt-auto flex flex-col" key="actions">
+      <NavItem href={paths.vendor.account.create} label={`Add New ${vendorType}`} active={pathname === paths.vendor.account.create} />
+      <NavItem href={paths.vendor.account.manage} label={`Remove ${vendorType}`} active={pathname === paths.vendor.account.manage} />
     </div>
   )
 

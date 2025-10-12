@@ -49,4 +49,12 @@ export const paths = {
     detail: 'attraction/detail',
   },
   map: '/map',
+  vendor: {
+    all: '/vendor',
+    account: {
+      all: '/vendor/account',
+      create: '/vendor/account/create',
+      manage: '/vendor/account/manage',
+    }
+  }
 }

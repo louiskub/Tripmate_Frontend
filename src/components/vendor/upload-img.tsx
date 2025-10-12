@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import UploadIcon from '@/assets/icons/upload.svg'
 import Img from 'next/image'
 
-export default function UploadImg({ text, onFileChange}: { text: string, onFileChange: (file: File | null) => void }) {
+export default function UploadImg({ text, id, onFileChange}: { text: string, id: string, onFileChange: (file: File | null) => void }) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -78,7 +78,7 @@ export default function UploadImg({ text, onFileChange}: { text: string, onFileC
         </div>
       ) : (
         <label
-          htmlFor="file-upload"
+          htmlFor={id}
           className={`
           group relative flex cursor-pointer flex-col items-center justify-center
           rounded-2xl border-2 border-dashed py-5 px-5
@@ -94,8 +94,8 @@ export default function UploadImg({ text, onFileChange}: { text: string, onFileC
           onDrop={handleDrop}
         >
           <input
-            id="file-upload"
-            name="file-upload"
+            id={id}
+            name={id}
             type="file"
             className="sr-only"
             accept="image/*"
