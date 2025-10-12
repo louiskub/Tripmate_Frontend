@@ -4,13 +4,14 @@ import React, { Children, FC, ReactNode } from "react";
 
 type DefaultPageProps = {
     children: ReactNode;
+    current_tab?: string
 };
 
-const ProfilePageLayout: FC<DefaultPageProps> = ({ children }) => {
+const ProfilePageLayout: FC<DefaultPageProps> = ({ children, current_tab }) => {
     return (
         <DefaultPage>
-            <div className='flex h-full bg-custom-white rounded-2xl overflow-hidden'>
-                <ProfileSideNavBar></ProfileSideNavBar>
+            <div className='flex w-full min-h-full p-2.5 bg-custom-white rounded-2xl overflow-hidden'>
+                <ProfileSideNavBar current={current_tab}></ProfileSideNavBar>
                 {children}
             </div>
         </DefaultPage>

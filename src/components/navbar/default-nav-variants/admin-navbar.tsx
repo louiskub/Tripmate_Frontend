@@ -1,4 +1,4 @@
-import { MenuButton, Button } from '@/components/buttons';
+import { MenuButton, Button } from '@/components/buttons/buttons';
 import { paths } from '@/config/paths.config'
 
 import ProfileIcon from '@/assets/icons/profile.svg'

@@ -1,4 +1,4 @@
-import { MenuButton, Button } from '@/components/buttons';
+import { MenuButton, Button } from '@/components/buttons/buttons';
 import { PageOptionSide} from '../navbar-button';
 import { paths } from '@/config/paths.config'
 
@@ -12,10 +12,13 @@ import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
 
+type ProfileSideNavBarProps = {
+    current?: string
+}
 
-export default function ProfileNavbar(current: string) {
+export default function ProfileSideNavBar({current}: ProfileSideNavBarProps) {
     return (
-        <div className='w-56 h-full border-r border-r-light-gray self-stretch bg-custom-white flex flex-col gap-2'>
+        <div className='w-56 text-base border-r border-r-light-gray self-stretch bg-custom-white flex flex-col gap-2'>
             <div>
                 <PageOptionSide text='Profile' href={paths.account.profile} active={current === 'profile'}>
                     <ProfileIcon />

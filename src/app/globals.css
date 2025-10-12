@@ -15,7 +15,7 @@
 
     --color-dark-red: #950606;
     --color-red: #FF2121;
-    --color-light-red: #FF8480;
+    --color-light-red: #E55D58;
 
     --color-custom-white: #FFFFFF;
     --color-dark-white: #F7F7F9;
@@ -31,7 +31,9 @@
     --color-transparent-black: #00000033;
 
     /* --bg-authen: url('/images/wave2.jpg'); */
+    
     --boxshadow-lifted: 0px 0px 5px 0px rgba(0,0,0,0.20);
+    --light-shadow: 0px 0px 4px 0px rgba(0,0,0,0.10);
 }
 
 .dark {
@@ -65,12 +67,14 @@
     --color-transparent-black: #FFFFFF33;
 }
 
+
 * {
   font-family: var(--font-manrope);
 }
 
 html, body {
   @apply text-custom-black;
+  @apply bg-dark-white;
 }
 
 input:-webkit-autofill,
@@ -95,4 +99,35 @@ button:hover {
   cursor: pointer;
   scale: 1.03;
   @apply shadow-sm;
+@keyframes beatingHeart {
+  0%, 40%, 90% { transform: scale(1); }
+  20%, 60% { transform: scale(1.2); }
+  80% { transform: scale(1.1); }
+}
+
+.filled-heart {
+  animation: beatingHeart 1s ease-in-out;
+}
+
+.custom-scroll-bar::-webkit-scrollbar {
+  width: 5px;               /* scrollbar width */
+  height: 6px;              /* scrollbar height (for horizontal) */
+}
+
+.custom-scroll-bar::-webkit-scrollbar-track {
+  background: var(--color-dark-white);  /* track background */
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb {
+  background-color: var(--color-light-blue);
+  border-radius: 100px;
+  border: 2px solid transparent; 
+}
+
+.custom-scroll-bar::-webkit-scrollbar-button {
+  display: none;
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-dark-blue); /* darker on hover */
 }

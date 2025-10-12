@@ -26,27 +26,27 @@ export const paths = {
   },
   hotel: {
     all: '/hotel',
-    detail: 'hotel/detail',
+    detail: '/hotel/1',
     book: '/hotel/book',
   },
   restaurant: {
     all: '/restaurant',
-    detail: 'restaurant/detail',
+    detail: '/restaurant/',
     book: '/restaurant/book',
   },
   rental_car: {
     all: '/rental-car',
-    detail: 'rental-car/detail',
+    detail: 'rental-car/',
     book: '/rental-car/book',
   },
   guide: {
     all: '/guide',
-    detail: 'guide/detail',
+    detail: 'guide/',
     book: '/guide/book',
   },
   attraction: {
     all: '/attraction',
-    detail: 'attraction/detail',
+    detail: 'attraction/',
   },
   map: '/map',
   vendor: {

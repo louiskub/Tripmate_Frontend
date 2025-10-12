@@ -1,30 +1,39 @@
-import {ButtonText, Subtitle} from '@/components/TextStyles';
+import {ButtonText, Subtitle} from '@/components/text-styles/textStyles';
 import React, { FC, ReactNode } from "react";
 
 type ButtonProps = {
     as?: "button" | "a";
     href?: string;
     text?: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     disabled?: boolean;
     className?: string;
     children?: React.ReactNode;
+    icon_after?: boolean
 };
 
-export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href} : ButtonProps) => {
+export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href, icon_after=false} : ButtonProps) => {
     const Comp = as;
+
+    const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation(); // ✅ prevent bubbling to parent
+        if (onClick) onClick(e);
+    };
+
     return (
         <Comp 
-            className={`inline-flex justify-center items-center gap-1 hover:cursor-pointer rounded-2xl h-9 select-none
-                ${(text) ? 'px-5' : 'aspect-square'} 
+            className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-[10px] select-none
+                ${(text) ? 'px-5 h-9' : 'aspect-square rounded-full'} 
                 ${className || 'hover:text-dark-blue'}
                 ${disabled && 'pointer-events-none opacity-50'}`}
             href={as === "a" ? href : undefined}
-            onClick={as === "button" ? onClick : undefined}
+            onClick={as === "button" ? handleClick : undefined}
         >
-            {children}
+            {!icon_after && children}
 
             {text && <ButtonText>{text}</ButtonText>}
+
+            {icon_after && children}
         </Comp>
     );
 };
