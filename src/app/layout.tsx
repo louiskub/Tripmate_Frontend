@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="" data-theme="">
       {/* <Script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></Script> */}
       <body
         className={`${manrope.variable} antialiased`}
