@@ -22,9 +22,9 @@ export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick,
 
     return (
         <Comp 
-            className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-[10px] select-none
+            className={`inline-flex justify-center items-center gap-[5px] hover:cursor-pointer rounded-[10px] select-none default-btn
                 ${(text) ? 'px-5 h-9' : 'aspect-square rounded-full'} 
-                ${className || 'hover:text-dark-blue'}
+                ${className || 'hover:text-dark-blue !scale-100'}
                 ${disabled && 'pointer-events-none opacity-50'}`}
             href={as === "a" ? href : undefined}
             onClick={as === "button" ? handleClick : undefined}
@@ -42,7 +42,7 @@ export const TextButton: FC<ButtonProps> = ({as = "button", children, text, onCl
     const Comp = as;
     return (
         <Comp 
-            className={`inline-flex justify-center items-center gap-1 hover:cursor-pointer rounded-2xl py-2 select-none
+            className={`inline-flex justify-center items-center gap-1 hover:cursor-pointer rounded-2xl py-2 select-none default-btn
                 ${className}
                 ${disabled && 'pointer-events-none opacity-50'}`}
             href={as === "a" ? href : undefined}
@@ -55,13 +55,6 @@ export const TextButton: FC<ButtonProps> = ({as = "button", children, text, onCl
     );
 };
 
-<div data-show-icon="true" data-show-text="true" className="self-stretch h-9 px-4 inline-flex justify-start items-center gap-2.5">
-<div className="w-3.5 h-3.5 relative overflow-hidden">
-<div className="w-3.5 h-2.5 left-0 top-[1.63px] absolute bg-stone-900" />
-</div>
-<div className="text-center justify-start text-stone-900 text-sm font-medium font-['Manrope']">My Groups</div>
-</div>
-
 type MenuButtonProps = {
     text?: string;
     href?: string;
@@ -71,7 +64,7 @@ type MenuButtonProps = {
 export const MenuButton: FC<MenuButtonProps> = ({text, href, className} : MenuButtonProps) => {
     return (
         <a 
-            className={`flex justify-center items-center px-5 h-10 min-w-24 hover:cursor-pointer hover:text-dark-blue active:translate-y-0.5 rounded-2xl ${className || 'text-custom-black'}`}
+            className={`flex justify-center items-center px-5 h-10 min-w-24 hover:cursor-pointer hover:text-dark-blue active:translate-y-0.5 rounded-2xl default-btn ${className || 'text-custom-black'}`}
             href={href}
         >
             {text && <Subtitle className={className}>{text}</Subtitle>}

@@ -11,7 +11,7 @@ type TagProps = {
 export const Tag: FC<TagProps> = ({ children, text, className, icon_after=false} : TagProps) => {
     return (
         <span 
-            className={`inline-flex justify-center items-center gap-1 rounded-2xl select-none px-2 h-5
+            className={`inline-flex justify-center items-center gap-1 rounded-2xl select-none px-2 h-5 self-start
                 ${className || 'bg-pale-blue text-dark-blue'}`}
         >
             {!icon_after && children}
