@@ -24,7 +24,7 @@ import ClockIcon from '@/assets/icons/Clock.svg'
 import { mockHotel1 } from '@/mocks/hotels'
 import { hotelRatingMeta } from '@/utils/service/rating';
 
-export default function AllHotel() {
+export default function HotelDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
 
 type tab = {
@@ -129,7 +129,7 @@ type tab = {
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={hotel.pictures}>
-          <FavoriteButton favorite={false} hotel_id={'1'}/>
+          <FavoriteButton favorite={false} id={'1'} type='hotel'/>
         </ServicePictures>
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
