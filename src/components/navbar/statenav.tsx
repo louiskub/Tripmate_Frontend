@@ -4,10 +4,16 @@ import { usePathname } from "next/navigation";
 export default function Statenav() {
     const pathname = usePathname();
 
-  const currentStep =
-    pathname?.includes("/bookhotel/completebooking") ? 3 :
-    pathname?.includes("/bookhotel/payment")         ? 2 :
-    pathname?.includes("/bookhotel/confirmbooking") ? 1 :                                                  1; // ที่เหลือถือว่าอยู่ Step 1
+  const map: Array<[RegExp, number]> = [
+    [/^\/bookhotel\/confirmbooking$/, 1],
+    [/^\/bookhotel\/payment$/, 2],
+    [/^\/bookhotel\/completebooking$/, 3],
+    [/^\/bookrentalcar\/confirmbooking$/, 1],
+    [/^\/bookrentalcar\/payment$/, 2],
+    [/^\/bookrentalcar\/completebooking$/, 3],
+  ];
+
+  const currentStep = (map.find(([re]) => re.test(pathname))?.[1]) ?? 0;                                                1; // ที่เหลือถือว่าอยู่ Step 1
 
   const dotClass = (step: number) =>
     "w-4 h-4 rounded-full text-white text-[10px] leading-none flex items-center justify-center transition-transform duration-200 ease-out hover:scale-120 " +
