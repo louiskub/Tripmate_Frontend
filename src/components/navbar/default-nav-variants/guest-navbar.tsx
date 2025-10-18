@@ -1,12 +1,12 @@
-import { MenuButton, Button } from '@/components/buttons';
-import { SubBody } from '@/components/TextStyles';
+import { MenuButton, Button } from '@/components/buttons/buttons';
+import { SubBody } from '@/components/text-styles/textStyles';
 import { paths } from '@/config/paths.config'
 // import ThemeToggle from '@/components/navbar/toggle-theme';
 
 
 export default function GuestNavbar() {
     return (
-        <nav className="w-full h-14 px-7 relative bg-custom-white border-b border-light-gray inline-flex justify-between items-center overflow-hidden">
+        <nav className="w-full h-14 px-7 sticky top-0 z-10 bg-white border-b border-light-gray inline-flex justify-between items-center overflow-hidden">
             <a href={paths.home} className="flex items-center gap-[3px]">
                 <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
@@ -20,8 +20,8 @@ export default function GuestNavbar() {
                 <Button as='a' href={paths.auth.register} text='Register' className='bg-custom-black text-custom-white'></Button>
             </div>
             <div className="-translate-x-1/2 left-1/2 absolute flex justify-center items-center gap-2.5">
-                <MenuButton text='Trip' href={paths.trip.all_trip}></MenuButton>
-                <MenuButton text='Group' href={paths.group.all_group}></MenuButton>
+                <MenuButton text='Trip' href={paths.trip.all}></MenuButton>
+                <MenuButton text='Group' href={paths.group.all}></MenuButton>
             </div>
         </nav>
     )

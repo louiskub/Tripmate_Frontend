@@ -7,11 +7,11 @@ type TextProps = {
 
 // Variants as separate components
 export const PageTitle: FC<TextProps> = ({ children, className }) => (
-    <h1 className={`text-2xl font-extrabold ${className || ""}`}>{children}</h1>
+    <h1 className={`text-2xl font-extrabold tracking-wide ${className || ""}`}>{children}</h1>
 );
 
 export const Title: FC<TextProps> = ({ children, className }) => (
-    <h2 className={`text-xl font-bold ${className || ""}`}>{children}</h2>
+    <h2 className={`text-xl font-bold tracking-wide ${className || ""}`}>{children}</h2>
 );
 
 export const Subtitle: FC<TextProps> = ({ children, className }) => (
@@ -23,7 +23,7 @@ export const Body: FC<TextProps> = ({ children, className }) => (
 );
 
 export const ButtonText: FC<TextProps> = ({ children, className }) => (
-    <span className={`text-base font-bold h-content ${className || ""}`}>{children}</span>
+    <span className={`text-base font-bold h-content tracking-wide ${className || ""}`}>{children}</span>
 );
 
 export const SubBody: FC<TextProps> = ({ children, className }) => (
@@ -31,7 +31,7 @@ export const SubBody: FC<TextProps> = ({ children, className }) => (
 );
 
 export const SmallTag: FC<TextProps> = ({ children, className }) => (
-    <span className={`text-xs font-medium ${className || ""}`}>{children}</span>
+    <span className={`text-xs font-semibold ${className || ""}`}>{children}</span>
 );
 
 
