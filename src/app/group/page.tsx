@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Search, Users } from "lucide-react"
-import CreateGroupModal from "@/components/group-create-popup"
+import CreateGroupModal from "@/components/group/group-create-popup"
 import Toast from "@/components/ui/toast"
 import DefaultPage from "@/components/layout/default-layout"
-import GroupCard from "@/components/group-card"
+import GroupCard from "@/components/group/group-card"
 
-// --- Interfaces (เหมือนเดิม) ---
+// --- Interfaces (อัปเดต Member interface) ---
 interface Member {
   id: string
+  name: string
+  role: "head" | "member"
   avatar?: string
 }
 type GroupStatus = "Planning" | "In Progress" | "Finished"
@@ -55,8 +57,9 @@ export default function BookingHistory() {
   }, [])
 
   useEffect(() => {
-    if (groups.length > 0 || localStorage.getItem("tripmate-groups")) {
-      localStorage.setItem("tripmate-groups", JSON.stringify(groups))
+    // บันทึกเฉพาะเมื่อมีข้อมูลจริงๆ
+    if (groups.length > 0) {
+        localStorage.setItem("tripmate-groups", JSON.stringify(groups))
     }
   }, [groups])
 
@@ -65,35 +68,41 @@ export default function BookingHistory() {
     let newId: string
     let isUnique = false
     while (!isUnique) {
+      // สร้าง ID แบบสุ่ม 6 หลัก
       const candidateId = Math.floor(100000 + Math.random() * 900000).toString()
       if (!groups.some((group) => group.id === candidateId)) {
         newId = candidateId
         isUnique = true
       }
     }
-    return newId
+    return newId!
   }
 
+  // --- ✅ [แก้ไข] ฟังก์ชันสร้างกลุ่ม ---
   const handleCreateGroup = (data: { name: string; description: string; image?: File }) => {
     const newGroupId = createUniqueGroupId()
-    const defaultMembers: Member[] = [
-        { id: "user_1", avatar: "/images/team.jpg" }, { id: "user_2", avatar: "/images/team.jpg" },
-        { id: "user_3", avatar: "/images/team.jpg" }, { id: "user_4", avatar: "/images/team.jpg" },
-        { id: "user_5", avatar: "/images/team.jpg" }, { id: "user_6", avatar: "/images/team.jpg" },
-        { id: "user_7", avatar: "/images/team.jpg" }, { id: "user_8", avatar: "/images/team.jpg" },
-        { id: "user_9", avatar: "/images/team.jpg" }, { id: "user_10", avatar: "/images/team.jpg" },
+    
+    // สร้างรายชื่อสมาชิกพร้อมกำหนด Role
+    const newMembers: Member[] = [
+      // 1. ผู้สร้างกลุ่ม (คนปัจจุบัน) จะเป็น Head
+      { id: "user_1", name: "You", role: "head", avatar: "/images/team.jpg" },
+      // 2. เพิ่มสมาชิกเริ่มต้นคนอื่นๆ เป็น Member (ตัวอย่าง)
+      { id: "user_2", name: "Bob", role: "member", avatar: "/images/team.jpg" },
+      { id: "user_3", name: "Charlie", role: "member", avatar: "/images/team.jpg" },
     ]
+
     const newGroup: Group = {
       id: newGroupId,
-      code: newGroupId,
+      code: newGroupId, // ใช้ ID เดียวกับ Code เพื่อให้ค้นหาง่าย
       name: data.name,
       description: data.description,
       imageUrl: data.image ? URL.createObjectURL(data.image) : undefined,
-      hostName: "Current User",
-      members: defaultMembers,
+      hostName: "You", // ชื่อผู้สร้างกลุ่ม
+      members: newMembers, // ใช้รายชื่อสมาชิกที่สร้างขึ้นใหม่
       status: "Planning",
       isFavorite: false,
     }
+
     setGroups((prev) => [newGroup, ...prev])
     setToastMessage("Group created successfully!")
     setToastType("success")
@@ -150,12 +159,10 @@ export default function BookingHistory() {
   // --- Sorting Logic ---
   const sortedGroups = useMemo(() => {
     return [...groups].sort((a, b) => {
-      // 1. Searched group comes first
       if (searchedGroupId) {
         if (a.id === searchedGroupId) return -1
         if (b.id === searchedGroupId) return 1
       }
-      // 2. Favorite groups come next
       return (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)
     })
   }, [groups, searchedGroupId])
@@ -163,7 +170,7 @@ export default function BookingHistory() {
   return (
     <DefaultPage>
       <main className="flex-1">
-        {/* --- Header & Search Bar (ดีไซน์เดิม) --- */}
+        {/* --- Header & Search Bar --- */}
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
@@ -185,7 +192,7 @@ export default function BookingHistory() {
           </div>
         </div>
 
-        {/* --- Filter Bar (ดีไซน์เดิม) --- */}
+        {/* --- Filter Bar --- */}
         <div className="flex items-center justify-between px-6 py-4">
           <p className="text-gray-600 font-medium">Found {sortedGroups.length} groups</p>
           <div className="flex items-center space-x-6">
