@@ -26,6 +26,8 @@ import ImageSlide from '@/components/services/other/image-slide';
 
 import { restaurantRatingMeta } from '@/utils/service/rating';
 
+import { useSearchParams } from 'next/navigation';
+
 export default function RestaurantDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
 
@@ -64,11 +66,18 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
+  const searchParams = useSearchParams();
+  const isFromManage = searchParams.get('from') === 'manage';
+
   const restaurant = restaurant_detail
 
   const first_comment: string | undefined = restaurant.review[0]?.comment;
 
   const handleBookRestaurant = () => {
+  
+  }
+
+  const handleEditRestaurant = () => {
   
   }
 
@@ -94,11 +103,19 @@ type tab = {
               <Tag text={restaurant.tag} />
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
+                {isFromManage ? (
                 <Button
-                  text='Book'
-                  className='bg-dark-blue rounded-[10px] px-6! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
-                  onClick={handleBookRestaurant}
+                  text='Edit'
+                  className='bg-green-600 rounded-[10px] px-6! text-white hover:bg-green-700 border-b-3 active:scale-[98%]'
+                  onClick={handleEditRestaurant}
                 />
+                ) : (
+                  <Button
+                    text='Book'
+                    className='bg-dark-blue rounded-[10px] px-6! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
+                    onClick={handleBookRestaurant}
+                  />
+                )}
               </div>
           </header>
 
