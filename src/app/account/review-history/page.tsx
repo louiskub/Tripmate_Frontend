@@ -1,8 +1,11 @@
 "use client";
 import DefaultPage from '@/components/layout/default-layout';
 import ProfileNavbar from '@/components/navbar/side-nav-variants/profile-side-navbar';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import LocationIcon from '@/assets/icons/location-point.svg';
 import Image from 'next/image';
+import { StarIcon } from 'lucide-react';
+import EditReviewPopup from './edit-review-popup';
 
 // ---------------- ReviewCard ----------------
 type ReviewCardProps = {
@@ -14,6 +17,11 @@ type ReviewCardProps = {
   viewOption: string;
 };
 
+interface RatingGroupProps {
+  label: string;
+  // selected?: number;
+  onChange: (value: number) => void;
+}
 
 const reviews = [
   {
@@ -52,6 +60,7 @@ const reviews = [
     date: "3 Aug 2025",
   }
 ];
+
 
 
 const ReviewCard = ({ name, service, score, review, date, viewOption }: ReviewCardProps) => {
@@ -189,6 +198,9 @@ export default function ReviewHistory() {
               </div>
             </div>
           </div>
+        </div>
+        <div>
+          <EditReviewPopup />
         </div>
     </DefaultPage>
   );
