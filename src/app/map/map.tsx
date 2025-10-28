@@ -751,14 +751,14 @@ export default function FinalMap() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-3 border-t border-gray-100">
+            {/* <div className="flex gap-2 pt-3 border-t border-gray-100">
               <button className="flex-1 px-4 py-2.5 bg-[#3883F8] text-white rounded-lg text-[14px] font-medium hover:bg-[#216CE1] transition-all shadow-sm">
                 นำทาง
               </button>
               <button className="flex-1 px-4 py-2.5 bg-[#F7F7F9] text-[#303030] rounded-lg text-[14px] font-medium hover:bg-[#E0E0E0] transition-all">
                 บันทึก
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       )}
