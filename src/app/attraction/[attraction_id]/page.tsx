@@ -69,6 +69,10 @@ type tab = {
 
   const first_comment = attraction.review?.find(a => a.comment)?.comment;
 
+  const lowest_fee = attraction.fee?.length
+  ? Math.min(...attraction.fee.map(item => item.price))
+  : 0;
+
   const fee_groups: Record<string, priceItem[]> = (attraction.fee ?? []).reduce(
     (acc, item) => {
       const key = item.group ?? "Ungrouped";
@@ -101,11 +105,11 @@ type tab = {
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
                 <span className='flex items-baseline gap-1'>
-                    {attraction.price > 0 ?
+                    {lowest_fee > 0 ?
                     <>   
                     <Caption className='text-dark-gray'>From</Caption>
                     <SubBody className='text-dark-blue'>฿</SubBody>
-                    <ButtonText className='text-dark-blue'>{attraction.price}</ButtonText>
+                    <ButtonText className='text-dark-blue'>{lowest_fee}</ButtonText>
                     </>
                     :
                     <ButtonText className='text-dark-blue'>Free</ButtonText>}
@@ -147,7 +151,7 @@ type tab = {
 
       <section id='fee' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Admission Fee</Title>
-        {fee_groups ?
+        {lowest_fee ?
         <div className='flex justify-center px-4 py-5'>
           {Object.entries(fee_groups).map(([groupName, items]) => (
           <div key={groupName} className="flex flex-col gap-4 px-10">
@@ -158,11 +162,6 @@ type tab = {
           </div>
       ))}
       </div>
-        // <div className='flex justify-center px-4 py-5'>
-        //   <div className='px-10'>
-        //     <PriceCard name={'Deposit'} price={1000} />
-        //   </div>
-        // </div>
         :
         <SubBody className='p-4 flex gap-1'>
           <CheckIcon width='16' className='text-green'/>
