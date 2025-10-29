@@ -68,7 +68,7 @@ type RatingProps = {
     subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating
     reviews?: Reviews[]
     className?: string
-    rating_meta: ratingMeta[]
+    rating_meta?: ratingMeta[]
 }
 
 export const Rating = (rating: RatingProps) => {
@@ -95,7 +95,7 @@ export const Rating = (rating: RatingProps) => {
                 </div>
                 {rating.subtopic_ratings &&
                     <ul className='flex flex-col gap-2.5'>
-                        {rating.rating_meta.map((meta) => {
+                        {rating.rating_meta?.map((meta) => {
                             const sub_ratings = rating.subtopic_ratings!;
                             return (
                             <li
