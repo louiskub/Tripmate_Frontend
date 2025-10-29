@@ -13,7 +13,7 @@ type PriceCardProps = {
 const PriceCard = ( {name, description, price, varient='default', per='day'} : PriceCardProps) => {
     const variantClass = {
     default:
-        'border-dark-blue',
+        'border-light-blue',
     unchecked:
         'border-light-gray group hover:border-light-blue hover:cursor-pointer',
     checked:
@@ -29,7 +29,10 @@ const PriceCard = ( {name, description, price, varient='default', per='day'} : P
             <span className='flex items-center gap-0.5 col-start-2 row-start-1 row-span-2'>
                 <SubBody className='text-custom-gray'>฿</SubBody>
                 <Subtitle className='text-custom-black'>{price}</Subtitle>
-                <SubBody className='text-custom-gray'>/{per}</SubBody>
+                {
+                    per !== 'one-time' && <SubBody className='text-custom-gray'>/{per}</SubBody>
+                }
+                
             </span>
             {
                 varient !== 'default' &&

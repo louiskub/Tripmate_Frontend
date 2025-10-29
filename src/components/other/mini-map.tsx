@@ -19,7 +19,7 @@ export const MiniMap = ({location_link}: MiniMapProps) => {
             <div className='w-64 bottom-0'>
                 <img src='/images/overview-map-bg.png' className='object-cover w-64'/>
             </div>
-            <div className='z-10 flex flex-col justify-center items-center gap-2 absolute'>
+            <div className='flex flex-col justify-center items-center gap-2 absolute'>
                 <LocationIcon />
                 <button 
                     className='shadow-[var(--light-shadow)] px-2! bg-custom-white h-7 flex items-center gap-1 rounded-[10px]'>
