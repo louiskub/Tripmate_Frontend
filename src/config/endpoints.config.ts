@@ -20,4 +20,6 @@ export const endpoints = {
     detail: (id: string) => `/attraction/${id}`,
     book: (id: string) => `/attraction/book/${id}`,
   },
+
+  user_profile: (id: string) => `/users/${id}`
 }

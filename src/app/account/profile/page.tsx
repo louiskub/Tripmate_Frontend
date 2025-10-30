@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { paths } from '@/config/paths.config'
 import ProfilePageLayout from '@/components/layout/profile-page-layout';
 import EditIcon from '@/assets/icons/edit.svg'
-import path from 'path'
+import ProfilePic from '@/assets/icons/profile-filled.svg';
 
 type ProfileData = {
     username: string;
@@ -47,8 +47,14 @@ export default function Profile(profile: ProfileData) {
         
         <div className="flex flex-col items-center gap-1">
             <div className="w-28 h-28">
-                <img className="w-28 h-28 rounded-full border border-dark-gray" src={profile.profile_pic || "https://placehold.co/120x120"} />
-            </div>
+            {profile.profile_pic ? 
+                <img className="w-28 h-28 rounded-full border border-dark-gray" 
+                    src={profile.profile_pic} 
+                />
+                :
+                <ProfilePic />
+            }
+        </div>
             <div className="flex-col gap-1.5">
                 <Subtitle className='text-custom-gray inline-flex'>@</Subtitle>
                 <Subtitle className='text-custom-black inline-flex'>{profile.username || 'username'}</Subtitle>
@@ -83,7 +89,11 @@ export default function Profile(profile: ProfileData) {
         </div>
         <div className="inline-flex flex-col self-start">
             <ButtonText className='text-custom-black'>Gender</ButtonText>
-            {genderMap[profile.gender ?? 'other']}
+            { profile.gender ?
+                genderMap[profile.gender]
+                :
+                '-'
+            }
         </div>
     </div>
 </div>
