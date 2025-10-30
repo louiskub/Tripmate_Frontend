@@ -36,7 +36,10 @@ const ServicePictures = ({ pictures, children }: ServicePicturesProps) => {
     };
 
     return (
-        <div className="flex overflow-hidden w-full h-90 gap-1.5">            
+        <div className="relative flex overflow-hidden w-full h-90 gap-1.5">
+            <div className='absolute right-0'>
+                {children} 
+            </div>    
             <div className="rounded-[10px] h-full flex-1 overflow-hidden">
                 <img 
                     src={pictures[0]}

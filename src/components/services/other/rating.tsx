@@ -9,11 +9,12 @@ import {ratingText, ratingMeta} from '@/utils/service/rating'
 import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
 import ProfileIcon from '@/assets/icons/profile.svg'
 import { RestaurantSubtopicRating } from '@/models/service/detail/restaurant-detail';
+import { GuideSubtopicRating } from '@/models/service/detail/guide-detail';
 
 type RatingOverviewProps = {
     rating: number
     rating_count: number
-    subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating
+    subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating | GuideSubtopicRating
     comment?: string
     className?: string
     rating_meta?: ratingMeta[]
@@ -27,7 +28,12 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
                 <div className="row-span-2 w-12 h-10 bg-pale-blue rounded-[10px] shadow-[0px_0px_10px_0px_var(--color-dark-blue)] border-2 border-custom-white inline-flex justify-center items-center gap-2.5">
                     <Title className='text-dark-blue'>{rating}</Title>
                 </div>
-                <ButtonText className='text-dark-blue'>{ratingText(rating)}</ButtonText>
+                {rating_count > 0 ? 
+                    <ButtonText className='text-dark-blue'>{ratingText(rating)}</ButtonText>
+                    :
+                    <ButtonText className='text-gray'>no reviews</ButtonText>
+
+                }
                 <button 
                     className='hover:cursor-pointer col-start-2 flex justify-self-start default-btn'
                     onClick={ () => {
@@ -46,17 +52,22 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
                     <li
                         key={meta.key}
                     >
-                        <Tag text={`${meta.label} ${subtopic_ratings?.[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}`} />
+                        <Tag text={`${meta.label} ${subtopic_ratings?.[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating | GuideSubtopicRating)]}`} />
                     </li>
                 ))}
             </ul>
 
-            {comment && <div className={`flex flex-col gap-2 ${rating_meta? 'basis-1/2': 'basis-3/4'}`}>
+            <div className={`flex flex-col gap-2 ${rating_meta? 'basis-1/2': 'basis-3/4'}`}>
                 <Caption className='text-dark-gray'>What guest says</Caption>
-                <Caption className='h-full max-h-full p-2 border border-light-blue rounded-lg overflow-auto custom-scroll-bar'>
-                    {comment}
-                </Caption>
-            </div>}
+                {comment ? 
+                    <Caption className='h-full max-h-full p-2 border border-light-blue rounded-lg overflow-auto custom-scroll-bar'>
+                        {comment} 
+                    </Caption>
+                    : 
+                    <Caption className='h-full max-h-full p-2 text-gray rounded-lg'>
+                        there is no comment for this guide
+                    </Caption>}
+            </div>
         </div>
     )
 }
@@ -65,7 +76,7 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
 type RatingProps = {
     rating: number
     rating_count: number
-    subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating
+    subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating | GuideSubtopicRating
     reviews?: Reviews[]
     className?: string
     rating_meta?: ratingMeta[]
@@ -103,7 +114,7 @@ export const Rating = (rating: RatingProps) => {
                             >
                                 <SubtopicRating 
                                     topic={meta.label} 
-                                    rating={sub_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}/>
+                                    rating={sub_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating | GuideSubtopicRating)]}/>
                             </li>
                         );})}
                     </ul>
@@ -128,8 +139,8 @@ type SubtopicRatingProps = {
 const SubtopicRating = ({topic, rating}: SubtopicRatingProps) => {
     return (
         <div className='flex items-center w-full text-dark-blue gap-2.5'>
-            <Body className='w-30'>{topic}</Body>
-            <div className='bg-pale-blue rounded-full w-full h-2.5'>
+            <Body className='w-1/4 truncate'>{topic}</Body>
+            <div className='bg-pale-blue rounded-full w-3/4 h-2.5'>
                 <div 
                     className='bg-dark-blue rounded-full h-full'
                     style={{ width: `${(rating / 10) * 100}%` }}

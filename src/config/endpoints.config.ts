@@ -20,4 +20,9 @@ export const endpoints = {
     detail: (id: string) => `/attraction/${id}`,
     book: (id: string) => `/attraction/book/${id}`,
   },
+  guide: {
+    all: "/guide/all",
+    detail: (id: string) => `/guide/${id}`,
+    book: (id: string) => `/guide/book/${id}`,
+  },
 }
