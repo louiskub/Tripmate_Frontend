@@ -6,7 +6,7 @@ import HotelIcon from '@/assets/icons/hotel.svg'
 import RestaurantIcon from '@/assets/icons/restaurant.svg'
 import CarIcon from '@/assets/icons/car.svg'
 import GuideIcon from '@/assets/icons/guide.svg'
-import LocationIcon from '@/assets/icons/tourist-attracton.svg'
+import LocationIcon from '@/assets/icons/attraction-filled.svg'
 import MapIcon from '@/assets/icons/map.svg'
 
 type SideNavBarProps = {
