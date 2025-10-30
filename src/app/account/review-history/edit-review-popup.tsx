@@ -5,13 +5,17 @@ import LocationIcon from "@/assets/icons/location-point.svg";
 interface EditReviewPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  onSave?: (data: any) => void;
   initialData?: {
     name: string;
-    location: string;
+    coverImg?: string;
+    service?: string;
     score: Record<string, number>;
     review: string;
     date: string;
+    viewOption: string;
     img?: string[];
+    location?: string;
   } | null;
 }
 
@@ -47,13 +51,14 @@ const RatingGroup: React.FC<RatingGroupProps> = ({ label, value, onChange }) => 
 const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
   isOpen,
   onClose,
+  onSave,
   initialData,
 }) => {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");
   const [images, setImages] = useState<File[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const maxImages = 3;
 
   useEffect(() => {
@@ -65,19 +70,21 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
   }, [initialData]);
 
   const average =
-    Object.values(ratings).reduce((a, b) => a + b, 0) /
-      Object.keys(ratings).length || 0;
+    Object.keys(ratings).length === 0
+      ? 0
+      : Object.values(ratings).reduce((a, b) => a + b, 0) /
+        Object.keys(ratings).length;
 
   const handleRatingChange = (label: string, value: number) => {
     setRatings((prev) => ({ ...prev, [label]: value }));
   };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     const fileArray = Array.from(files);
     if (existingImages.length + images.length + fileArray.length > maxImages) {
-      alert('You can upload up to ' + maxImages + ' images.');
+      alert("You can upload up to " + maxImages + " images.");
       return;
     }
     setImages((prev) => [...prev, ...fileArray]);
@@ -91,26 +98,17 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append("name", initialData?.name ?? "");
-      formData.append("service", initialData?.location ?? "");
-      formData.append("comment", comment);
-      Object.entries(ratings).forEach(([key, value]) => {
-        formData.append(`score[${key}]`, value.toString());
-      });
-      images.forEach((image) => {
-        formData.append("images", image);
-      });
-
-      const response = await fetch("/api/reviews", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save review");
-      }
-
+      const updated = {
+        ...initialData,
+        score: ratings,
+        review: comment,
+        img: [
+          ...existingImages,
+          ...images.map((i) => URL.createObjectURL(i)),
+        ],
+      };
+      console.log("Updated review data:", updated);
+      onSave?.(updated);
       onClose();
     } catch (error) {
       console.error(error);
@@ -125,23 +123,32 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 z-[100] flex justify-center items-center">
       <div className="w-[70%] max-w-[800px] bg-custom-white rounded-[10px] flex flex-col overflow-hidden shadow-lg animate-fade-in">
+        {/* Header */}
         <div className="h-11 p-2.5 border-b border-neutral-200 flex justify-between items-center">
           <div className="text-custom-black text-xl font-bold">Edit Review</div>
-          <button onClick={onClose} className="text-gray-500 hover:text-black">
+          <button
+            onClick={onClose}
+            aria-label="Close popup"
+            className="text-gray-500 hover:text-black"
+          >
             ✕
           </button>
         </div>
 
         {/* Info */}
         <div className="p-3 border-b border-neutral-200 flex gap-3 items-center">
-          <div className="w-16 h-16 bg-gradient-to-b from-zinc-800/0 to-black/30 rounded-[10px]" />
+          {/* <div className="w-16 h-16 bg-gradient-to-b from-zinc-800/0 to-black/30 rounded-[10px]" /> */}
+          <img src={initialData?.coverImg} alt="" className="w-16 h-16 rounded-[10px] object-cover" />
           <div className="flex-1">
             <div className="font-bold text-custom-black text-base">
               {initialData?.name || ""}
             </div>
             <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (
-                <StarIcon key={i} className="w-3 h-3 fill-dark-blue text-dark-blue" />
+                <StarIcon
+                  key={i}
+                  className="w-3 h-3 fill-dark-blue text-dark-blue"
+                />
               ))}
             </div>
             <div className="flex items-center gap-1 text-xs text-custom-black">
@@ -151,19 +158,27 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
           </div>
         </div>
 
+        {/* Ratings + Comment */}
         <div className="flex border-b border-neutral-200">
           <div className="flex-[1.1] p-4 border-r border-neutral-200 flex flex-col items-center gap-4 justify-start">
-            {Object.entries(ratings).map(([label, value]) => (
-              <RatingGroup
-                key={label}
-                label={label}
-                value={value}
-                onChange={(v) => handleRatingChange(label, v)}
-              />
-            ))}
+            {Object.keys(ratings).length > 0 ? (
+              Object.entries(ratings).map(([label, value]) => (
+                <RatingGroup
+                  key={label}
+                  label={label}
+                  value={value}
+                  onChange={(v) => handleRatingChange(label, v)}
+                />
+              ))
+            ) : (
+              <div className="text-gray text-sm italic">
+                No rating categories available
+              </div>
+            )}
           </div>
 
           <div className="flex-[1.2] p-5 flex flex-col items-center justify-start gap-4 text-left">
+            {/* Overall */}
             <div className="flex items-center gap-2 self-start">
               <div className="text-custom-black text-sm font-medium">
                 Overall
@@ -176,6 +191,7 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
               </div>
             </div>
 
+            {/* Comment */}
             <div className="flex flex-col gap-1 w-full">
               <label
                 htmlFor="comment"
@@ -189,21 +205,16 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
                 value={comment}
                 onChange={(e) => {
                   setComment(e.target.value);
-
-                  // ปรับขนาดอัตโนมัติ
                   const target = e.target;
-                  target.style.height = "auto"; // reset ก่อน
-                  target.style.height = `${target.scrollHeight}px`; // ปรับตามเนื้อหา
+                  target.style.height = "auto";
+                  target.style.height = `${target.scrollHeight}px`;
                 }}
-                style={{
-                  minHeight: "96px", // ความสูงเริ่มต้น (ประมาณ 6 บรรทัด)
-                }}
+                style={{ minHeight: "96px" }}
               />
             </div>
 
             {/* Images */}
             <div className="flex flex-wrap gap-3 justify-start w-full">
-              {/* Existing images */}
               {existingImages.map((src, index) => (
                 <div key={`existing-${index}`} className="relative w-20 h-20">
                   <img
@@ -220,7 +231,6 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
                 </div>
               ))}
 
-              {/* Newly uploaded images */}
               {images.map((img, index) => (
                 <div key={`upload-${index}`} className="relative w-20 h-20">
                   <img

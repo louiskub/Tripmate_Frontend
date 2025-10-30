@@ -2,11 +2,12 @@
 import DefaultPage from "@/components/layout/default-layout";
 import ProfileNavbar from "@/components/navbar/side-nav-variants/profile-side-navbar";
 import React, { useState } from "react";
-import { MoreHorizontal, StarIcon } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import EditReviewPopup from "./edit-review-popup";
 
 type ReviewCardProps = {
   name: string;
+  coverImg?: string;
   service?: string;
   score: Record<string, number>;
   review: string;
@@ -16,14 +17,14 @@ type ReviewCardProps = {
   location?: string;
 };
 
-const reviews = [
+// ---------------- Sample Reviews ----------------
+const reviewsData: ReviewCardProps[] = [
   {
     name: "Pool Villa Resort",
+    coverImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh3PEPFGu-DCyBRIYE09C1ZKbM5MiTqA5hww&s",
     service: "Hotel",
     location: "Phuket, Thailand",
-    // score: 9.0,
     score: {
-      // Overall: 9,
       Cleanliness: 9,
       Service: 8,
       Facilities: 9,
@@ -36,31 +37,31 @@ const reviews = [
     img: [
       "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
       "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-    ]
+    ],
+    viewOption: "List",
   },
   {
     name: "Seafood Delight",
+    coverImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWtBwPjoEDAH_Q_XsApIT9VSZ6p-qupAycyQ&s",
     service: "Restaurant",
     location: "Phuket, Thailand",
-    // score: 9.0,
     score: {
       Overall: 9,
     },
     review:
-      "The staff are friendly and listen to customer feedback and use it to improve. The hotel is constantly being developed and improved.",
-    date: "12 Aug 2025",
+      "Delicious seafood with a nice atmosphere. Friendly staff and great service!",
+    date: "15 Aug 2025",
     img: [
       "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-    ]
+    ],
+    viewOption: "List",
   },
 ];
 
 // ---------------- ReviewCard ----------------
 const ReviewCard = ({
   name,
+  coverImg,
   location,
   score,
   review,
@@ -76,14 +77,20 @@ const ReviewCard = ({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const average =
-    Object.values(score).reduce((a, b) => a + b, 0) / Object.keys(score).length;
+    Object.keys(score).length === 0
+      ? 0
+      : Object.values(score).reduce((a, b) => a + b, 0) /
+        Object.keys(score).length;
 
   return (
     <div className="relative">
       <div className="w-full p-4 rounded-[10px] border border-light-gray flex flex-col gap-3 bg-custom-white hover:shadow-sm transition">
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full border border-light-gray flex items-center justify-center bg-white" />
+            {/* <div className="w-10 h-10 rounded-full border border-light-gray flex items-center justify-center bg-white" /> */}
+            <img src={coverImg}  
+            // onError={"this.onerror=null; this.src='https://i.sstatic.net/y9DpT.jpg'"}
+            alt="" className="w-10 h-10 rounded-full border border-light-gray flex items-center justify-center bg-white" />
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-custom-black">
                 {name}
@@ -91,6 +98,7 @@ const ReviewCard = ({
               <span className="text-xs text-gray">{location}</span>
             </div>
           </div>
+
           {/* More button */}
           <div className="relative">
             <button
@@ -156,13 +164,13 @@ const ReviewCard = ({
                 img.length === 1
                   ? "grid-cols-1"
                   : img.length === 2
-                    ? "grid-cols-2"
-                    : "grid-cols-3"
+                  ? "grid-cols-2"
+                  : "grid-cols-3"
               }`}
             >
               {img.map((src, index) => (
                 <img
-                  key={`${src}-${index}`}
+                  key={`${name}-${index}`}
                   src={src}
                   alt={`Review ${index + 1}`}
                   className="w-full h-32 object-cover rounded-lg"
@@ -177,19 +185,17 @@ const ReviewCard = ({
   );
 };
 
-
 // ---------------- ReviewHistory ----------------
 export default function ReviewHistory() {
-  const [sortOption, setSortOption] = useState("option1");
+  // const [sortOption, setSortOption] = useState("option1");
   const [viewOption, setViewOption] = useState("List");
   const [filterReview, setFilterReview] = useState("All");
-  const [remainReview, setRemainReview] = useState(reviews);
+  const [remainReview, setRemainReview] = useState(reviewsData);
 
   // Popup state
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<ReviewCardProps | null>(
-    null
-  );
+  const [selectedReview, setSelectedReview] =
+    useState<ReviewCardProps | null>(null);
 
   const handleEdit = (review: ReviewCardProps) => {
     setSelectedReview(review);
@@ -197,19 +203,53 @@ export default function ReviewHistory() {
   };
 
   const handleDelete = (review: ReviewCardProps) => {
-    const confirmDelete = confirm(`Delete review by ${review.name}?`);
-    if (!confirmDelete) return;
-
+    if (!confirm(`Delete review by ${review.name}?`)) return;
     setRemainReview((prev) =>
       prev.filter((r) => r.name !== review.name || r.date !== review.date)
     );
   };
 
   const filterRemainReview = (filter: string) => {
-    if (filter == filterReview) filter = "All";
-    setFilterReview(filter);
-    if (filter == "All") setRemainReview(reviews);
-    else setRemainReview(reviews.filter((r) => r.service == filter));
+    setFilterReview(filter === filterReview ? "All" : filter);
+    if (filter === "All" || filter === filterReview) setRemainReview(reviewsData);
+    else setRemainReview(reviewsData.filter((r) => r.service === filter));
+  };
+
+  const sortByOption = (option: string) => {
+    console.log("Sorting by:", option);
+
+    const sortedReviews = [...remainReview]; // copy เพื่อไม่ mutate state เดิม
+
+    if (option === "date") {
+      sortedReviews.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateB - dateA; // เรียงจากใหม่ → เก่า
+      });
+    } 
+    else if (option === "score") {
+      sortedReviews.sort((a, b) => {
+        const avgA =
+          Object.values(a.score).reduce((sum, val) => sum + val, 0) /
+          Object.keys(a.score).length;
+        const avgB =
+          Object.values(b.score).reduce((sum, val) => sum + val, 0) /
+          Object.keys(b.score).length;
+        return avgB - avgA; // คะแนนมาก → น้อย
+      });
+    }
+
+    setRemainReview(sortedReviews);
+  };
+
+  const handleSave = (updatedReview: ReviewCardProps) => {
+    setRemainReview((prev) =>
+      prev.map((r) =>
+        r.name === updatedReview.name && r.date === updatedReview.date
+          ? updatedReview
+          : r
+      )
+    );
   };
 
   return (
@@ -228,7 +268,9 @@ export default function ReviewHistory() {
                     key={tab}
                     className={`px-4 py-1 rounded-md text-base font-medium text-gray hover:bg-pale-blue hover:text-dark-blue 
                       ${
-                        filterReview == tab ? "bg-pale-blue text-dark-blue" : ""
+                        filterReview === tab
+                          ? "bg-pale-blue text-dark-blue"
+                          : ""
                       }`}
                     onClick={() => filterRemainReview(tab)}
                   >
@@ -237,7 +279,7 @@ export default function ReviewHistory() {
                 )
               )}
             </div>
-
+            
             {/* Header */}
             <div className="flex justify-between items-center">
               <span className="text-base font-medium text-custom-black">
@@ -248,13 +290,15 @@ export default function ReviewHistory() {
                   defaultValue=""
                   className="text-custom-black d-select w-fit"
                   onChange={(e) =>
-                    setSortOption((e.target as HTMLSelectElement).value)
+                    sortByOption((e.target as HTMLSelectElement).value)
+                    // setSortOption((e.target as HTMLSelectElement).value)
                   }
                 >
                   <option value="" disabled>
                     Sort by option
                   </option>
-                  <option value="option1">Sort by option1</option>
+                  <option value="date">Sort by date</option>
+                  <option value="score">Sort by score</option>
                 </select>
                 <select
                   defaultValue=""
@@ -280,12 +324,12 @@ export default function ReviewHistory() {
                   : "flex flex-col"
               }`}
             >
-              {remainReview.map((r, idx) => (
+              {remainReview.map((r) => (
                 <ReviewCard
+                  key={`${r.name}-${r.date}`}
                   viewOption={viewOption}
-                  key={idx}
                   {...r}
-                  onEdit={handleEdit}
+                  onEdit={() => handleEdit(r)}
                   onDelete={handleDelete}
                 />
               ))}
@@ -300,6 +344,7 @@ export default function ReviewHistory() {
           isOpen={isEditing}
           onClose={() => setIsEditing(false)}
           initialData={selectedReview}
+          onSave={handleSave}
         />
       )}
     </DefaultPage>
