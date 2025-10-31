@@ -215,7 +215,7 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
             />
           </div>
 
-          <div className="w-full lg:w-1/2 bg-white p-8 flex flex-col">
+          <div className="w-full lg:w-1/2 bg-gray-50 p-8 flex flex-col">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">Upload Guide Images</h3>
 
             {/* [แก้ไข] 7. ลบ Grid แสดงภาพตัวอย่างเดิมทิ้ง */}
