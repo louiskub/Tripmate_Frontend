@@ -37,9 +37,9 @@ export default function ManageCarNav({ onAddNew }) {
         active={pathname === '/car-manage/rental-cars/available'} 
       />
        <NavItem 
-        href="/car-manage/rental-cars/active" 
-        text="Active Rentals" 
-        active={pathname === '/car-manage/rental-cars/active'} 
+        href="/car-manage/rental-cars/rented" 
+        text="Rented Rentals" 
+        active={pathname === '/car-manage/rental-cars/rented'} 
       />
       <NavItem 
         href="/car-manage/rental-cars/repair" 

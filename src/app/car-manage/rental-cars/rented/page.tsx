@@ -1,26 +1,26 @@
 "use client"
 
 import { useState } from 'react';
-// ตรวจสอบว่า path ของ components ถูกต้องตามโครงสร้างโปรเจกต์ของคุณ
+// (Imports ทั้งหมดเหมือนเดิม)
 import SideNavbar from '@/components/car-manage/sidenav/sidenav'; 
 import Navbar from '@/components/navbar/navbar';
 import ManageCarNav from '@/components/car-manage/rentalcars/ManageCarNav';
 import CarListItem from '@/components/car-manage/rentalcars/CarListItem';
 import AddNewCarModal from '@/components/car-manage/AddNewCarModal';
 import CarDetailModal from '@/components/car-manage/CarDetailModal'; 
-import Toast from '@/components/ui/toast'; // (Import Toast)
+import Toast from '@/components/ui/toast';
 
-// -- Mock Data: (ใช้เป็นค่าเริ่มต้น) --
+// (initialCars เหมือนเดิม)
 const initialCars = [
   { id: 1, name: 'Toyota Yaris Ativ', status: 'Available', registration: 'SD-2568', transmission: 'Auto', engine: 'EV', fuel: 'Electric', passengers: 4, deposit: 5000, insurance: 500, location: 'Bangkok', description: 'A reliable and fuel-efficient sedan, perfect for city driving.', imageUrls: ['https://placehold.co/430x412/3B82F6/FFFFFF?text=Car+1'], price: 1200, rating: 4.8 },
   { id: 2, name: 'Honda Civic', status: 'Rented', registration: 'HC-1121', transmission: 'Auto', engine: '1.5L Turbo', fuel: 'Gasoline', passengers: 5, deposit: 8000, insurance: 500, location: 'Chiang Mai', description: 'Sporty look with a comfortable interior. Great handling.', imageUrls: ['https://placehold.co/430x412/10B981/FFFFFF?text=Car+2'], price: 1800, rating: 4.9 },
   { id: 3, name: 'Ford Ranger', status: 'Under Repair', registration: 'FR-7890', transmission: 'Manual', engine: '2.0L Diesel', fuel: 'Diesel', passengers: 5, deposit: 10000, insurance: 800, location: 'Phuket', description: 'A powerful pickup truck ready for any adventure, on or off the road.', imageUrls: ['https://placehold.co/430x412/F59E0B/FFFFFF?text=Car+3'], price: 2500, rating: 4.7 },
 ];
 
-// [แก้ไข] 1. เปลี่ยนชื่อ Component (ถ้าต้องการ) หรือใช้ Page 
-export default function AvailableCarsPage() { 
+export default function RentedCarsPage() { 
   const [cars, setCars] = useState(initialCars);
   
+  // (States และ Handlers ทั้งหมดเหมือนเดิม)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
@@ -31,7 +31,6 @@ export default function AvailableCarsPage() {
     type: "success" as "success" | "error" | "info",
   });
 
-  // (Handler Functions ทั้งหมดเหมือนเดิม)
   const handleCreateCar = (allData) => { 
     const newCar = {
       id: cars.length + 1,
@@ -89,8 +88,7 @@ export default function AvailableCarsPage() {
     setToastState((prev) => ({ ...prev, isVisible: false }));
   };
 
-  // (คำนวณ Count เหมือนเดิม)
-  const availableCount = cars.filter(car => car.status === 'Available').length;
+  const rentedCount = cars.filter(car => car.status === 'Rented').length;
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-['Manrope']">
@@ -105,16 +103,16 @@ export default function AvailableCarsPage() {
             <div className="flex-1 flex flex-col gap-4 bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex justify-between items-center">
                 <div>
-                  {/* [แก้ไข] 2. เปลี่ยนหัวข้อและจำนวน */}
-                  <h1 className="text-2xl font-bold text-gray-800">Available Cars</h1>
-                  <p className="text-base text-gray-500 mb-2">{availableCount} Cars</p>
+                  {/* [แก้ไข] 1. เปลี่ยนหัวข้อและจำนวน */}
+                  <h1 className="text-2xl font-bold text-gray-800">Rented Cars</h1>
+                  <p className="text-base text-gray-500 mb-2">{rentedCount} Cars</p>
                   
                   {/* (ส่วนแสดงผลย่อย เหมือนเดิม) */}
                   <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 bg-green-500 rounded-full"></span>
-                      <span className="text-gray-600">Available:</span>
-                      <span className="font-semibold text-gray-800">{availableCount}</span>
+                      <span className="h-2 w-2 bg-yellow-500 rounded-full"></span>
+                      <span className="text-gray-600">Rented:</span>
+                      <span className="font-semibold text-gray-800">{rentedCount}</span>
                     </div>
                   </div>
                 </div>
@@ -125,8 +123,8 @@ export default function AvailableCarsPage() {
               </div>
 
               <div className="flex flex-col gap-4 overflow-y-auto">
-                {/* [แก้ไข] 3. เพิ่ม .filter() ที่นี่ */}
-                {cars.filter(car => car.status === 'Available').map(car => (
+                {/* [แก้ไข] 2. เพิ่ม .filter() ที่นี่ */}
+                {cars.filter(car => car.status === 'Rented').map(car => (
                   <CarListItem 
                     key={car.id} 
                     car={car} 
