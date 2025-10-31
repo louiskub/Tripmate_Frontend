@@ -37,15 +37,20 @@ export function AccountNav() {
   const [vendorType] = useLocalStorage('vendorType', 'car');
   const pathname = usePathname();
   console.log("pathname: ", pathname);
+
+  const text = vendorType == "hotel" ? "Room" : 
+              vendorType == "car" ? "Car" : 
+              vendorType == "guide" ? "Guide" : ""
+
   const  navItems = [
-      <NavItem key="total" label={`Total ${vendorType}`} href={paths.vendor.account.manage} />,
-      <NavItem key="available" label={`Available ${vendorType}`} href={paths.vendor.account.manage} />
+      <NavItem key="total" label={`Total ${text}`} href={paths.vendor.account.manage} />,
+      <NavItem key="available" label={`Available ${text}`} href={paths.vendor.account.manage} />
   ]
 
   if (vendorType != "car") {
     navItems.push(
-      <NavItem key="unavailable" label={`Unavailable ${vendorType}`} href={paths.vendor.account.manage} />,
-      <NavItem key="full_booking" label={`Full booking ${vendorType}`} href={paths.vendor.account.manage} />
+      <NavItem key="unavailable" label={`Unavailable ${text}`} href={paths.vendor.account.manage} />,
+      <NavItem key="full_booking" label={`Full booking ${text}`} href={paths.vendor.account.manage} />
     )
   }
   else {
@@ -74,6 +79,7 @@ export function AccountNav() {
 
 export default function VendorSideNavbar() {
     const [vendorType] = useLocalStorage('vendorType', null);
+    
     return (
         <div className='sticky top-0 w-56 h-[calc(100vh-56px)] border-r-light-gray self-stretch bg-custom-white border border-pale-blue flex flex-col gap-4'>
             <div>
