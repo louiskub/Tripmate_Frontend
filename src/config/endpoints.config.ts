@@ -28,10 +28,10 @@ export const endpoints = {
   
   guide: {
     all: "${endpoints.baseURL}/guide/all",
-    detail: (id: string) => `${endpoints.baseURL}/guide/${id}`,
-    book: (id: string) => `${endpoints.baseURL}/guide/book/${id}`,
+    detail: (id: string) => `${BASE_URL}/guide/${id}`,
+    book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
   
-  user_profile: (id: string) => `${endpoints.baseURL}/users/${id}`,
+  user_profile: (id: string) => `${BASE_URL}/users/${id}`,
 
 }
