@@ -22,7 +22,7 @@ const HotelCard = (hotel: HotelCardProps) => {
     const router = useRouter();
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5 hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(endpoints.hotel.detail(hotel.hotel_id))}>
+            onClick={() => router.push(paths.hotel.detail(hotel.hotel_id))}>
             <ImageSlide pictures={hotel.pictures}>
                 <FavoriteButton favorite={hotel.favorite} id={hotel.hotel_id} type='hotel'/>
             </ImageSlide>
@@ -56,7 +56,6 @@ const HotelCard = (hotel: HotelCardProps) => {
                         <SubBody className='text-dark-blue'>฿</SubBody>
                         <ButtonText className='text-dark-blue'>{hotel.price}</ButtonText>
                     </span>
-                    <Button as='a' href={paths.hotel.detail} text='view hotel' className='bg-dark-blue rounded-lg text-custom-white !h-8 !px-3' />
                 </div>
             </div>
         </div>

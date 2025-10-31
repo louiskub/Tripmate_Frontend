@@ -7,15 +7,14 @@ import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { guides } from '@/mocks/guide';
 
-export default function AllAttraction() {
+export default function AllGuides() {
   return (
     <DefaultPage current_tab='guide'>
       <SearchServiceInput/>
       <div className='flex w-full gap-2.5 mt-2'>
         <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
           <span className='flex justify-between  p-2.5'>
-            <Body>Found 9999 restaurants</Body>
-            <Body>Sort by</Body>
+            <Body>Found {guides.length} attractions</Body>
           </span>
           {guides.map((guide, idx) => (
             <GuideCard key={idx} {...guide} />

@@ -7,9 +7,10 @@ type ImageSlideProps = {
     pictures: Array<string>
     children?: ReactNode
     className?: string
+    onClick?: () => void
 }
 
-const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
+const ImageSlide = ({ pictures, children, className, onClick }: ImageSlideProps) => {
     const [index, setIndex] = useState(1);
     const [transition, setTransition] = useState(true);
     
@@ -39,7 +40,9 @@ const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
     };
 
     return (
-        <div className={`relative rounded-[10px] overflow-hidden group ${className ? className: 'w-44 aspect-square'}`}>            
+        <div 
+            onClick={onClick}
+            className={`relative rounded-[10px] overflow-hidden group ${className ? className: 'w-44 aspect-square'} ${onClick? 'hover:cursor-pointer': ''}`}>            
             <div
                 className={`w-full h-full flex z-100 ${transition ? 'transition-transform duration-300' : ''}`}
                 style={{ transform: `translateX(-${index * 100}%)` }}

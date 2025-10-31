@@ -26,7 +26,7 @@ const GuideCard = (service: GuideCardProps) => {
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5
                     hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(endpoints.guide.detail(service.id))}>
+            onClick={() => router.push(paths.guide.detail(service.id))}>
             <ImageSlide pictures={service.pictures}>
                 <FavoriteButton favorite={service.favorite} id={service.id} type='rental_car'/>
             </ImageSlide>
