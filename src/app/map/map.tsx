@@ -4,11 +4,11 @@ import { useEffect, useRef, useState, type FormEvent } from "react"
 import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { MapPin, Navigation, X, Search, Route } from "lucide-react"
-import { renderToString } from "react-dom/server";
+import { renderToString } from "react-dom/server"
 
-import MyHotelIcon from "@/assets/icons/hotel.svg";
-import MyRestaurantIcon from "@/assets/icons/restaurant-fill.svg";
-import MyAttractionIcon from "@/assets/icons/attractions.svg";
+import MyHotelIcon from "@/assets/icons/hotel.svg"
+import MyRestaurantIcon from "@/assets/icons/restaurant-fill.svg"
+import MyAttractionIcon from "@/assets/icons/attractions.svg"
 
 type MarkerCategory = "hotel" | "restaurant" | "attraction"
 
@@ -42,7 +42,8 @@ export default function FinalMap() {
   const originMarkerRef = useRef<maplibregl.Marker | null>(null)
   const destMarkerRef = useRef<maplibregl.Marker | null>(null)
   const singleMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const myLocationRef = useRef<maplibregl.Marker | null>(null) // 🧭 Marker ของผู้ใช้
+  const myLocationRef = useRef<maplibregl.Marker | null>(null)
+  const waypointMarkersRef = useRef<maplibregl.Marker[]>([])
 
   // System marker overlays to manage labels
   const systemMarkersRef = useRef<
@@ -58,12 +59,14 @@ export default function FinalMap() {
 
   // Routing state (keep refs so map handlers don't recreate map)
   const directionsOnRef = useRef(false)
-  const activeTargetRef = useRef<"origin" | "destination">("destination")
+  const activeTargetRef = useRef<"origin" | "destination" | "waypoint">("destination")
 
+  const [activeTab, setActiveTab] = useState<"search" | "route">("search")
   const [directionsOn, setDirectionsOn] = useState(false)
-  const [activeTarget, setActiveTarget] = useState<"origin" | "destination">("destination")
+  const [activeTarget, setActiveTarget] = useState<"origin" | "destination" | "waypoint">("destination")
   const [origin, setOrigin] = useState<LngLat | null>(null)
   const [destination, setDestination] = useState<LngLat | null>(null)
+  const [waypoints, setWaypoints] = useState<LngLat[]>([])
   const [routeInfo, setRouteInfo] = useState<{ distanceText: string; durationText: string } | null>(null)
   const [routeSteps, setRouteSteps] = useState<string[]>([])
 
@@ -87,7 +90,7 @@ export default function FinalMap() {
     attraction: { icon: MyAttractionIcon, color: "#10B981" },
   }
 
-    // 🧭 ดึงตำแหน่งผู้ใช้
+  // 🧭 ดึงตำแหน่งผู้ใช้
   const fetchUserLocation = () => {
     if (!navigator.geolocation) {
       alert("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง (Geolocation)")
@@ -100,7 +103,6 @@ export default function FinalMap() {
         const map = mapRef.current
         if (!map) return
 
-        // ลบ marker เดิมก่อน
         myLocationRef.current?.remove()
 
         const el = document.createElement("div")
@@ -110,13 +112,10 @@ export default function FinalMap() {
           box-shadow:0 0 10px rgba(56,131,248,0.8);
         "></div>`
 
-        myLocationRef.current = new maplibregl.Marker({ element: el })
-          .setLngLat([lng, lat])
-          .addTo(map)
+        myLocationRef.current = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map)
 
         map.flyTo({ center: [lng, lat], zoom: 15 })
 
-        // ถ้าเปิดโหมดเส้นทางอยู่ → ตั้งเป็นต้นทางทันที
         if (directionsOnRef.current) {
           setOrigin({ lat, lng })
           placeABMarker({ lat, lng }, "origin")
@@ -125,7 +124,7 @@ export default function FinalMap() {
       (err) => {
         console.error("ไม่สามารถดึงตำแหน่งได้:", err)
         alert("ไม่สามารถเข้าถึงตำแหน่งของคุณได้ กรุณาอนุญาตการเข้าถึงตำแหน่ง")
-      }
+      },
     )
   }
 
@@ -138,14 +137,17 @@ export default function FinalMap() {
       originMarkerRef.current?.remove()
       originMarkerRef.current = null
       setOrigin(null)
+
+      setWaypoints([])
+      waypointMarkersRef.current.forEach((marker) => marker.remove())
+      waypointMarkersRef.current = []
+
       clearRouteLayer()
     } else {
-      // เปิดโหมดเส้นทาง → ตั้งต้นทางเป็นตำแหน่งของเรา
       fetchUserLocation()
     }
   }
 
-  // Sync React state -> refs
   useEffect(() => {
     directionsOnRef.current = directionsOn
   }, [directionsOn])
@@ -153,7 +155,6 @@ export default function FinalMap() {
     activeTargetRef.current = activeTarget
   }, [activeTarget])
 
-  // Reverse geocoding for clicked points
   const reverseGeocode = async (lat: number, lon: number): Promise<PopupInfo> => {
     try {
       const res = await fetch(
@@ -172,7 +173,6 @@ export default function FinalMap() {
     }
   }
 
-  // Initialize map once
   useEffect(() => {
     if (!mapContainer.current) return
 
@@ -185,49 +185,21 @@ export default function FinalMap() {
     mapRef.current = map
     map.addControl(new maplibregl.NavigationControl(), "top-right")
 
-    // 🔹 โหลดตำแหน่งของเราเมื่อเปิด map ครั้งแรก
     fetchUserLocation()
 
-    // System markers (kept from map.tsx)
     const systemPoints: SystemMarker[] = [
       { name: "โรงแรม The River", category: "hotel", lat: 13.7367, lng: 100.5231 },
       { name: "ร้านอาหารครัวบางรัก", category: "restaurant", lat: 13.745, lng: 100.53 },
       { name: "สวนลุมพินี", category: "attraction", lat: 13.7302, lng: 100.5417 },
     ]
-    
-    // สร้าง SVG จาก React icon (lucide) เป็น string เพื่อยัดลง DOM ของ marker
-      const renderIconToString = (IconComp: any, color: string, size = 22) =>
-        renderToString(<IconComp color={color} width={size} height={size} />);
-      
+
+    const renderIconToString = (IconComp: any, color: string, size = 22) =>
+      renderToString(<IconComp color={color} width={size} height={size} />)
 
     systemPoints.forEach((m) => {
-      const {icon, color } = categoryStyles[m.category]
+      const { icon, color } = categoryStyles[m.category]
       const markerEl = document.createElement("div")
-      markerEl.innerHTML = renderIconToString(icon, color, 40);
-      // markerEl.innerHTML = `
-      //   <div style="
-      //     width: 32px;
-      //     height: 32px;
-      //     background: ${color};
-      //     border: 3px solid white;
-      //     border-radius: 50% 50% 50% 0;
-      //     transform: rotate(-45deg);
-      //     box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      //     cursor: pointer;
-      //     transition: all 0.2s ease;
-      //   ">
-      //     <div style="
-      //       width: 12px;
-      //       height: 12px;
-      //       background: white;
-      //       border-radius: 50%;
-      //       position: absolute;
-      //       top: 50%;
-      //       left: 50%;
-      //       transform: translate(-50%, -50%);
-      //     "></div>
-      //   </div>
-      // `
+      markerEl.innerHTML = renderIconToString(icon, color, 40)
 
       markerEl.addEventListener("mouseenter", () => {
         const pin = markerEl.querySelector("div") as HTMLElement
@@ -263,25 +235,26 @@ export default function FinalMap() {
       map.getContainer().appendChild(label)
       systemMarkersRef.current.push({ markerEl, label, lat: m.lat, lng: m.lng, name: m.name, category: m.category })
 
-      // Click system marker → show bottom popup; integrate with routing if active
       markerEl.addEventListener("click", (e) => {
         e.stopPropagation()
         setLocationInfo({ name: m.name, address: `${m.name}, กรุงเทพมหานคร`, lat: m.lat, lng: m.lng })
         setIsClosing(false)
 
         if (directionsOnRef.current) {
-          setDestination({ lat: m.lat, lng: m.lng })
-          placeABMarker({ lat: m.lat, lng: m.lng }, "destination")
-          if (origin) routeBetween(origin, { lat: m.lat, lng: m.lng })
+          const pos = { lat: m.lat, lng: m.lng }
+          setDestination(pos)
+          placeABMarker(pos, "destination")
+          if (origin) {
+            const allPoints = [origin, ...waypoints, pos]
+            routeBetween(allPoints)
+          }
         } else {
-          // normal mode → also drop a single marker at that position
           if (singleMarkerRef.current) singleMarkerRef.current.remove()
           singleMarkerRef.current = new maplibregl.Marker({ color: "#FF2121" }).setLngLat([m.lng, m.lat]).addTo(map)
         }
       })
     })
 
-    // Label updater (scale + visibility like map.tsx)
     const updateLabels = () => {
       const zoom = map.getZoom()
       const normalized = Math.max(0, Math.min(1, (zoom - 3) / 12))
@@ -303,9 +276,7 @@ export default function FinalMap() {
     map.on("idle", updateLabels)
     setTimeout(updateLabels, 300)
 
-    // Map click handler
     map.on("click", async (e) => {
-      // If click near system marker → treat as system marker
       const sys = findNearbySystemMarker(e.lngLat.lng, e.lngLat.lat)
       if (sys) {
         setLocationInfo({ name: sys.name, address: `${sys.name}, กรุงเทพมหานคร`, lat: sys.lat, lng: sys.lng })
@@ -314,7 +285,10 @@ export default function FinalMap() {
         if (directionsOnRef.current) {
           setDestination({ lat: sys.lat, lng: sys.lng })
           placeABMarker({ lat: sys.lat, lng: sys.lng }, "destination")
-          if (origin) routeBetween(origin, { lat: sys.lat, lng: sys.lng })
+          if (origin) {
+            const allPoints = [origin, ...waypoints, { lat: sys.lat, lng: sys.lng }]
+            routeBetween(allPoints)
+          }
         } else {
           if (singleMarkerRef.current) singleMarkerRef.current.remove()
           singleMarkerRef.current = new maplibregl.Marker({ color: "#FF2121" }).setLngLat([sys.lng, sys.lat]).addTo(map)
@@ -322,17 +296,19 @@ export default function FinalMap() {
         return
       }
 
-      // Otherwise: normal click behavior
       if (directionsOnRef.current) {
+        const pos = { lat: e.lngLat.lat, lng: e.lngLat.lng }
+
         if (activeTargetRef.current === "origin") {
-          setOrigin({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+          setOrigin(pos)
           placeABMarker(e.lngLat, "origin")
-        } else {
-          setDestination({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+        } else if (activeTargetRef.current === "destination") {
+          setDestination(pos)
           placeABMarker(e.lngLat, "destination")
+        } else {
+          setWaypoints((prev) => [...prev, pos])
         }
       } else {
-        // Normal mode → place single marker and show bottom popup from reverse geocode
         if (singleMarkerRef.current) singleMarkerRef.current.remove()
         singleMarkerRef.current = new maplibregl.Marker({ color: "#FF2121" }).setLngLat(e.lngLat).addTo(map)
         const info = await reverseGeocode(e.lngLat.lat, e.lngLat.lng)
@@ -344,7 +320,38 @@ export default function FinalMap() {
     return () => map.remove()
   }, [])
 
-  // Find system marker close to click (pixel space)
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !directionsOn) return
+
+    waypointMarkersRef.current.forEach((marker) => marker.remove())
+    waypointMarkersRef.current = []
+
+    const newMarkers = waypoints.map((wp, index) => {
+      const markerEl = document.createElement("div")
+      markerEl.innerHTML = `
+        <div style="
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: #F59E0B;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 14px;
+          color: white;
+        ">${index + 1}</div>
+      `
+      const marker = new maplibregl.Marker({ element: markerEl }).setLngLat([wp.lng, wp.lat]).addTo(map)
+      return marker
+    })
+
+    waypointMarkersRef.current = newMarkers
+  }, [waypoints, directionsOn])
+
   const findNearbySystemMarker = (lng: number, lat: number) => {
     const map = mapRef.current
     if (!map) return null
@@ -363,7 +370,6 @@ export default function FinalMap() {
     return best
   }
 
-  // Place A/B markers for routing
   const placeABMarker = (pos: LngLat | maplibregl.LngLat, type: "origin" | "destination") => {
     const map = mapRef.current
     if (!map) return
@@ -399,48 +405,71 @@ export default function FinalMap() {
     }
   }
 
-  // Bottom popup (styled like map.tsx)
   const closeBottomPopup = () => {
     setIsClosing(true)
     setTimeout(() => {
       setLocationInfo(null)
-      // Remove only the single (normal) marker; keep routing markers
       singleMarkerRef.current?.remove()
       singleMarkerRef.current = null
       setIsClosing(false)
     }, 250)
   }
 
-  // Routing via OSRM
-  const routeBetween = async (a: LngLat, b: LngLat) => {
+  const routeBetween = async (allPoints: LngLat[]) => {
     const map = mapRef.current
-    if (!map) return
-    const url = `https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson&steps=true`
+    if (!map || allPoints.length < 2) return
+
+    const coordsString = allPoints.map((p) => `${p.lng},${p.lat}`).join(";")
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson&steps=true`
+
     try {
       const res = await fetch(url)
       const data = await res.json()
       const route = data?.routes?.[0]
       if (!route) return
 
-      const coords = route.geometry.coordinates
-      const geojson = {
-        type: "Feature",
-        geometry: { type: "LineString", coordinates: coords },
-        properties: {},
-      }
-
       clearRouteLayer()
-      map.addSource(ROUTE_SOURCE_ID, { type: "geojson", data: geojson })
-      map.addLayer({
-        id: ROUTE_LAYER_ID,
-        type: "line",
-        source: ROUTE_SOURCE_ID,
-        paint: { "line-color": "#3883F8", "line-width": 5, "line-opacity": 0.8 },
-      })
+
+      const LEG_COLORS = ["#3883F8", "#F59E0B", "#FF2121", "#47DE36", "#9333EA"]
 
       const bounds = new maplibregl.LngLatBounds()
-      coords.forEach(([lng, lat]: [number, number]) => bounds.extend([lng, lat]))
-      map.fitBounds(bounds, { padding: 60 })
+
+      route.legs.forEach((leg: any, index: number) => {
+        const legCoords = leg.steps.flatMap((step: any) => step.geometry.coordinates)
+
+        if (legCoords.length === 0) return
+
+        const sourceId = `${ROUTE_SOURCE_ID}-${index}`
+        const layerId = `${ROUTE_LAYER_ID}-${index}`
+
+        const color = LEG_COLORS[index % LEG_COLORS.length]
+
+        const geojson = {
+          type: "Feature",
+          geometry: { type: "LineString", coordinates: legCoords },
+          properties: {},
+        }
+
+        map.addSource(sourceId, { type: "geojson", data: geojson as any })
+        map.addLayer({
+          id: layerId,
+          type: "line",
+          source: sourceId,
+          paint: {
+            "line-color": color,
+            "line-width": 6,
+            "line-opacity": 0.85,
+          },
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+        })
+
+        legCoords.forEach(([lng, lat]: [number, number]) => bounds.extend([lng, lat]))
+      })
+
+      map.fitBounds(bounds, { padding: 80 })
 
       setRouteInfo({
         distanceText:
@@ -455,6 +484,8 @@ export default function FinalMap() {
         }
       }
       setRouteSteps(steps)
+
+      setActiveTab("route")
     } catch (e) {
       console.error("Route error:", e)
     }
@@ -463,13 +494,46 @@ export default function FinalMap() {
   const clearRouteLayer = () => {
     const map = mapRef.current
     if (!map) return
-    if (map.getLayer(ROUTE_LAYER_ID)) map.removeLayer(ROUTE_LAYER_ID)
-    if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID)
+
+    const style = map.getStyle()
+    if (!style || !style.layers) {
+      setRouteInfo(null)
+      setRouteSteps([])
+      return
+    }
+
+    const layerIds = style.layers.map((layer) => layer.id).filter((id) => id.startsWith(ROUTE_LAYER_ID))
+
+    layerIds.forEach((id) => {
+      if (map.getLayer(id)) {
+        map.removeLayer(id)
+      }
+    })
+
+    const sourceIds = Object.keys(style.sources).filter((id) => id.startsWith(ROUTE_SOURCE_ID))
+
+    sourceIds.forEach((id) => {
+      if (map.getSource(id)) {
+        map.removeSource(id)
+      }
+    })
+
     setRouteInfo(null)
     setRouteSteps([])
   }
 
-  // Search suggestions
+  const calculateFullRoute = () => {
+    if (!origin || !destination) return
+
+    const allPoints = [origin, ...waypoints, destination]
+    routeBetween(allPoints)
+  }
+
+  const removeWaypoint = (indexToRemove: number) => {
+    setWaypoints((prev) => prev.filter((_, index) => index !== indexToRemove))
+    clearRouteLayer()
+  }
+
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (query.trim().length < 2) {
@@ -501,13 +565,13 @@ export default function FinalMap() {
       if (activeTarget === "origin") {
         setOrigin({ lat, lng })
         placeABMarker({ lat, lng }, "origin")
-      } else {
+      } else if (activeTarget === "destination") {
         setDestination({ lat, lng })
         placeABMarker({ lat, lng }, "destination")
+      } else {
+        setWaypoints((prev) => [...prev, { lat, lng }])
       }
-      if (origin && destination) routeBetween(origin, destination)
     } else {
-      // Normal mode: single marker + bottom popup (reverse geocode)
       singleMarkerRef.current?.remove()
       singleMarkerRef.current = new maplibregl.Marker({ color: "#FF2121" }).setLngLat([lng, lat]).addTo(map)
       const info = await reverseGeocode(lat, lng)
@@ -530,197 +594,302 @@ export default function FinalMap() {
 
   return (
     <div className="w-full h-screen relative font-sans bg-[#F7F7F9]">
-      <form
-        onSubmit={handleSubmit}
-        className="absolute top-5 left-5 z-30 w-[420px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.15)] overflow-hidden"
-      >
-        {/* Search input section */}
-        <div className="relative">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-            <Search size={20} />
-          </div>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 150)}
-            placeholder={
-              !directionsOn ? "ค้นหาสถานที่..." : activeTarget === "origin" ? "ค้นหาต้นทาง (A)..." : "ค้นหาปลายทาง (B)..."
-            }
-            className="w-full pl-12 pr-4 py-4 text-[15px] text-[#303030] placeholder:text-gray-400 border-none outline-none focus:outline-none"
-          />
-          {isFocused && suggestions.length > 0 && (
-            <ul className="absolute left-0 right-0 top-full bg-white rounded-b-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] max-h-64 overflow-y-auto z-50 custom-scroll-bar">
-              {suggestions.map((s, i) => (
-                <li
-                  key={i}
-                  onClick={() => handleSearchSelect(s)}
-                  className="px-4 py-3 text-[14px] text-[#303030] hover:bg-[#F7F7F9] cursor-pointer border-b border-gray-100 last:border-0 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <MapPin size={18} className="text-gray-400 mt-0.5 flex-shrink-0" />
-                    <span className="leading-relaxed">{s.display_name}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Directions toggle */}
-        <div className="px-4 py-3 border-t border-gray-100">
+      <div className="absolute top-5 left-5 z-30 w-[420px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.15)] overflow-hidden">
+        {/* Tab Headers */}
+        <div className="flex border-b border-gray-100">
           <button
             type="button"
-            onClick={() => changeDirectionsOn(!directionsOn)}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
-              directionsOn
-                ? "bg-[#3883F8] text-white shadow-sm hover:bg-[#216CE1]"
-                : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
+            onClick={() => setActiveTab("search")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-medium transition-all ${
+              activeTab === "search"
+                ? "text-[#3883F8] border-b-2 border-[#3883F8] bg-[#F0F7FF]"
+                : "text-gray-500 hover:text-[#303030] hover:bg-[#F7F7F9]"
+            }`}
+          >
+            <Search size={18} />
+            ค้นหา
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("route")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[14px] font-medium transition-all ${
+              activeTab === "route"
+                ? "text-[#3883F8] border-b-2 border-[#3883F8] bg-[#F0F7FF]"
+                : "text-gray-500 hover:text-[#303030] hover:bg-[#F7F7F9]"
             }`}
           >
             <Route size={18} />
-            {directionsOn ? "ปิดโหมดเส้นทาง" : "เปิดโหมดเส้นทาง"}
+            เส้นทาง
+            {routeSteps.length > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 bg-[#3883F8] text-white text-[11px] font-bold rounded-full">
+                {routeSteps.length}
+              </span>
+            )}
           </button>
         </div>
 
-        {/* Directions controls */}
-        {directionsOn && (
-          <div className="px-4 pb-4 space-y-3">
-            {/* Target selector */}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveTarget("origin")}
-                className={`flex-1 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
-                  activeTarget === "origin"
-                    ? "bg-[#47DE36] text-white shadow-sm"
-                    : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
-                }`}
-              >
-                ตั้งต้นทาง (A)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTarget("destination")}
-                className={`flex-1 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
-                  activeTarget === "destination"
-                    ? "bg-[#FF2121] text-white shadow-sm"
-                    : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
-                }`}
-              >
-                ตั้งปลายทาง (B)
-              </button>
-            </div>
-
-            {/* Origin/Destination display */}
-            <div className="space-y-2 text-[13px]">
-              <div className="flex items-center justify-between p-2.5 bg-[#F7F7F9] rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#47DE36] flex items-center justify-center text-white text-[11px] font-bold">
-                    A
-                  </div>
-                  <span className="text-[#303030]">
-                    {origin ? `${origin.lat.toFixed(4)}, ${origin.lng.toFixed(4)}` : "ยังไม่ได้เลือกต้นทาง"}
-                  </span>
+        {/* Tab Content */}
+        <div className="max-h-[calc(100vh-200px)] overflow-y-auto custom-scroll-bar">
+          {/* Search Tab Content */}
+          {activeTab === "search" && (
+            <form onSubmit={handleSubmit}>
+              {/* Search input section */}
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  <Search size={20} />
                 </div>
-                {origin && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      originMarkerRef.current?.remove()
-                      originMarkerRef.current = null
-                      setOrigin(null)
-                      clearRouteLayer()
-                    }}
-                    className="text-[#FF2121] hover:text-[#950606] transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setTimeout(() => setIsFocused(false), 150)}
+                  placeholder={
+                    !directionsOn
+                      ? "ค้นหาสถานที่..."
+                      : activeTarget === "origin"
+                        ? "ค้นหาต้นทาง (A)..."
+                        : activeTarget === "destination"
+                          ? "ค้นหาปลายทาง (B)..."
+                          : "ค้นหาจุดแวะ..."
+                  }
+                  className="w-full pl-12 pr-4 py-4 text-[15px] text-[#303030] placeholder:text-gray-400 border-none outline-none focus:outline-none"
+                />
+                {isFocused && suggestions.length > 0 && (
+                  <ul className="absolute left-0 right-0 top-full bg-white rounded-b-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] max-h-64 overflow-y-auto z-50 custom-scroll-bar">
+                    {suggestions.map((s, i) => (
+                      <li
+                        key={i}
+                        onClick={() => handleSearchSelect(s)}
+                        className="px-4 py-3 text-[14px] text-[#303030] hover:bg-[#F7F7F9] cursor-pointer border-b border-gray-100 last:border-0 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          <MapPin size={18} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span className="leading-relaxed">{s.display_name}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-2.5 bg-[#F7F7F9] rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#FF2121] flex items-center justify-center text-white text-[11px] font-bold">
-                    B
+              {/* Directions toggle */}
+              <div className="px-4 py-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => changeDirectionsOn(!directionsOn)}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+                    directionsOn
+                      ? "bg-[#3883F8] text-white shadow-sm hover:bg-[#216CE1]"
+                      : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
+                  }`}
+                >
+                  <Route size={18} />
+                  {directionsOn ? "ปิดโหมดเส้นทาง" : "เปิดโหมดเส้นทาง"}
+                </button>
+              </div>
+
+              {/* Directions controls */}
+              {directionsOn && (
+                <div className="px-4 pb-4 space-y-3">
+                  {/* Target selector */}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTarget("origin")}
+                      className={`flex-1 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
+                        activeTarget === "origin"
+                          ? "bg-[#47DE36] text-white shadow-sm"
+                          : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
+                      }`}
+                    >
+                      ตั้งต้นทาง (A)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTarget("waypoint")}
+                      className={`flex-1 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
+                        activeTarget === "waypoint"
+                          ? "bg-yellow-500 text-white shadow-sm"
+                          : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
+                      }`}
+                    >
+                      เพิ่มจุดแวะ
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTarget("destination")}
+                      className={`flex-1 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
+                        activeTarget === "destination"
+                          ? "bg-[#FF2121] text-white shadow-sm"
+                          : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
+                      }`}
+                    >
+                      ตั้งปลายทาง (B)
+                    </button>
                   </div>
-                  <span className="text-[#303030]">
-                    {destination ? `${destination.lat.toFixed(4)}, ${destination.lng.toFixed(4)}` : "ยังไม่ได้เลือกปลายทาง"}
-                  </span>
-                </div>
-                {destination && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      destMarkerRef.current?.remove()
-                      destMarkerRef.current = null
-                      setDestination(null)
-                      clearRouteLayer()
-                    }}
-                    className="text-[#FF2121] hover:text-[#950606] transition-colors"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
 
-            {/* Route actions */}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => origin && destination && routeBetween(origin, destination)}
-                disabled={!origin || !destination}
-                className="flex-1 bg-[#3883F8] text-white rounded-lg py-2.5 text-[14px] font-medium hover:bg-[#216CE1] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              >
-                คำนวณเส้นทาง
-              </button>
-              <button
-                type="button"
-                onClick={clearRouteLayer}
-                className="px-4 py-2.5 bg-[#F7F7F9] text-[#303030] rounded-lg text-[14px] font-medium hover:bg-[#E0E0E0] transition-all"
-              >
-                ล้าง
-              </button>
-            </div>
+                  {/* Origin/Destination display */}
+                  <div className="space-y-2 text-[13px]">
+                    <div className="flex items-center justify-between p-2.5 bg-[#F7F7F9] rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-[#47DE36] flex items-center justify-center text-white text-[11px] font-bold">
+                          A
+                        </div>
+                        <span className="text-[#303030]">
+                          {origin ? `${origin.lat.toFixed(4)}, ${origin.lng.toFixed(4)}` : "ยังไม่ได้เลือกต้นทาง"}
+                        </span>
+                      </div>
+                      {origin && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            originMarkerRef.current?.remove()
+                            originMarkerRef.current = null
+                            setOrigin(null)
+                            clearRouteLayer()
+                          }}
+                          className="text-[#FF2121] hover:text-[#950606] transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
 
-            {/* Route info */}
-            {routeInfo && (
-              <div className="p-3 bg-[#E0F0FF] rounded-lg text-[13px] text-[#303030] font-medium">
-                <div className="flex items-center gap-2">
-                  <Navigation size={16} className="text-[#3883F8]" />
-                  <span>
-                    ระยะทาง: {routeInfo.distanceText} • เวลา: {routeInfo.durationText}
-                  </span>
+                    {waypoints.map((wp, index) => (
+                      <div key={index} className="flex items-center justify-between p-2.5 bg-[#F7F7F9] rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-[11px] font-bold">
+                            {index + 1}
+                          </div>
+                          <span className="text-[#303030] text-[13px]">
+                            {`จุดแวะ: ${wp.lat.toFixed(4)}, ${wp.lng.toFixed(4)}`}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeWaypoint(index)}
+                          className="text-[#FF2121] hover:text-[#950606] transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+
+                    <div className="flex items-center justify-between p-2.5 bg-[#F7F7F9] rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-[#FF2121] flex items-center justify-center text-white text-[11px] font-bold">
+                          B
+                        </div>
+                        <span className="text-[#303030]">
+                          {destination
+                            ? `${destination.lat.toFixed(4)}, ${destination.lng.toFixed(4)}`
+                            : "ยังไม่ได้เลือกปลายทาง"}
+                        </span>
+                      </div>
+                      {destination && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            destMarkerRef.current?.remove()
+                            destMarkerRef.current = null
+                            setDestination(null)
+                            clearRouteLayer()
+                          }}
+                          className="text-[#FF2121] hover:text-[#950606] transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Route actions */}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={calculateFullRoute}
+                      disabled={!origin || !destination}
+                      className="flex-1 bg-[#3883F8] text-white rounded-lg py-2.5 text-[14px] font-medium hover:bg-[#216CE1] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                    >
+                      คำนวณเส้นทาง
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearRouteLayer}
+                      className="px-4 py-2.5 bg-[#F7F7F9] text-[#303030] rounded-lg text-[14px] font-medium hover:bg-[#E0E0E0] transition-all"
+                    >
+                      ล้าง
+                    </button>
+                  </div>
+
+                  {/* Route info */}
+                  {routeInfo && (
+                    <div className="p-3 bg-[#E0F0FF] rounded-lg text-[13px] text-[#303030] font-medium">
+                      <div className="flex items-center gap-2">
+                        <Navigation size={16} className="text-[#3883F8]" />
+                        <span>
+                          ระยะทาง: {routeInfo.distanceText} • เวลา: {routeInfo.durationText}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-      </form>
+              )}
+            </form>
+          )}
+
+          {/* Route Tab Content */}
+          {activeTab === "route" && (
+            <div>
+              {routeSteps.length > 0 ? (
+                <>
+                  {routeInfo && (
+                    <div className="px-4 pt-4 pb-3">
+                      <div className="p-3 bg-[#E0F0FF] rounded-lg text-[13px] text-[#303030] font-medium">
+                        <div className="flex items-center gap-2">
+                          <Navigation size={16} className="text-[#3883F8]" />
+                          <span>
+                            ระยะทาง: {routeInfo.distanceText} • เวลา: {routeInfo.durationText}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="px-4 pb-4">
+                    <h3 className="font-semibold text-[15px] text-[#303030] mb-3">ขั้นตอนการเดินทาง</h3>
+                    <ol className="space-y-2">
+                      {routeSteps.map((step, i) => (
+                        <li key={i} className="flex gap-3 text-[13px] text-[#303030]">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#E0F0FF] text-[#3883F8] flex items-center justify-center text-[11px] font-bold">
+                            {i + 1}
+                          </span>
+                          <span className="leading-relaxed">{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </>
+              ) : (
+                <div className="px-4 py-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F7F7F9] flex items-center justify-center">
+                    <Route size={32} className="text-gray-400" />
+                  </div>
+                  <p className="text-[14px] text-gray-500 mb-2">ยังไม่มีข้อมูลเส้นทาง</p>
+                  <p className="text-[13px] text-gray-400">กรุณาคำนวณเส้นทางในแท็บ "ค้นหา" ก่อน</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Map */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {directionsOn && routeSteps.length > 0 && (
-        <div className="absolute bottom-6 left-6 w-96 max-h-72 overflow-y-auto bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.15)] custom-scroll-bar">
-          <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 font-semibold text-[15px] text-[#303030]">
-            เส้นทาง
-          </div>
-          <ol className="p-4 space-y-2">
-            {routeSteps.map((step, i) => (
-              <li key={i} className="flex gap-3 text-[13px] text-[#303030]">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#E0F0FF] text-[#3883F8] flex items-center justify-center text-[11px] font-bold">
-                  {i + 1}
-                </span>
-                <span className="leading-relaxed">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-
+      {/* Bottom location info popup */}
       {locationInfo && (
         <div
           className={`absolute left-1/2 -translate-x-1/2 bottom-8 w-[90%] max-w-md 
@@ -750,15 +919,6 @@ export default function FinalMap() {
                 )}
               </div>
             </div>
-
-            {/* <div className="flex gap-2 pt-3 border-t border-gray-100">
-              <button className="flex-1 px-4 py-2.5 bg-[#3883F8] text-white rounded-lg text-[14px] font-medium hover:bg-[#216CE1] transition-all shadow-sm">
-                นำทาง
-              </button>
-              <button className="flex-1 px-4 py-2.5 bg-[#F7F7F9] text-[#303030] rounded-lg text-[14px] font-medium hover:bg-[#E0E0E0] transition-all">
-                บันทึก
-              </button>
-            </div> */}
           </div>
         </div>
       )}
