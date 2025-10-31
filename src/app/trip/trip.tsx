@@ -5,17 +5,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import FinalMap from "./map";
-// 1. 👇 Import TextareaAutosize
-import TextareaAutosize from 'react-textarea-autosize'; 
-// 2. 👆 ลบ import { body } ... ที่ไม่ได้ใช้ออก
+import "maplibre-gl/dist/maplibre-gl.css"
+import FinalMap from "./map"; // 👈 นี่คือ Map สำหรับ "เลือก" พิกัด
+// import ViewOnMap from "./ViewOnMap"; // 👈 [1. เพิ่ม] Import Map สำหรับ "แสดง" เส้นทาง
+import TripRouteDisplay from "./trip-route";
+import TextareaAutosize from 'react-textarea-autosize';
+import "maplibre-gl/dist/maplibre-gl.css"; // 👈 ต้องมีบรรทัดนี้
 
+// 2. [แก้ไข] เพิ่ม lat/lng ใน chip
 interface EventRowProps {
   time: string;
   title: string;
   desc?: string;
-  chip?: { icon: React.ComponentType<{ className?: string }>; label: string };
+  chip?: { 
+    icon: React.ComponentType<{ className?: string }>; 
+    label: string;
+    lat?: number; // 👈 เพิ่ม
+    lng?: number; // 👈 เพิ่ม
+  };
 }
+
 
 interface TripDay {
   dayLabel: string;
@@ -28,7 +37,13 @@ export default function TripEditor() {
   const [days, setDays] = useState<TripDay[]>([]);
   const [popupOpen, setPopupOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{ dayIndex: number; eventIndex: number } | null>(null);
+  
+  // State สำหรับ Map (เลือกพิกัด)
   const [mapOverlayOpen, setMapOverlayOpen] = useState(false);
+  
+  // 3. [เพิ่ม] State สำหรับ Map (แสดงเส้นทางรวม)
+  const [showFullRouteMap, setShowFullRouteMap] = useState(false); 
+
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [editTarget, setEditTarget] = useState<{ dayIndex: number; eventIndex: number } | null>(null);
   const [form, setForm] = useState({ title: "", desc: "", location: "", time: "" });
@@ -101,12 +116,12 @@ export default function TripEditor() {
 
 
   useEffect(() => {
-    if (popupOpen){
+    if (popupOpen || mapOverlayOpen || showFullRouteMap){ // 👈 แก้ไข
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
     }
-  }, [popupOpen]);
+  }, [popupOpen, mapOverlayOpen, showFullRouteMap]); // 👈 แก้ไข
 
   const openAddPopup = (dayIndex: number) => {
     setForm({ title: "", desc: "", location: "", time: "" });
@@ -124,7 +139,8 @@ export default function TripEditor() {
       location: event.chip?.label || "",
       time: event.time,
     });
-    setSelectedCoords(null);
+    // เมื่อแก้ไข เราจะยึด lat/lng เดิมไว้ก่อน จนกว่าจะมีการเลือกใหม่
+    setSelectedCoords(event.chip?.lat && event.chip?.lng ? { lat: event.chip.lat, lng: event.chip.lng } : null);
     setEditTarget({ dayIndex, eventIndex });
     setError(null);
     setPopupOpen(true);
@@ -135,6 +151,7 @@ export default function TripEditor() {
     setForm({ title: "", desc: "", location: "", time: "" });
   };
 
+  // 4. [แก้ไข] อัปเดต handleSubmit ให้เก็บ lat/lng
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) {
@@ -153,7 +170,14 @@ export default function TripEditor() {
       title: form.title,
       desc: form.desc,
       time: form.time,
-      chip: locationLabel ? { icon: MapPin, label: locationLabel } : undefined,
+      chip: locationLabel 
+        ? { 
+            icon: MapPin, 
+            label: locationLabel,
+            lat: selectedCoords?.lat, // 👈 เก็บ lat
+            lng: selectedCoords?.lng  // 👈 เก็บ lng
+          } 
+        : undefined,
     };
 
     const updatedDays = [...days];
@@ -188,18 +212,28 @@ export default function TripEditor() {
     return newDate;
   }
 
+  // ฟังก์ชันสำหรับ Map (เลือกพิกัด)
   const handleOpenMapOverlay = () => setMapOverlayOpen(true);
   const handleCloseMapOverlay = () => setMapOverlayOpen(false);
+  
+  // 3. [เพิ่ม] ฟังก์ชันสำหรับ Map (แสดงเส้นทางรวม)
+  const handleOpenFullRouteMap = () => {
+    setShowFullRouteMap(true);
+  };
+  const handleCloseFullRouteMap = () => {
+    setShowFullRouteMap(false);
+  };
 
-  const handleSelectLocation = (lat: number, lng: number, name?: string) => {
-    setSelectedCoords({ lat, lng });
-    console.log("sel", { ...form, location: `${name} (${lat.toFixed(4)}, ${lng.toFixed(4)})` });
-    setForm({ ...form, location: `${name} (${lat.toFixed(4)}, ${lng.toFixed(4)})` });
+  const handleSelectLocation = (lng: number, lat: number, name?: string) => { // 👈 สลับที่นี่
+    setSelectedCoords({ lat, lng }); // 👈 เก็บให้ถูก { lat: lat, lng: lng }
+    const locationName = name ? `${name} (${lat.toFixed(4)}, ${lng.toFixed(4)})` : `${lat.toFixed(4)}, ${lng.toFixed(4)}`; // 👈 แสดงผลให้ถูก
+    setForm({ ...form, location: locationName });
     setMapOverlayOpen(false);
   };
 
   return (
     <section className="relative w-full p-4 bg-custom-white rounded-[10px] flex flex-col gap-3">
+      {/* ... (โค้ด Header) ... */}
       <header className="w-full pb-3 border-b border-neutral-200 flex items-center justify-between">
         <input
           className="text-custom-black text-2xl font-extrabold font-[Manrope] bg-transparent outline-none"
@@ -229,7 +263,7 @@ export default function TripEditor() {
             />
           </div>
 
-          {/* CSS override */}
+          {/* ... (โค้ด CSS override) ... */}
           <style>{`
             .react-datepicker {
               font-size: 0.8rem; 
@@ -268,7 +302,7 @@ export default function TripEditor() {
             }
           `}</style>
 
-          {/* Dates card */}
+          {/* ... (โค้ด Dates card) ... */}
           <div className="w-full px-2.5 pt-2.5 bg-custom-white rounded-[10px] outline outline-1 outline-neutral-200 flex flex-col gap-2">
             {/* From */}
             <div className="w-full px-1 pb-1.5 flex flex-col gap-1">
@@ -332,7 +366,6 @@ export default function TripEditor() {
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Location preview */}
@@ -346,7 +379,10 @@ export default function TripEditor() {
 
             <div className="relative h-32 w-full rounded-[10px] shadow-sm overflow-hidden">
               <img className="w-full h-full object-cover" src="https://placehold.co/196x131" alt="map preview" />
-              <button className="absolute bottom-2 left-1/2 -translate-x-1/2 h-6 min-w-24 px-2 py-1 bg-custom-white rounded-[20px] shadow inline-flex items-center gap-1">
+              {/* 5. [แก้ไข] ผูก onClick กับปุ่มนี้ */}
+              <button 
+                onClick={handleOpenFullRouteMap}
+                className="absolute bottom-2 left-1/2 -translate-x-1/2 h-6 min-w-24 px-2 py-1 bg-custom-white rounded-[20px] shadow inline-flex items-center gap-1">
                 <span className="text-custom-black text-sm font-semibold font-[Manrope]">View on map</span>
                 <MapPin className="w-4 h-4" />
               </button>
@@ -354,7 +390,7 @@ export default function TripEditor() {
           </div>
         </aside>
 
-        {/* Middle column – Days & Events */}
+        {/* ... (โค้ด Middle column – Days & Events) ... */}
         <main className="flex flex-col gap-3">
           {days.length === 0 && (
             <div className="text-center text-gray p-4 bg-pale-blue/50 rounded-lg">
@@ -374,6 +410,14 @@ export default function TripEditor() {
                 <span className="text-gray text-sm flex items-center gap-1">
                   {formatDate(addDays(startDate, day.dateOffset))} <Calendar className="w-4 h-4" />
                 </span>
+
+                <button
+                    onClick={() => openAddPopup(i)}
+                    className="py-1.5 px-3 rounded-4xl border bg-custom-white border-light-blue text-dark-blue font-medium flex items-center justify-center gap-1"
+                  >
+                    Event <Plus className="w-4 h-4" /> 
+                  </button>
+
               </div>
 
               {day.events.length === 0 ? (
@@ -408,136 +452,135 @@ export default function TripEditor() {
                 ))
               )}
 
-              <button
+              {/* <button
                 onClick={() => openAddPopup(i)}
                 className="w-full mt-2 py-1.5 rounded-md border border-light-blue text-dark-blue font-medium flex items-center justify-center gap-1 hover:bg-pale-blue"
               >
                 <Plus className="w-4 h-4" /> Add Event
-              </button>
+              </button> */}
             </motion.section>
           ))}
 
         </main>
       </div>
 
-      {/* 3. 👇 ลบ <div> wrapper ที่ซ้ำซ้อนและมีบั๊กออก */}
-      <div className={`fixed top-0 left-0 h-full w-full z-10 ${popupOpen ? "" : "hidden"}`}>
-      {/* Popup สำหรับเพิ่ม/แก้ไขกิจกรรม */}
-      <AnimatePresence>
-        {popupOpen && (
-          <motion.div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" // ใช้ z-50 ก็พอ
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+      {/* Popup / Overlay Section */}
+      <div className={`fixed top-0 left-0 h-full w-full z-10 ${popupOpen || confirmDelete ? "" : "hidden"}`}>
+        {/* Popup สำหรับเพิ่ม/แก้ไขกิจกรรม */}
+        <AnimatePresence>
+          {popupOpen && (
             <motion.div
-              className="w-full max-w-md bg-white rounded-lg shadow-lg p-4 relative"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <button onClick={closePopup} className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-              <h3 className="text-lg font-bold text-custom-black mb-2">
-                {editTarget ? "Edit Event" : "Add Event"}
-              </h3>
-              {error && (
-                <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded-md mb-2">
-                  <AlertCircle className="w-4 h-4" /> {error}
-                </div>
-              )}
-              <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  placeholder="Activity name"
-                  className="p-2 border border-neutral-300 rounded-md text-sm"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
-                
-                {/* 3. 👇 นี่คือ textarea ที่เปลี่ยนใหม่ */}
-                <TextareaAutosize
-                  placeholder="Activity details"
-                  className="p-2 border border-neutral-300 rounded-md text-sm resize-none overflow-hidden"
-                  value={form.desc}
-                  onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                  minRows={2} // ให้เริ่มต้นที่ 2 แถว
-                />
-                
-                <div className="flex gap-2 items-center">
+              <motion.div
+                className="w-full max-w-md bg-white rounded-lg shadow-lg p-4 relative"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+              >
+                <button onClick={closePopup} className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+                <h3 className="text-lg font-bold text-custom-black mb-2">
+                  {editTarget ? "Edit Event" : "Add Event"}
+                </h3>
+                {error && (
+                  <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded-md mb-2">
+                    <AlertCircle className="w-4 h-4" /> {error}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit} className="flex flex-col gap-2">
                   <input
                     type="text"
-                    placeholder="Location (optional)"
-                    className="flex-1 p-2 border border-neutral-300 rounded-md text-sm"
-                    value={form.location}
-                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    placeholder="Activity name"
+                    className="p-2 border border-neutral-300 rounded-md text-sm"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
                   />
-                  <button
-                    type="button"
-                    onClick={handleOpenMapOverlay}
-                    className="px-3 py-2 bg-pale-blue rounded-md text-dark-blue text-sm font-medium hover:bg-light-blue/50"
+                  
+                  <TextareaAutosize
+                    placeholder="Activity details"
+                    className="p-2 border border-neutral-300 rounded-md text-sm resize-none overflow-hidden"
+                    value={form.desc}
+                    onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                    minRows={2}
+                  />
+                  
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      placeholder="Location (optional)"
+                      className="flex-1 p-2 border border-neutral-300 rounded-md text-sm"
+                      value={form.location}
+                      onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleOpenMapOverlay}
+                      className="px-3 py-2 bg-pale-blue rounded-md text-dark-blue text-sm font-medium hover:bg-light-blue/50"
+                    >
+                      <MapPin className="w-4 h-4 inline mr-1" /> Map
+                    </button>
+                  </div>
+                  <select
+                    className="p-2 border border-neutral-300 rounded-md text-sm"
+                    value={form.time}
+                    onChange={(e) => setForm({ ...form, time: e.target.value })}
                   >
-                    <MapPin className="w-4 h-4 inline mr-1" /> Map
+                    <option value="">Select time</option>
+                    {Array.from({ length: 24 * 2 }, (_, i) => {
+                      const hour = Math.floor(i / 2);
+                      const minute = i % 2 === 0 ? "00" : "30";
+                      const formatted = `${hour.toString().padStart(2, "0")}.${minute}`;
+                      return (
+                        <option key={formatted} value={formatted}>
+                          {formatted}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <button type="submit" className="px-4 py-2 bg-dark-blue text-white rounded-md text-sm hover:opacity-90">
+                    {editTarget ? "Save Changes" : "Add Event"}
                   </button>
-                </div>
-                <select
-                  className="p-2 border border-neutral-300 rounded-md text-sm"
-                  value={form.time}
-                  onChange={(e) => setForm({ ...form, time: e.target.value })}
-                >
-                  <option value="">Select time</option>
-                  {Array.from({ length: 24 * 2 }, (_, i) => {
-                    const hour = Math.floor(i / 2);
-                    const minute = i % 2 === 0 ? "00" : "30";
-                    const formatted = `${hour.toString().padStart(2, "0")}.${minute}`;
-                    return (
-                      <option key={formatted} value={formatted}>
-                        {formatted}
-                      </option>
-                    );
-                  })}
-                </select>
-                <button type="submit" className="px-4 py-2 bg-dark-blue text-white rounded-md text-sm hover:opacity-90">
-                  {editTarget ? "Save Changes" : "Add Event"}
-                </button>
-              </form>
+                </form>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      {/* Popup ยืนยันการลบ */}
-      <AnimatePresence>
-        {confirmDelete && (
-          <motion.div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-[70]" // z-70 ให้สูงกว่า popup หลัก
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+        {/* Popup ยืนยันการลบ */}
+        <AnimatePresence>
+          {confirmDelete && (
             <motion.div
-              className="bg-white p-5 rounded-lg shadow-lg max-w-sm text-center"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
+              className="fixed inset-0 bg-black/40 flex items-center justify-center z-[70]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <h3 className="font-bold text-custom-black text-lg mb-2">ยืนยันการลบ</h3>
-              <p className="text-gray-600 text-sm mb-4">คุณต้องการลบกิจกรรมนี้จริงหรือไม่?</p>
-              <div className="flex justify-center gap-3">
-                <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red-500 text-white rounded-md">ลบ</button>
-                <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 border rounded-md">ยกเลิก</button>
-              </div>
+              <motion.div
+                className="bg-white p-5 rounded-lg shadow-lg max-w-sm text-center"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+              >
+                <h3 className="font-bold text-custom-black text-lg mb-2">ยืนยันการลบ</h3>
+                <p className="text-gray-600 text-sm mb-4">คุณต้องการลบกิจกรรมนี้จริงหรือไม่?</p>
+                <div className="flex justify-center gap-3">
+                  <button onClick={handleConfirmDelete} className="px-4 py-2 bg-red-500 text-white rounded-md">ลบ</button>
+                  <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 border rounded-md">ยกเลิก</button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {/* 3. 👆 ปิด </div> ที่มีบั๊กตรงนี้ */}
+          )}
+        </AnimatePresence>
       </div>
 
+      {/* Overlay สำหรับ Map (เลือกพิกัด) */}
       {mapOverlayOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"> {/* z-60 สูงกว่า popup หลัก แต่ต่ำกว่า delete */}
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center">
           <div className="relative w-full h-full bg-white">
             <button
               onClick={handleCloseMapOverlay}
@@ -546,9 +589,41 @@ export default function TripEditor() {
               <X className="w-6 h-6 text-dark-blue" />
             </button>
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-lg">
-              <FinalMap onMapClick={(lat, lng, name) => handleSelectLocation(lat, lng, name)} />
+              {/* <FinalMap onMapClick={(lat, lng, name) => handleSelectLocation(lat, lng, name)} /> */}
+              <FinalMap onMapClick={(lng, lat, name) => handleSelectLocation(lng, lat, name)} />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 6. [เพิ่ม] Overlay สำหรับ Map (แสดงเส้นทางรวม) */}
+      {showFullRouteMap && (
+        <div className="fixed inset-0 z-[60] bg-white">
+          <TripRouteDisplay
+            onClose={handleCloseFullRouteMap}
+            events={
+              // 3. [แก้ไข] รวบรวมข้อมูลทั้งหมดส่งไป (เพิ่ม time และ date)
+              days.flatMap(day => {
+                // คำนวณวันที่ของ day นั้นๆ
+                const dayDate = addDays(startDate, day.dateOffset);
+                const formattedDate = formatDate(dayDate);
+
+                return day.events
+                  .map(event => 
+                    (event.chip && event.chip.lat && event.chip.lng) 
+                      ? { 
+                          lat: event.chip.lat, 
+                          lng: event.chip.lng, 
+                          title: event.title,
+                          time: event.time,      // 👈 ส่ง time
+                          date: formattedDate  // 👈 ส่ง date
+                        } 
+                      : null
+                  )
+                  .filter(Boolean) // เอาค่า null (event ที่ไม่มีพิกัด) ออก
+              }) as { lat: number, lng: number, title: string, time: string, date: string }[] 
+            }
+          />
         </div>
       )}
     </section>
