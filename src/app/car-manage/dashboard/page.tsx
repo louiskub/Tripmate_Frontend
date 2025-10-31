@@ -3,6 +3,16 @@
 import SideNavbar from '@/components/car-manage/sidenav/sidenav'; 
 import Navbar from '@/components/navbar/navbar';
 import StatCard from '@/components/car-manage/dashboard/stat-card';
+import ChartCard from '@/components/car-manage/dashboard/ChartCard';
+
+const monthlyEarningsData = [
+    { month: 'Jan', earnings: 4500 }, { month: 'Feb', earnings: 3000 },
+    { month: 'Mar', earnings: 5200 }, { month: 'Apr', earnings: 2800 },
+    { month: 'May', earnings: 4800 }, { month: 'Jun', earnings: 6000 },
+    { month: 'Jul', earnings: 5500 }, { month: 'Aug', earnings: 7000 },
+    { month: 'Sep', earnings: 6200 }, { month: 'Oct', earnings: 8000 },
+    { month: 'Nov', earnings: 9500 }, { month: 'Dec', earnings: 11000 },
+];
 
 // -- Component ย่อยสำหรับหน้า Dashboard --
 const ReviewProgressBar = ({ label, value, percentage }) => (
@@ -52,10 +62,9 @@ const ReviewsSection = () => (
 );
 
 const MapSection = () => (
-  <div className="p-6 bg-white rounded-xl border border-neutral-200 shadow-sm flex flex-col items-center justify-center">
-    <h2 className="text-xl font-bold mb-4">Location</h2>
+  <div className="w-auto h-50 bg-white rounded-xl border border-neutral-200 shadow-sm flex flex-col items-center justify-center">
      <img 
-        className="w-full h-48 object-cover rounded-lg" 
+        className="w-full h-full object-cover rounded-xl" 
         src="https://placehold.co/240x239" 
         alt="Map placeholder" 
       />
@@ -63,10 +72,13 @@ const MapSection = () => (
 );
 
 const FinancialSection = () => (
-  <div className="mt-6 p-6 bg-white rounded-xl border border-neutral-200 shadow-sm">
-    <h2 className="text-xl font-bold mb-4">Financial</h2>
-    <p className="text-gray-400">Financial chart goes here...</p>
-  </div>
+    <div className="mt-6 h-96">
+      <ChartCard 
+        title="Monthly Earnings"
+        subtitle="Your earnings over the last 12 months"
+        data={monthlyEarningsData}
+      />
+    </div>
 );
 
 
