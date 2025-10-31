@@ -19,23 +19,34 @@ const ReviewProgressBar = ({ label, value, percentage }) => (
 );
 
 const ReviewsSection = () => (
-  <div className="lg:col-span-2 p-6 bg-white rounded-xl border border-neutral-200 shadow-sm">
+  // 1. เพิ่ม flex flex-col เพื่อให้การ์ดเป็น flex container ในแนวตั้ง
+  <div className="lg:col-span-2 p-6 bg-white rounded-xl border border-neutral-200 shadow-sm flex flex-col">
     <h2 className="text-xl font-bold mb-4 text-gray-800">Reviews</h2>
-    <div className="flex flex-col md:flex-row gap-6">
-      <div className="flex items-center gap-4 border-b md:border-b-0 md:border-r pr-6 pb-4 md:pb-0">
-        <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-4xl font-extrabold">
-          8.8
+    
+    {/* 2. เพิ่ม wrapper div 
+        - flex-1: ให้ยืดเต็มพื้นที่ที่เหลือ
+        - flex items-center: จัดเนื้อหาข้างใน (ลูก) ให้อยู่ตรงกลางแนวตั้ง
+    */}
+    <div className="flex-1 flex items-center">
+      
+      {/* 3. เพิ่ม w-full ให้กับเนื้อหาเดิม เพื่อให้มันขยายเต็ม wrapper */}
+      <div className="flex flex-col md:flex-row gap-6 w-full"> 
+        <div className="flex items-center gap-4 border-b md:border-b-0 md:border-r pr-6 pb-4 md:pb-0">
+          <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-4xl font-extrabold">
+            8.8
+          </div>
+          <div>
+            <p className="text-blue-600 text-xl font-bold">Excellent</p>
+            <p className="text-gray-500 text-sm">from 1,234 reviews</p>
+          </div>
         </div>
-        <div>
-          <p className="text-blue-600 text-xl font-bold">Excellent</p>
-          <p className="text-gray-500 text-sm">from 1,234 reviews</p>
+        <div className="flex-1 flex flex-col justify-center gap-4">
+          <ReviewProgressBar label="Quality" value={8.0} percentage={80} />
+          <ReviewProgressBar label="Service" value={9.2} percentage={92} />
+          <ReviewProgressBar label="Price" value={8.5} percentage={85} />
         </div>
       </div>
-      <div className="flex-1 flex flex-col justify-center gap-4">
-        <ReviewProgressBar label="Quality" value={8.0} percentage={80} />
-        <ReviewProgressBar label="Service" value={9.2} percentage={92} />
-        <ReviewProgressBar label="Price" value={8.5} percentage={85} />
-      </div>
+
     </div>
   </div>
 );
