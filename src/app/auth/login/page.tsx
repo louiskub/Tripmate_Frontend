@@ -6,15 +6,19 @@ import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState } from 'react';
 import { paths } from '@/config/paths.config'
-
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const router = useRouter();
 
-    const handleLogin = () => [
-        console.log("log in")
-    ]
+    const handleLogin = () => {
+        console.log("log in");
+        // temporary token
+        document.cookie = "token=37f66c3b-2edd-4a36-b6db-5dabd2a783c1; max-age=3600; path=/";
+        router.push(paths.home)
+    }
 
     return (
         <div className="bg-[url('/images/wave2.jpg')] shadow-[var(--boxshadow-lifted)] h-[100vh] bg-cover bg-center">
