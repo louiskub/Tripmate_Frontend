@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import maplibregl from "maplibre-gl"
+import "maplibre-gl/dist/maplibre-gl.css"
 import { MapPin, Navigation, X, Search, Route } from "lucide-react"
 import { renderToString } from "react-dom/server";
 
@@ -59,8 +60,8 @@ export default function FinalMap({onMapClick}: {onMapClick: (lat: number, lng: n
   const directionsOnRef = useRef(false)
   const activeTargetRef = useRef<"origin" | "destination">("destination")
 
-  // const [directionsOn, setDirectionsOn] = useState(false)
-  // const [activeTarget, setActiveTarget] = useState<"origin" | "destination">("destination")
+  const [directionsOn, setDirectionsOn] = useState(false)
+  const [activeTarget, setActiveTarget] = useState<"origin" | "destination">("destination")
   const [origin, setOrigin] = useState<LngLat | null>(null)
   const [destination, setDestination] = useState<LngLat | null>(null)
   const [routeInfo, setRouteInfo] = useState<{ distanceText: string; durationText: string } | null>(null)
@@ -86,8 +87,26 @@ export default function FinalMap({onMapClick}: {onMapClick: (lat: number, lng: n
     attraction: { icon: MyAttractionIcon, color: "#10B981" },
   }
 
+  const changeDirectionsOn = (value: boolean) => {
+    setDirectionsOn(value)
+    if (value == false) {
+      destMarkerRef.current?.remove()
+      destMarkerRef.current = null
+      setDestination(null)
+      originMarkerRef.current?.remove()
+      originMarkerRef.current = null
+      setOrigin(null)
+      clearRouteLayer()
+    } 
+  }
 
   // Sync React state -> refs
+  useEffect(() => {
+    directionsOnRef.current = directionsOn
+  }, [directionsOn])
+  useEffect(() => {
+    activeTargetRef.current = activeTarget
+  }, [activeTarget])
 
   // Reverse geocoding for clicked points
   const reverseGeocode = async (lat: number, lon: number): Promise<PopupInfo> => {
@@ -440,12 +459,23 @@ export default function FinalMap({onMapClick}: {onMapClick: (lat: number, lng: n
     const map = mapRef.current
     if (!map) return
 
-    // Normal mode: single marker + bottom popup (reverse geocode)
-    singleMarkerRef.current?.remove()
-    singleMarkerRef.current = new maplibregl.Marker({ color: "#FF2121" }).setLngLat([lng, lat]).addTo(map)
-    const info = await reverseGeocode(lat, lng)
-    setLocationInfo(info)
-    setIsClosing(false)
+    if (directionsOn) {
+      if (activeTarget === "origin") {
+        setOrigin({ lat, lng })
+        placeABMarker({ lat, lng }, "origin")
+      } else {
+        setDestination({ lat, lng })
+        placeABMarker({ lat, lng }, "destination")
+      }
+      if (origin && destination) routeBetween(origin, destination)
+    } else {
+      // Normal mode: single marker + bottom popup (reverse geocode)
+      singleMarkerRef.current?.remove()
+      singleMarkerRef.current = new maplibregl.Marker({ color: "#FF2121" }).setLngLat([lng, lat]).addTo(map)
+      const info = await reverseGeocode(lat, lng)
+      setLocationInfo(info)
+      setIsClosing(false)
+    }
 
     setQuery(s.display_name)
     setSuggestions([])
@@ -464,7 +494,7 @@ export default function FinalMap({onMapClick}: {onMapClick: (lat: number, lng: n
     <div className="w-full h-screen relative font-sans bg-[#F7F7F9]">
       <form
         onSubmit={handleSubmit}
-        className="absolute top-5 left-5 z-30 w-[420px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.15)] overflow-hidden"
+        className="absolute top-5 left-5 z-30 w-[420px] bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
       >
         {/* Search input section */}
         <div className="relative">
@@ -477,7 +507,9 @@ export default function FinalMap({onMapClick}: {onMapClick: (lat: number, lng: n
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 150)}
-            placeholder="ค้นหาสถานที่..."
+            placeholder={
+              !directionsOn ? "ค้นหาสถานที่..." : activeTarget === "origin" ? "ค้นหาต้นทาง (A)..." : "ค้นหาปลายทาง (B)..."
+            }
             className="w-full pl-12 pr-4 py-4 text-[15px] text-[#303030] placeholder:text-gray-400 border-none outline-none focus:outline-none"
           />
           {isFocused && suggestions.length > 0 && (
@@ -497,10 +529,47 @@ export default function FinalMap({onMapClick}: {onMapClick: (lat: number, lng: n
             </ul>
           )}
         </div>
+
+        {/* Directions toggle */}
+        <div className="px-4 py-3 border-t border-gray-100">
+          {/* <button
+            type="button"
+            onClick={() => changeDirectionsOn(!directionsOn)}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-[14px] font-medium transition-all ${
+              directionsOn
+                ? "bg-[#3883F8] text-white shadow-sm hover:bg-[#216CE1]"
+                : "bg-[#F7F7F9] text-[#303030] hover:bg-[#E0E0E0]"
+            }`}
+          >
+            <Route size={18} />
+            {directionsOn ? "ปิดโหมดเส้นทาง" : "เปิดโหมดเส้นทาง"}
+          </button> */}
+        </div>
+
+        {/* Directions controls */}
+        
       </form>
 
       {/* Map */}
       <div ref={mapContainer} className="w-full h-full" />
+
+      {directionsOn && routeSteps.length > 0 && (
+        <div className="absolute bottom-6 left-6 w-96 max-h-72 overflow-y-auto bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.15)] custom-scroll-bar">
+          <div className="sticky top-0 bg-white px-4 py-3 border-b border-gray-100 font-semibold text-[15px] text-[#303030]">
+            เส้นทาง
+          </div>
+          <ol className="p-4 space-y-2">
+            {routeSteps.map((step, i) => (
+              <li key={i} className="flex gap-3 text-[13px] text-[#303030]">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#E0F0FF] text-[#3883F8] flex items-center justify-center text-[11px] font-bold">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       {locationInfo && (
         <div
