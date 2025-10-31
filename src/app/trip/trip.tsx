@@ -2,8 +2,13 @@
 
 import { Calendar, MapPin, Eye, Plus, Trash2, Edit3, X, AlertCircle, Clock, Copy, Users, Star, Utensils, Bed } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import FinalMap from "./map";
+// 1. 👇 Import TextareaAutosize
+import TextareaAutosize from 'react-textarea-autosize'; 
+// 2. 👆 ลบ import { body } ... ที่ไม่ได้ใช้ออก
 
 interface EventRowProps {
   time: string;
@@ -14,19 +19,13 @@ interface EventRowProps {
 
 interface TripDay {
   dayLabel: string;
-  date: string;
+  dateOffset: number;
   events: EventRowProps[];
 }
 
 export default function TripEditor() {
   const [tripTitle, setTripTitle] = useState("Trip to Pattaya");
-  const [days, setDays] = useState<TripDay[]>([
-    {
-      dayLabel: "Day 1",
-      date: "Sat, 25 Aug 2025",
-      events: [],
-    },
-  ]);
+  const [days, setDays] = useState<TripDay[]>([]);
   const [popupOpen, setPopupOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{ dayIndex: number; eventIndex: number } | null>(null);
   const [mapOverlayOpen, setMapOverlayOpen] = useState(false);
@@ -35,6 +34,79 @@ export default function TripEditor() {
   const [form, setForm] = useState({ title: "", desc: "", location: "", time: "" });
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  const [startDate, endDate] = dateRange;
+
+  const [peopleCount, setPeopleCount] = useState(2);
+  const [roomCount, setRoomCount] = useState(1);
+  
+  const [startTime, setStartTime] = useState("10.00");
+  const [endTime, setEndTime] = useState("18.00");
+
+  const formatDate = (date: Date | null): string => {
+    if (!date) return "Select date";
+    return date.toLocaleDateString("en-GB", {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    });
+  };
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      setDays(prevDays => {
+        const newDays: TripDay[] = [];
+        for (let i = 0; i < diffDays; i++) {
+          const existingDayData = prevDays[i]; 
+          newDays.push({
+            dayLabel: `Day ${i + 1}`,
+            dateOffset: i,
+            events: existingDayData ? existingDayData.events : [], 
+          });
+        }
+        return newDays;
+      });
+      
+    } else {
+      setDays([]);
+    }
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    let firstTime = null;
+    for (const day of days) {
+      if (day.events.length > 0) {
+        firstTime = day.events[0].time; 
+        break;
+      }
+    }
+
+    let lastTime = null;
+    for (let i = days.length - 1; i >= 0; i--) {
+      const day = days[i];
+      if (day.events.length > 0) {
+        lastTime = day.events[day.events.length - 1].time;
+        break;
+      }
+    }
+
+    setStartTime(firstTime || "10.00");
+    setEndTime(lastTime || "18.00");
+
+  }, [days]); 
+
+
+  useEffect(() => {
+    if (popupOpen){
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [popupOpen]);
 
   const openAddPopup = (dayIndex: number) => {
     setForm({ title: "", desc: "", location: "", time: "" });
@@ -92,9 +164,7 @@ export default function TripEditor() {
       updatedDays[activeDay].events.push(newEvent);
     }
 
-    // sort events by time automatically
     updatedDays[activeDay].events.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
-
     setDays(updatedDays);
     closePopup();
   };
@@ -111,10 +181,12 @@ export default function TripEditor() {
     setConfirmDelete(null);
   };
 
-  const handleAddDay = () => {
-    const newDayIndex = days.length + 1;
-    setDays([...days, { dayLabel: `Day ${newDayIndex}`, date: "TBD", events: [] }]);
-  };
+  function addDays(date: Date | null, days: number): Date | null {
+    if (!date) return null;
+    const newDate = new Date(date);
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
+  }
 
   const handleOpenMapOverlay = () => setMapOverlayOpen(true);
   const handleCloseMapOverlay = () => setMapOverlayOpen(false);
@@ -122,7 +194,7 @@ export default function TripEditor() {
   const handleSelectLocation = (lat: number, lng: number, name?: string) => {
     setSelectedCoords({ lat, lng });
     console.log("sel", { ...form, location: `${name} (${lat.toFixed(4)}, ${lng.toFixed(4)})` });
-    setForm({ ...form, location: name || `${lat.toFixed(4)}, ${lng.toFixed(4)}` });
+    setForm({ ...form, location: `${name} (${lat.toFixed(4)}, ${lng.toFixed(4)})` });
     setMapOverlayOpen(false);
   };
 
@@ -138,10 +210,63 @@ export default function TripEditor() {
       </header>
 
       {/* Body 3-column layout */}
-      <div className="w-full grid grid-cols-1 lg:grid-cols-[14rem_1fr_14rem] gap-2.5">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-[14rem_1fr] gap-2.5">
         {/* Left rail */}
         <aside className="w-full px-2 py-2.5 border-r lg:border-r border-neutral-200 flex flex-col items-center gap-2.5">
-          <img className="w-48 h-52 rounded-lg object-cover" src="https://placehold.co/200x204" alt="cover" />
+          
+          {/* Date Range Picker */}
+          <div className="w-full flex justify-center px-2">
+            <DatePicker
+              selectsRange={true}
+              startDate={startDate}
+              endDate={endDate}
+              onChange={(update) => {
+                setDateRange(update);
+              }}
+              minDate={new Date()} 
+              inline 
+              calendarClassName="border-0 shadow-none w-full" 
+            />
+          </div>
+
+          {/* CSS override */}
+          <style>{`
+            .react-datepicker {
+              font-size: 0.8rem; 
+              width: 100%;
+              background-color: transparent; 
+            }
+            .react-datepicker__header {
+              background-color: #f0f3f7; 
+              border-bottom: none;
+            }
+            .react-datepicker__month-container {
+              width: 100%;
+            }
+            .react-datepicker__day-names,
+            .react-datepicker__week {
+              display: flex;
+              justify-content: space-between;
+            }
+            .react-datepicker__day,
+            .react-datepicker__day-name {
+              margin: 0.1rem;
+              width: 1.5rem; 
+              line-height: 1.5rem;
+            }
+            .react-datepicker__navigation {
+              top: 0.5rem; 
+            }
+            /* ซ่อนลูกศรขึ้นลงของ input[type=number] */
+            input[type=number]::-webkit-inner-spin-button, 
+            input[type=number]::-webkit-outer-spin-button { 
+              -webkit-appearance: none; 
+              margin: 0; 
+            }
+            input[type=number] {
+              -moz-appearance: textfield;
+            }
+          `}</style>
 
           {/* Dates card */}
           <div className="w-full px-2.5 pt-2.5 bg-custom-white rounded-[10px] outline outline-1 outline-neutral-200 flex flex-col gap-2">
@@ -149,11 +274,13 @@ export default function TripEditor() {
             <div className="w-full px-1 pb-1.5 flex flex-col gap-1">
               <div className="text-custom-black text-sm font-medium font-[Manrope]">From :</div>
               <div className="h-7 min-w-24 px-2.5 bg-custom-white rounded-lg outline outline-1 outline-neutral-200 inline-flex items-center justify-between">
-                <span className="text-gray text-sm font-medium font-[Manrope]">Sat, 25 Aug 2025</span>
+                <span className="text-gray text-sm font-medium font-[Manrope]">
+                  {formatDate(startDate) || "Select date"}
+                </span>
                 <Calendar className="w-4 h-4 text-custom-black" />
               </div>
               <div className="h-7 min-w-24 px-2.5 bg-custom-white rounded-lg outline outline-1 outline-neutral-200 inline-flex items-center justify-between">
-                <span className="text-gray text-sm font-medium font-[Manrope]">10.00</span>
+                <span className="text-gray text-sm font-medium font-[Manrope]">{startTime}</span>
                 <Clock className="w-4 h-4 text-custom-black" />
               </div>
             </div>
@@ -167,11 +294,13 @@ export default function TripEditor() {
             <div className="w-full px-1 pb-1.5 flex flex-col gap-1">
               <div className="text-custom-black text-sm font-medium font-[Manrope]">To :</div>
               <div className="h-7 min-w-24 px-2.5 bg-custom-white rounded-lg outline outline-1 outline-neutral-200 inline-flex items-center justify-between">
-                <span className="text-gray text-sm font-medium font-[Manrope]">Sun, 26 Aug 2025</span>
+                <span className="text-gray text-sm font-medium font-[Manrope]">
+                  {formatDate(endDate) || "Select date"}
+                </span>
                 <Calendar className="w-4 h-4 text-custom-black" />
               </div>
               <div className="h-7 min-w-24 px-2.5 bg-custom-white rounded-lg outline outline-1 outline-neutral-200 inline-flex items-center justify-between">
-                <span className="text-gray text-sm font-medium font-[Manrope]">18.00</span>
+                <span className="text-gray text-sm font-medium font-[Manrope]">{endTime}</span>
                 <Clock className="w-4 h-4 text-custom-black" />
               </div>
             </div>
@@ -181,16 +310,29 @@ export default function TripEditor() {
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4 text-custom-black" />
                 <div className="flex-1 h-6 px-2.5 py-2 bg-custom-white rounded-lg outline outline-1 outline-neutral-200 inline-flex items-center">
-                  <span className="text-gray text-sm font-medium font-[Manrope]">2</span>
+                  <input
+                    type="number"
+                    value={peopleCount}
+                    onChange={(e) => setPeopleCount(Math.max(1, parseInt(e.target.value) || 1))} 
+                    min="1"
+                    className="w-full text-gray text-sm font-medium font-[Manrope] bg-transparent outline-none"
+                  />
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <Bed className="w-4 h-4 text-custom-black" />
                 <div className="flex-1 h-6 px-2.5 py-2 bg-custom-white rounded-lg outline outline-1 outline-neutral-200 inline-flex items-center">
-                  <span className="text-gray text-sm font-medium font-[Manrope]">1</span>
+                  <input
+                    type="number"
+                    value={roomCount}
+                    onChange={(e) => setRoomCount(Math.max(1, parseInt(e.target.value) || 1))} 
+                    min="1"
+                    className="w-full text-gray text-sm font-medium font-[Manrope] bg-transparent outline-none"
+                  />
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* Location preview */}
@@ -214,6 +356,12 @@ export default function TripEditor() {
 
         {/* Middle column – Days & Events */}
         <main className="flex flex-col gap-3">
+          {days.length === 0 && (
+            <div className="text-center text-gray p-4 bg-pale-blue/50 rounded-lg">
+              กรุณาเลือกช่วงวันที่ในปฏิทินเพื่อเริ่มวางแผน
+            </div>
+          )}
+
           {days.map((day, i) => (
             <motion.section
               key={i}
@@ -224,7 +372,7 @@ export default function TripEditor() {
               <div className="flex items-center justify-between bg-pale-blue rounded-md p-2">
                 <span className="font-semibold text-custom-black">{day.dayLabel}</span>
                 <span className="text-gray text-sm flex items-center gap-1">
-                  {day.date} <Calendar className="w-4 h-4" />
+                  {formatDate(addDays(startDate, day.dateOffset))} <Calendar className="w-4 h-4" />
                 </span>
               </div>
 
@@ -269,34 +417,16 @@ export default function TripEditor() {
             </motion.section>
           ))}
 
-          <button
-            onClick={handleAddDay}
-            className="flex-1 h-9 px-5 bg-pale-blue rounded-[10px] inline-flex items-center gap-2 justify-center"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="text-custom-black text-base font-bold font-[Manrope]">Add Day</span>
-          </button>
         </main>
-
-        {/* Right rail – People */}
-        <aside className="w-full p-2.5 border-l lg:border-l border-neutral-200 flex flex-col gap-3">
-          <div className="w-full flex flex-col gap-2">
-            <div className="w-full pb-1.5 border-b border-neutral-200 inline-flex items-center gap-2.5">
-              <h3 className="flex-1 text-custom-black text-base font-bold font-[Manrope]">People in trip (2)</h3>
-              <Users className="w-5 h-5 text-custom-black" />
-            </div>
-
-            <PersonRow name="full name" role="head" you />
-            <PersonRow name="full name" role="member" />
-          </div>
-        </aside>
       </div>
 
+      {/* 3. 👇 ลบ <div> wrapper ที่ซ้ำซ้อนและมีบั๊กออก */}
+      <div className={`fixed top-0 left-0 h-full w-full z-10 ${popupOpen ? "" : "hidden"}`}>
       {/* Popup สำหรับเพิ่ม/แก้ไขกิจกรรม */}
       <AnimatePresence>
         {popupOpen && (
           <motion.div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" // ใช้ z-50 ก็พอ
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -326,12 +456,16 @@ export default function TripEditor() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
-                <textarea
+                
+                {/* 3. 👇 นี่คือ textarea ที่เปลี่ยนใหม่ */}
+                <TextareaAutosize
                   placeholder="Activity details"
-                  className="p-2 border border-neutral-300 rounded-md text-sm"
+                  className="p-2 border border-neutral-300 rounded-md text-sm resize-none overflow-hidden"
                   value={form.desc}
                   onChange={(e) => setForm({ ...form, desc: e.target.value })}
+                  minRows={2} // ให้เริ่มต้นที่ 2 แถว
                 />
+                
                 <div className="flex gap-2 items-center">
                   <input
                     type="text"
@@ -378,7 +512,7 @@ export default function TripEditor() {
       <AnimatePresence>
         {confirmDelete && (
           <motion.div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-[70]"
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-[70]" // z-70 ให้สูงกว่า popup หลัก
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -399,21 +533,21 @@ export default function TripEditor() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* 3. 👆 ปิด </div> ที่มีบั๊กตรงนี้ */}
+      </div>
 
       {mapOverlayOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center"> {/* z-60 สูงกว่า popup หลัก แต่ต่ำกว่า delete */}
           <div className="relative w-full h-full bg-white">
             <button
               onClick={handleCloseMapOverlay}
-              className="absolute top-3 right-3 bg-white shadow-md p-2 rounded-full hover:bg-gray-100 z-50"
+              className="absolute top-3 right-3 bg-white shadow-md p-2 rounded-full hover:bg-gray-100 z-[70]"
             >
               <X className="w-6 h-6 text-dark-blue" />
             </button>
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-lg">
-              {/* <p>Map Overlay Placeholder (คลิกตำแหน่งเพื่อเลือก)</p> */}
               <FinalMap onMapClick={(lat, lng, name) => handleSelectLocation(lat, lng, name)} />
             </div>
-            {/* ตัวอย่าง: onMapClick={(lat, lng, name) => handleSelectLocation(lat, lng, name)} */}
           </div>
         </div>
       )}
