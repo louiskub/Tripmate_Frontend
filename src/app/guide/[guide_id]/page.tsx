@@ -10,7 +10,7 @@ import ServicePictures from '@/components/services/other/service-pictures'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
-import { RatingOverview, Rating } from '@/components/services/other/rating';
+import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
 import { formatDurationHHMM } from '@/utils/service/string-formatter';
 import { formatPrice } from '@/utils/service/string-formatter';
 
@@ -28,9 +28,11 @@ import ProfileIcon from '@/assets/icons/profile.svg'
 
 import { guide_detail } from '@/mocks/guide';
 import ImageSlide from '@/components/services/other/image-slide';
+import { PicturePopup } from '@/components/services/other/service-pictures';
 
 export default function GuideDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
+  const [PicturePopUp, setPicturePopUp] = useState(false);
 
 type tab = {
     label: string
@@ -88,9 +90,20 @@ type tab = {
         <ButtonText className='text-dark-blue font-medium'>See all guides in {service.location}</ButtonText>
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
-        <ServicePictures pictures={service.pictures}>
+        <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
           <FavoriteButton favorite={false} id={'1'} type='guide' large/>
         </ServicePictures>
+        {PicturePopUp && 
+          <PicturePopup pictures={service.pictures}
+            name={service.name}
+            Close={() => setPicturePopUp(false)}>
+            <RatingPopup 
+              rating={service.rating}
+              rating_count={service.rating_count}
+              subtopic_ratings={service.subtopic_ratings}
+              reviews={service.review}
+              rating_meta={guideRatingMeta} />
+        </PicturePopup>}
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-3 grid-cols-2 gap-1 grid-rows-[auto_auto_auto] border-b border-light-gray'>
             <div className='flex gap-1 items-center text-dark-gray'>
@@ -202,7 +215,7 @@ type tab = {
       </section>
 
       <section id='info' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
-        <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Policy</Title>
+        <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Info</Title>
         <div className='flex flex-col px-4 py-2 gap-3'>
           <div className='grid grid-cols-[auto_1fr] gap-1'>
             <ClockIcon width='16' className='text-custom-gray self-center'/>

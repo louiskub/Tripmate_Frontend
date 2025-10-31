@@ -14,8 +14,7 @@ export default function AllAttraction() {
       <div className='flex w-full gap-2.5 mt-2'>
         <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
           <span className='flex justify-between  p-2.5'>
-            <Body>Found 9999 restaurants</Body>
-            <Body>Sort by</Body>
+            <Body>Found {attractions.length} attractions</Body>
           </span>
           {attractions.map((attraction, idx) => (
             <AttractionCard key={idx} {...attraction} />
