@@ -1,19 +1,6 @@
 "use client"
 
-import { Star, ThumbsUp, Calendar } from 'lucide-react';
-
-// --- Reusable Star Rating Component ---
-const StarRating = ({ rating, className = "" }) => (
-  <div className={`flex items-center gap-1 ${className}`}>
-    {[...Array(5)].map((_, index) => (
-      <Star 
-        key={index} 
-        size={24} 
-        className={index < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} 
-      />
-    ))}
-  </div>
-);
+import { ThumbsUp, Calendar } from 'lucide-react';
 
 // --- Main Review Item Card ---
 export default function ReviewItem({ review }) {
@@ -29,11 +16,18 @@ export default function ReviewItem({ review }) {
             <h2 className="text-2xl font-extrabold text-gray-800">{review.customerName}</h2>
             <h3 className="text-lg font-semibold text-gray-700 mt-1">{review.tourName}</h3>
           </div>
-          <StarRating rating={review.rating} />
+          
+          {/* [แก้ไขตรงนี้] แสดงคะแนนแบบวงกลม */}
+          <div className="flex items-center justify-center w-12 h-7 bg-blue-300/35 rounded-xl shrink-0">
+            <span className="text-xl font-extrabold text-blue-700">
+              {review.rating}
+            </span>
+          </div>
+
         </div>
 
         {/* Review Comment */}
-        <p className="text-base text-gray-600 mt-2">
+        <p className="text-base text-gray-600 mt-2 mt-4"> {/* เพิ่ม mt-4 ให้มีระยะห่างจากชื่อเล็กน้อย */}
           {review.comment}
         </p>
 
