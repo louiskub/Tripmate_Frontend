@@ -38,7 +38,7 @@ export default function UserNavbar() {
         //         <Icon icon="mdi:account" width={24} height={24} />
         //     </div>
         // </div>
-        <nav className="w-full h-14 px-7 sticky top-0 z-10 bg-white border-b border-light-gray inline-flex justify-between items-center">
+        <nav className="w-full h-14 px-7 sticky top-0 z-20 bg-white border-b border-light-gray inline-flex justify-between items-center">
             <a href={paths.home} className="flex items-center gap-[3px]">
                 <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
@@ -112,7 +112,7 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
                 </PageOptionDropdown>
             </div>
             <div>
-                <PageOptionDropdown text='Log out'href='' className='text-red hover:bg-dark-white'>
+                <PageOptionDropdown text='Log out'href='' className='text-red hover:bg-dark-whit h-10 hover:text-red hover:bg-dark-white'>
                     <LogOutIcon />
                 </PageOptionDropdown>
             </div>

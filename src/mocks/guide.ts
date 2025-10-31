@@ -18,7 +18,7 @@ const guides: GuideCardProps[] = [
         location: 'Bangkok, Thailand',
         favorite: true,
         guider: {
-            username: "thaiwanderer",
+            username: "37f66c3b-2edd-4a36-b6db-5dabd2a783c1",
             profile_pic: "",
             first_name: "Somsak",
             last_name: "Phanpipat"
@@ -30,7 +30,7 @@ const guide_detail: GuideDetail = {
     name: "Bangkok Old Town Cultural Walk",
     type: 'city tour',
     guider: {
-        username: "thaiwanderer",
+        username: "2fe5f9cf-bb15-4543-b57a-73a443914c4f",
         profile_pic: "",
         first_name: "Somsak",
         last_name: "Phanpipat"

@@ -155,7 +155,7 @@ type ReviewCardProps = {
     review: Reviews
 }
 
-const ReviewCard = ({ review }: ReviewCardProps) => {
+export const ReviewCard = ({ review }: ReviewCardProps) => {
     return (
         <div className="px-5 py-4 rounded-[10px] border border-light-gray flex gap-1.5">
             <div className="w-48 flex flex-col gap-1">

@@ -1,5 +1,6 @@
 export const endpoints = {
-  baseURL: "http://161.246.5.236",
+  // baseURL: "http://localhost:3001",
+  baseURL: "http://161.246.5.236:8800",
   hotel: {
     all: "/hotel/all",
     detail: (id: string) => `/hotel/${id}`,
@@ -20,9 +21,13 @@ export const endpoints = {
     detail: (id: string) => `/attraction/${id}`,
     book: (id: string) => `/attraction/book/${id}`,
   },
+  
   guide: {
-    all: "/guide/all",
-    detail: (id: string) => `/guide/${id}`,
-    book: (id: string) => `/guide/book/${id}`,
+    all: "${endpoints.baseURL}/guide/all",
+    detail: (id: string) => `${endpoints.baseURL}/guide/${id}`,
+    book: (id: string) => `${endpoints.baseURL}/guide/book/${id}`,
   },
+  
+  user_profile: (id: string) => `${endpoints.baseURL}/users/${id}`,
+
 }

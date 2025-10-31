@@ -8,9 +8,17 @@ import AdminNavbar from './default-nav-variants/admin-navbar'
 import GuestNavbar from './default-nav-variants/guest-navbar'
 import UserNavbar from './default-nav-variants/user-navbar'
 import BookNavbar from './default-nav-variants/book-navbar'
+import { useEffect, useState } from 'react'
 
 const Navbar = () => {
-  const isAuthenticated: boolean = false;
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Temporary check if "token" cookie exists
+    const tokenExists = document.cookie.split(';').some(cookie => cookie.trim().startsWith('token='))
+    setIsAuthenticated(tokenExists)
+  }, [])
+
   const pathname = usePathname()
 
   switch (pathname) {

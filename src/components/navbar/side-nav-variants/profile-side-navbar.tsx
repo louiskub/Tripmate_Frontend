@@ -50,7 +50,7 @@ export default function ProfileSideNavBar({current}: ProfileSideNavBarProps) {
                 </PageOptionSide>
             </div>
             <div>
-                <PageOptionSide text='Log out'href='' className='text-red hover:bg-dark-white'>
+                <PageOptionSide text='Log out'href='' className='text-red hover:bg-dark-white hover:text-red'>
                     <LogOutIcon />
                 </PageOptionSide>
             </div>
