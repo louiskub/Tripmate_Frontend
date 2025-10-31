@@ -14,8 +14,7 @@ export default function AllHotel() {
       <div className='flex w-full gap-2.5 mt-2'>
         <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
           <span className='flex justify-between p-2.5'>
-            <Body>Found 9999 hotels</Body>
-            <Body>Sort by</Body>
+            <Body>Found {hotels.length} hotels</Body>
           </span>
           {hotels.map((hotel, idx) => (
             <HotelCard key={idx} {...hotel} hotel_id={idx.toString()}/>

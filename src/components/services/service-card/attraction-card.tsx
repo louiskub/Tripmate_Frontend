@@ -23,7 +23,7 @@ const AttractionCard = (attraction: AttractionCardProps) => {
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5
                     hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(endpoints.attraction.detail(attraction.id))}>
+            onClick={() => router.push(paths.attraction.detail(attraction.id))}>
             <ImageSlide pictures={attraction.pictures}>
                 <FavoriteButton favorite={attraction.favorite} id={attraction.id} type='rental_car'/>
             </ImageSlide>

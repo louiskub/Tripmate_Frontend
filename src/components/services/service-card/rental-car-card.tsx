@@ -23,7 +23,7 @@ const RentalCarCard = (car: RentalCarCardProps) => {
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5
                     hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(endpoints.rental_car.detail(car.rental_car_id))}>
+            onClick={() => router.push(paths.rental_car.detail(car.rental_car_id))}>
             <ImageSlide pictures={car.pictures}>
                 <FavoriteButton favorite={car.favorite} id={car.rental_car_id} type='rental_car'/>
             </ImageSlide>

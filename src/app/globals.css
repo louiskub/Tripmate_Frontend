@@ -133,3 +133,16 @@ button:hover:not(.default-btn) {
 .custom-scroll-bar::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-dark-blue); /* darker on hover */
 }
+
+.rdrDefinedRangesWrapper {
+  display: none !important;
+}
+
+.rdrDateDisplayWrapper {
+  display: none !important;
+}
+
+/* make the calendar take full width */
+.rdrCalendarWrapper {
+  width: 100% !important;
+}

@@ -10,7 +10,7 @@ import ServicePictures from '@/components/services/other/service-pictures'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
-import { RatingOverview, Rating } from '@/components/services/other/rating';
+import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
 import MiniMap from '@/components/other/mini-map';
 import LargeMap from '@/components/other/large-map';
 
@@ -26,9 +26,11 @@ import PriceCard from '@/components/services/other/price_card';
 
 import { priceItem } from '@/models/service/detail/attraction-detail';
 import { SubTitle } from 'chart.js';
+import { PicturePopup } from '@/components/services/other/service-pictures';
 
 export default function AttractionDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
+  const [PicturePopUp, setPicturePopUp] = useState(false);
 
 type tab = {
     label: string
@@ -65,15 +67,15 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
-  const attraction = attraction_detail
+  const service = attraction_detail
 
-  const first_comment = attraction.review?.find(a => a.comment)?.comment;
+  const first_comment = service.review?.find(a => a.comment)?.comment;
 
-  const lowest_fee = attraction.fee?.length
-  ? Math.min(...attraction.fee.map(item => item.price))
+  const lowest_fee = service.fee?.length
+  ? Math.min(...service.fee.map(item => item.price))
   : 0;
 
-  const fee_groups: Record<string, priceItem[]> = (attraction.fee ?? []).reduce(
+  const fee_groups: Record<string, priceItem[]> = (service.fee ?? []).reduce(
     (acc, item) => {
       const key = item.group ?? "Ungrouped";
       (acc[key] ||= []).push(item);
@@ -88,20 +90,29 @@ type tab = {
       <ServiceNavTab current_tab={currentTab} onSelect={setCurrentTab} tabs={tabs}/>
       <div className="p-2 flex justify-between items-center">
         <Body> 
-          {`Restaurant > ${attraction.location} > `} 
-          <TextButton className='text-dark-blue'>{attraction.name}</TextButton>
+          {`Restaurant > ${service.location} > `} 
+          <TextButton className='text-dark-blue'>{service.name}</TextButton>
         </Body>
-        <ButtonText className='text-dark-blue font-medium'>See all restaurants in {attraction.location}</ButtonText>
+        <ButtonText className='text-dark-blue font-medium'>See all restaurants in {service.location}</ButtonText>
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
-        <ServicePictures pictures={attraction.pictures}>
-          <FavoriteButton favorite={false} id={'1'} type='restaurant'/>
+        <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
+          <FavoriteButton favorite={false} id={'1'} type='attraction' large/>
         </ServicePictures>
-        <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
+        {PicturePopUp && 
+          <PicturePopup pictures={service.pictures}
+            name={service.name}
+            Close={() => setPicturePopUp(false)}>
+            <RatingPopup 
+            rating={service.rating}
+            rating_count={service.rating_count}
+            reviews={service.review} />
+        </PicturePopup>}
+        <div className='rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
-            <Title className=''>{attraction.name}</Title>
+            <Title className=''>{service.name}</Title>
             <div>
-              <Tag text={attraction.type} />
+              <Tag text={service.type} />
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
                 <span className='flex items-baseline gap-1'>
@@ -120,8 +131,8 @@ type tab = {
           <div className='grid grid-cols-[1fr_auto] grid-rows-[1fr_auto] p-2.5 gap-2.5'>
             <RatingOverview 
               className=' row-start-1 col-start-1' 
-              rating={attraction.rating} 
-              rating_count={attraction.rating_count} 
+              rating={service.rating} 
+              rating_count={service.rating_count} 
               comment={first_comment} 
             />
 
@@ -129,7 +140,7 @@ type tab = {
                 <MiniMap location_link=''/>
                 <ul>
                   {
-                    attraction.nearby_locations.slice(0, 4).map((location,idx) => (
+                    service.nearby_locations.slice(0, 4).map((location,idx) => (
                       <li key={idx} className='flex gap-1.5'>
                         <LocationIcon width='12'/>
                         <Caption>{location}</Caption>
@@ -142,7 +153,7 @@ type tab = {
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-2 col-span-2'>
               <ButtonText className='text-dark-blue'>Description</ButtonText>
-              <Caption>{attraction.description || 'no description for this rentaurant'}</Caption>
+              <Caption>{service.description || 'no description for this rentaurant'}</Caption>
             </div>
 
           </div>
@@ -165,7 +176,7 @@ type tab = {
         :
         <SubBody className='p-4 flex gap-1'>
           <CheckIcon width='16' className='text-green'/>
-          Admission is free at this attraction.
+          Admission is free at this service.
         </SubBody>
         }
         
@@ -174,9 +185,9 @@ type tab = {
       <section id='review' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className=' py-1.5 px-4'>Reviews</Title>
         <Rating 
-          rating={attraction.rating}
-          rating_count={attraction.rating_count}
-          reviews={attraction.review} 
+          rating={service.rating}
+          rating_count={service.rating_count}
+          reviews={service.review} 
           />
       </section>
 
@@ -190,7 +201,7 @@ type tab = {
           <div className='basis-2/5'>
             <ul className='grid grid-cols-2 w-full py-2 gap-2.5'>
               {
-                attraction.nearby_locations.map((location,idx) => (
+                service.nearby_locations.map((location,idx) => (
                   <li key={idx} className='flex gap-1.5'>
                     <LocationIcon width='12'/>
                     <Caption>{location}</Caption>
