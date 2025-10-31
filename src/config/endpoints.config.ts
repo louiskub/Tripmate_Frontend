@@ -1,6 +1,6 @@
 export const endpoints = {
-  baseURL: "http://localhost:3001",
-  // baseURL: "http://161.246.5.236:8800",
+  // baseURL: "http://localhost:3001",
+  baseURL: "http://161.246.5.236:8800",
   hotel: {
     all: "/hotel/all",
     detail: (id: string) => `/hotel/${id}`,

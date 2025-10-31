@@ -112,7 +112,7 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
                 </PageOptionDropdown>
             </div>
             <div>
-                <PageOptionDropdown text='Log out'href='' className='text-red hover:bg-dark-white'>
+                <PageOptionDropdown text='Log out'href='' className='text-red hover:bg-dark-whit h-10 hover:text-red hover:bg-dark-white'>
                     <LogOutIcon />
                 </PageOptionDropdown>
             </div>
