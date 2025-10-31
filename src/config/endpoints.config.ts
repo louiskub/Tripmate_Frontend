@@ -1,5 +1,10 @@
+export const BASE_URL = "http://161.246.5.236:8800"
+
 export const endpoints = {
-  baseURL: "http://161.246.5.236",
+  auth: {
+    login: `${BASE_URL}/auth/login`,
+    register: `${BASE_URL}/auth/register`
+  },
   hotel: {
     all: "/hotel/all",
     detail: (id: string) => `/hotel/${id}`,
