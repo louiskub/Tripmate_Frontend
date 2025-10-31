@@ -10,23 +10,55 @@ import ProfilePageLayout from '@/components/layout/profile-page-layout';
 import EditIcon from '@/assets/icons/edit.svg'
 import ProfilePic from '@/assets/icons/profile-filled.svg';
 
-type ProfileData = {
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    email: string;
-    telephone?: string;
-    birth_date?: string;
-    gender?: "female" | "male" | "other" | null;
-    profile_pic?: string;
+// import { cookies } from "next/headers";
+import { endpoints } from '@/config/endpoints.config'
+import { ProfileData } from '@/models/profile'
+
+import { ProfileEx } from '@/mocks/profile'
+import getCookie from '@/utils/service/cookie'
+
+
+// async function getProfile(): Promise<ProfileData | null> {
+//     const cookieStore = await cookies();
+//     const token = cookieStore.get("token")?.value;
+
+//     if (!token) return null;
+
+//     const res = await fetch(endpoints.user_profile(token), {
+//         headers: { Authorization: `Bearer ${token}` },
+//         cache: "no-store"
+//     });
+
+//     if (!res.ok) return null;
+//     return res.json();
+// }
+
+async function getProfile(id: string): Promise<ProfileData | null> {
+    const res = await fetch(endpoints.user_profile(id), {
+        cache: "no-store",
+    });
+
+    if (!res.ok) return null;
+    return res.json();
 }
 
 
-export default function Profile(profile: ProfileData) {
+export default async function Profile() {
+    const id = getCookie('token')
+
+    if (!id) return <p>Unauthorized</p>;
+
+    const profile = await getProfile(id);
+    
+    // const profile = ProfileEx;
+    console.log(profile)
+
+    if (!profile) return <p>Unauthorized</p>;
+
     const genderMap = {
-    'female': <FemaleGender active />,
-    'male': <MaleGender active />,
-    'other': <OtherGender active />,
+    'Female': <FemaleGender active />,
+    'Male': <MaleGender active />,
+    'Other': <OtherGender active />,
     };
     return (
     <ProfilePageLayout current_tab='profile'>
@@ -57,18 +89,18 @@ export default function Profile(profile: ProfileData) {
         </div>
             <div className="flex-col gap-1.5">
                 <Subtitle className='text-custom-gray inline-flex'>@</Subtitle>
-                <Subtitle className='text-custom-black inline-flex'>{profile.username || 'username'}</Subtitle>
+                <Subtitle className='text-custom-black inline-flex'>{profile.username}</Subtitle>
             </div>
         </div>
 
         <div className='w-2/3 flex gap-2.5'>
             <div className="flex flex-col w-full">
                 <ButtonText className='text-custom-black'>First name</ButtonText>
-                <Subtitle className='px-2 h-9 flex items-center'>{profile.first_name || 'first name'}</Subtitle>
+                <Subtitle className='px-2 h-9 flex items-center'>{profile.fname}</Subtitle>
             </div>
             <div className="flex flex-col w-full">
                 <ButtonText className='text-custom-black'>Last name</ButtonText>
-                <Subtitle className='px-2 h-9 flex items-center'>{profile.last_name || 'last name'}</Subtitle>
+                <Subtitle className='px-2 h-9 flex items-center'>{profile.lname}</Subtitle>
             </div>
         </div>
 
@@ -77,15 +109,15 @@ export default function Profile(profile: ProfileData) {
     <div className="px-7 py-5 rounded-[10px] border border-light-gray flex flex-col justify-center gap-4">
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Email</ButtonText>
-            <Body className='px-2 h-9 flex items-center'>{profile.email || 'example@gmail.com'}</Body>
+            <Body className='px-2 h-9 flex items-center'>{profile.email}</Body>
         </div>
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Telephone Number</ButtonText>
-            <Body className='px-2 h-9 flex items-center'>{profile.birth_date || '-'}</Body>
+            <Body className='px-2 h-9 flex items-center'>{profile.birthDate || '-'}</Body>
         </div>
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Birth Date</ButtonText>
-            <Body className='px-2 h-9 flex items-center'>{profile.telephone || '-'}</Body>
+            <Body className='px-2 h-9 flex items-center'>{profile.phone || '-'}</Body>
         </div>
         <div className="inline-flex flex-col self-start">
             <ButtonText className='text-custom-black'>Gender</ButtonText>

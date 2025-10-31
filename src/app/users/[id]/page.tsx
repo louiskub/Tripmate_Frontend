@@ -24,23 +24,43 @@ import DefaultLayout from '@/components/layout/default-layout';
 import { OtherProfileData } from '@/models/profile';
 import { OtherProfileEx } from '@/mocks/profile';
 
-import { SubTitle } from 'chart.js';
+import { endpoints } from '@/config/endpoints.config'
 
+async function getUserProfile(id: string): Promise<OtherProfileData | null> {
+  const res = await fetch(endpoints.user_profile(id), {
+    cache: "no-store"
+  });
 
-export default function OtherProfile() {
-  const profile = OtherProfileEx as OtherProfileData;
-  const genderMap = {
-    'female': <FemaleGender active />,
-    'male': <MaleGender active />,
-    'other': <OtherGender active />,
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export default async function OtherProfile({ params }: { params: { id: string } }){
+  const { id } = params;
+  const data = await getUserProfile(id);
+
+  console.log(data);
+
+  if (!data) return <h1>User not found</h1>;
+
+  const profile = {
+    profile_pic: '',
+    username: 'hello',
+    trip_count: data.trip_count ?? 12,
+    review_count: data.trip_review_countcount ?? 111,
+    booking_count: data.booking_count ?? 22,
+    role: 'customer',
+    trips: [],
+    ...data
   };
+
   return (
     <DefaultLayout current_tab='profile'>
     <div className="flex-1 px-5 py-2.5 flex flex-col gap-5">
       <PageTitle className='px-4'>Profile</PageTitle>
-      <div className="px-7 py-5 rounded-2xl bg-white shadow-[var(--light-shadow)] flex items-center gap-16 justify-between">
-        <div className='flex gap-6 basis-1/3'>  
-          <div className="w-28 h-28">
+      <div className="px-7 py-5 rounded-2xl bg-white shadow-[var(--light-shadow)] flex items-center justify-between w-full">
+        <div className="grid grid-cols-[auto_1fr] gap-6 max-w-1/2">
+          <div className="min-w-0 w-28 h-28">
             {profile.profile_pic ? 
               <img className="w-28 h-28 rounded-full border border-dark-gray" 
                 src={profile.profile_pic} 
@@ -49,9 +69,9 @@ export default function OtherProfile() {
               <ProfilePic />
             }
           </div>
-          <div className="flex flex-col justify-center gap-0.5">
-            <Title className='px-0.5 flex items-center'>
-              {profile.first_name} {profile.last_name}
+          <div className="min-w-0 flex flex-col justify-center gap-0.5 ">
+            <Title className='px-0.5 flex items-center truncate overflow-hidden whitespace-nowrap'>
+              {profile.fname} {profile.lname}
             </Title>
             <div className="flex gap-0.5">
               <Body className='text-gray inline-flex'>@</Body>
@@ -63,7 +83,7 @@ export default function OtherProfile() {
             </div>
           </div>
         </div>
-        <div className="flex basis-2/3 justify-center items-center gap-2.5 overflow-hidden">
+        <div className="flex w-1/2 justify-center items-center gap-2.5 overflow-hidden">
             <div className="inline-flex flex-col justify-center items-center">
                 <Subtitle className=''>{profile.trip_count}</Subtitle>
                 <SubBody className='text-gray'>trips planned</SubBody>
