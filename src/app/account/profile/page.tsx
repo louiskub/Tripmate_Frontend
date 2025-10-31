@@ -1,10 +1,7 @@
-"use client"
-
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
 import { FemaleGender, MaleGender, OtherGender } from '@/components/inputs/gender-input'
 import { Button, TextButton } from '@/components/buttons/buttons'
-import { useState } from 'react';
 import { paths } from '@/config/paths.config'
 import ProfilePageLayout from '@/components/layout/profile-page-layout';
 import EditIcon from '@/assets/icons/edit.svg'
@@ -16,6 +13,7 @@ import { ProfileData } from '@/models/profile'
 
 import { ProfileEx } from '@/mocks/profile'
 import getCookie from '@/utils/service/cookie'
+import { cookies } from "next/headers";
 
 
 // async function getProfile(): Promise<ProfileData | null> {
@@ -44,7 +42,8 @@ async function getProfile(id: string): Promise<ProfileData | null> {
 
 
 export default async function Profile() {
-    const id = getCookie('token')
+    const cookieStore = await cookies();
+    const id = cookieStore.get("token")?.value;
 
     if (!id) return <p>Unauthorized</p>;
 
