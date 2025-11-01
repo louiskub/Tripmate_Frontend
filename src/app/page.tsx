@@ -1,13 +1,13 @@
-import Image from "next/image";
+import DefaultPage from '@/components/layout/default-layout';
+import TripHeroSection from './home/page2';
+import React from "react";
 
-export default function Home() {
+const TripMateMain: React.FC = () => {
   return (
-    <div className="text-text">
-      test
-      <h1>testjaas</h1>
-      <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ">
-  Hover Me
-</button>
-    </div>
+    <DefaultPage>
+        <TripHeroSection />
+    </DefaultPage>
   );
-}
+};
+
+export default TripMateMain;

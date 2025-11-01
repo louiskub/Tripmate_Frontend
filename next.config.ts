@@ -1,8 +1,13 @@
-import type { NextConfig } from "next";
-const BACKEND_ORIGIN = process.env.BACKEND_ORIGIN ?? "http://localhost:8800";
+import type { NextConfig } from 'next';
+
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return [{ source: "/api/:path*", destination: `${BACKEND_ORIGIN}/:path*` }];
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
   },
 };
 export default nextConfig;

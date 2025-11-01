@@ -1,54 +1,156 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default, night;
+  root: ":root";
+  include: ;
+  exclude: ;
+  prefix: "d-";
+  logs: true;
+}
 
-/* :root {
-  --background: #ffffff;
-  --border: #000
-  --sans: Arial, Helvetica, sans-serif;
-  --mono: monospace;
+@theme {
+    --color-darker-blue: #216CE1;
+    --color-dark-blue: #3883F8;
+    --color-light-blue: #B9DCFF;
+    --color-pale-blue: #E0F0FF;
+    --color-toggle-blue: #466592;
+    --color-cyan: #87D2F9;
 
-  --text: #000;
-  --muted: #7b7b7b;
+    --color-light-green: #9BD779;
+    --color-darker-green: #06402B;
+    --color-green: #47DE36;
+    --color-green-palam: #059669;
+
+    --color-dark-red: #950606;
+    --color-red: #FF2121;
+    --color-light-red: #E55D58;
+
+    --color-custom-white: #FFFFFF;
+    --color-dark-white: #F7F7F9;
+
+    --color-gray: #99999A;
+    --color-light-gray: #E0E0E0;
+    --color-custom-gray: #99999A;
+    --color-dark-gray: #787878;
+    --color-custom-black: #303030;
+
+    --color-translucent-white: #FFFFFF80;
+    --color-transparent-white: #FFFFFF33;
+    --color-transparent-black: #00000033;
+
+    /* --bg-authen: url('/images/wave2.jpg'); */
+    
+    --boxshadow-lifted: 0px 0px 5px 0px rgba(0,0,0,0.20);
+    --light-shadow: 0px 0px 4px 0px rgba(0,0,0,0.10);
 }
 
 .dark {
-  --background: #0a0a0a;
-  --border: #fff;
-  --text: #fff;
-  --muted: #aaa;
-} */
+    --color-darker-blue: #FFFFFF;
+    --color-dark-blue: #5EA9FF;
+    --color-light-blue: #1D2E47;
+    --color-pale-blue: #303B53;
+    --color-toggle-blue: #3372d0;
+    --color-cyan: #87D2F9;
+
+    --color-light-green: #B8D779;
+    --color-darker-green: #06402B;
+    --color-green: #4D7D19;
+    --color-green-palam: #059669;
+
+    --color-dark-red: #FFFFFF;
+    --color-red: #FFFFFF;
+    --color-light-red: #FFFFFF;
+
+    --color-custom-white: #38383A;
+    --color-dark-white: #2B2B2E;
+
+    --color-gray: #818187;
+    --color-light-gray: #5F5F67;
+    --color-custom-gray: #818187;
+    --color-dark-gray: #FFFFFF;
+    --color-custom-black: #F4F4F4;
+
+    --color-translucent-white: #2B2B2E80;
+    --color-transparent-white: #2B2B2E33;
+    --color-transparent-black: #FFFFFF33;
+}
 
 
-/* @theme inline {
-  --color-background: var(--background);
-  --color-border: var(--border);
-  --color-text: var(--text);
-  --color-muted: var(--muted);
+* {
+  font-family: var(--font-manrope);
+}
 
-  --font-sans: var(--sans);
-  --font-mono: var(--mono);
+html, body {
+  @apply text-custom-black;
+  @apply bg-dark-white;
+}
 
-  --animate-fade-in: fade-in 0.3s ease-out;
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  -webkit-text-fill-color: inherit !important; /* keep text color */
+  transition: background-color 5000s ease-in-out 0s !important;
+}
 
-  @keyframes fade-in {
-    0% {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-} */
+body {
+  @apply bg-dark-white;
+}
 
-/* @layer components  {
-  h1 {
-    @apply text-cyan-400;
-  }
+button {
+  transition: all 0.2s ease-in-out;
+}
 
-  button {
-    @apply transition duration-1000 ease-in-out hover:scale-200;
-    color: red;
-  }
-} */
+button:hover:not(.default-btn) {
+  cursor: pointer;
+  scale: 1.03;
+  @apply shadow-sm;
+}
 
+@keyframes beatingHeart {
+  0%, 40%, 90% { transform: scale(1); }
+  20%, 60% { transform: scale(1.2); }
+  80% { transform: scale(1.1); }
+}
+
+.filled-heart {
+  animation: beatingHeart 1s ease-in-out;
+}
+
+.custom-scroll-bar::-webkit-scrollbar {
+  width: 5px;               /* scrollbar width */
+  height: 6px;              /* scrollbar height (for horizontal) */
+}
+
+.custom-scroll-bar::-webkit-scrollbar-track {
+  background: var(--color-dark-white);  /* track background */
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb {
+  background-color: var(--color-light-blue);
+  border-radius: 100px;
+  border: 2px solid transparent; 
+}
+
+.custom-scroll-bar::-webkit-scrollbar-button {
+  display: none;
+}
+
+.custom-scroll-bar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-dark-blue); /* darker on hover */
+}
+
+.rdrDefinedRangesWrapper {
+  display: none !important;
+}
+
+.rdrDateDisplayWrapper {
+  display: none !important;
+}
+
+/* make the calendar take full width */
+.rdrCalendarWrapper {
+  width: 100% !important;
+}

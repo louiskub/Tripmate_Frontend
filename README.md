@@ -1,3 +1,12 @@
+### TripMate Website
+ A tarveling website, for booking hotel, rental car, guide, restaurant and planning trips.
+
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Learn More](#learn-more)
+- [Deploy on Vercel](#deploy-on-vercel)
+  
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -19,6 +28,16 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Project Structure
+```bash
+src/
+├── app/ # Next.js app router pages
+├── assets/ # Static files (icons, images, logos)
+├── components/ # Reusable UI components
+└── config/ # path and endpoint configs
+└── hooks/ # Custom React hooks
+```
 
 ## Learn More
 
