@@ -65,7 +65,7 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
                     </Caption>
                     : 
                     <Caption className='h-full max-h-full p-2 text-gray rounded-lg'>
-                        there is no comment for this guide
+                        there is no comment
                     </Caption>}
             </div>
         </div>

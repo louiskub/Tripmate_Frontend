@@ -10,7 +10,7 @@ type GuideDetail = {
         last_name: string
     },
 
-    duration: string,
+    // duration: string,
     
     type?: string,
 

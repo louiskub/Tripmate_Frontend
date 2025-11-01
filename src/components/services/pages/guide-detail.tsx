@@ -3,9 +3,9 @@
 import DefaultPage from '@/components/layout/default-layout';
 import SearchServiceInput from '@/components/inputs/search-service-input'
 import ServiceNavTab from '@/components/services/tabs/service-nav-tab'
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 
-import {Title, Caption, SubBody, Subtitle, Body, ButtonText, SmallTag} from '@/components/text-styles/textStyles'
+import {Title, Caption, SubBody, Body, ButtonText} from '@/components/text-styles/textStyles'
 import ServicePictures from '@/components/services/other/service-pictures'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
@@ -20,14 +20,11 @@ import MiniMap from '@/components/other/mini-map';
 import LargeMap from '@/components/other/large-map';
 
 import ContactIcon from '@/assets/icons/telephone.svg'
-import CheckIcon from '@/assets/icons/bullet.svg'
 import GuestIcon from '@/assets/icons/max-guest.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import ClockIcon from '@/assets/icons/Clock.svg'
 import ProfileIcon from '@/assets/icons/profile.svg'
 
-import { guide_detail } from '@/mocks/guide';
-import ImageSlide from '@/components/services/other/image-slide';
 import { PicturePopup } from '@/components/services/other/service-pictures';
 
 import GuideDetailModel from '@/models/service/detail/guide-detail';
@@ -76,7 +73,7 @@ type tab = {
   }, []);
 
   const first_comment = service.review?.find(a => a.comment)?.comment;
-  const duration = formatDurationHHMM(service.duration);
+  // const duration = formatDurationHHMM(service.duration);
 
   const handleBookGuide = () => {
 
@@ -109,7 +106,7 @@ type tab = {
               rating_meta={guideRatingMeta} />
         </PicturePopup>}
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
-          <header className='grid px-4 py-3 grid-cols-2 gap-1 grid-rows-[auto_auto_auto] border-b border-light-gray'>
+          <header className='grid px-4 py-3 grid-cols-2 gap-1 grid-rows-[auto_auto] border-b border-light-gray'>
             <div className='flex gap-1 items-center text-dark-gray'>
               <div className='w-4 aspect-square'>
                 {service.guider.profile_pic ?
@@ -122,10 +119,10 @@ type tab = {
             <Title className=''>{service.name}</Title>
             <div className='items-center'>
               <Tag text={service.type} />
-              <div className="inline-flex items-center gap-1 pl-1 text-dark-gray">
+              {/* <div className="inline-flex items-center gap-1 pl-1 text-dark-gray">
                 <ClockIcon width='10'/>
                 <Caption>{duration}</Caption>
-              </div>
+              </div> */}
             </div>
             <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-3'>
               <span className='flex items-baseline gap-1'>

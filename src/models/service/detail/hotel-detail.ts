@@ -31,7 +31,7 @@ type Facility = {
     internet: string[]
     food: string[]
     accessibility: string[]
-    services: string[]
+    service: string[]
     transportation: string[]
 }
 

@@ -1,19 +1,19 @@
 import axios from 'axios';
 import { endpoints } from '@/config/endpoints.config';
-import HotelDetailModel from '@/models/service/detail/hotel-detail';
-import HotelDetail from '@/components/services/pages/hotel-detail';
-import { mockHotel1 } from '@/mocks/hotels';
+import GuideDetailModel from '@/models/service/detail/guide-detail';
+import GuideDetail from '@/components/services/pages/guide-detail';
+import { guide_detail } from '@/mocks/guide';
 
-export default async function HotelDetailPage({ params }: { params: { id: string } }) {
+export default async function GuideDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  // return <HotelDetail service={mockHotel1}/>
+  // return <GuideDetail service={guide_detail}/>
 
   try {
-    
-    const response = await axios.get(endpoints.hotel.detail(id));
+    console.log(endpoints.guide.detail(id))
+    const response = await axios.get(endpoints.guide.detail(id));
     const data = response.data;
     console.log(data)
-    const hotel: HotelDetailModel = {
+    const guide: GuideDetailModel = {
       ...data,
       review: [],
       subtopic_ratings: data.subtopicRatings,
@@ -24,10 +24,8 @@ export default async function HotelDetailPage({ params }: { params: { id: string
         contact: data.contact
       },
       nearby_locations: data.nearbyLocations,
-      room: mockHotel1.room,
-
     }
-    return <HotelDetail service={hotel} />;
+    return <GuideDetail service={guide} />;
 
   } 
   catch (error: any) {

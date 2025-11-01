@@ -6,7 +6,7 @@ type GuideCardProps = {
         first_name: string
         last_name: string
     }
-    duration: string;
+    // duration: string;
     rating: number
     rating_count: number
     location: string

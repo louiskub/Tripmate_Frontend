@@ -21,9 +21,9 @@ export const endpoints = {
     book: (id: string) => `${BASE_URL}/restaurant/book/${id}`,
   },
   rental_car: {
-    all: `${BASE_URL}/rental-car`,
-    detail: (id: string) => `${BASE_URL}/rental-car/${id}`,
-    book: (id: string) => `${BASE_URL}/rental-car/book/${id}`,
+    all: `${BASE_URL}/car`,
+    detail: (id: string) => `${BASE_URL}/car/${id}`,
+    book: (id: string) => `${BASE_URL}/car/book/${id}`,
   },
   attraction: {
     all: `${BASE_URL}/place`,

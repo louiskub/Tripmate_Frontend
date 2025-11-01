@@ -6,7 +6,7 @@ const rental_cars: RentalCarCardProps[] =
 [
     {
         name: 'Cheap Car for Rent',
-        renter: {
+        owner: {
         username: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
         first_name: 'Mit',
         last_name: 'Shasheep',
@@ -23,11 +23,11 @@ const rental_cars: RentalCarCardProps[] =
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",
         ],
         favorite: false,
-        rental_car_id: '1'
+        rental_car_id: 'Hee123'
     },
     {
         name: 'Cheap Car for Rent',
-        renter: {
+        owner: {
         username: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
         first_name: 'Mit',
         last_name: 'Shasheep',
@@ -44,7 +44,7 @@ const rental_cars: RentalCarCardProps[] =
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",
         ],
         favorite: false,
-        rental_car_id: '1'
+        rental_car_id: '213'
     },
 ]
 

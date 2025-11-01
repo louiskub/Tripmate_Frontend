@@ -6,12 +6,27 @@ import { rental_car_detail } from '@/mocks/rental-cars';
 
 export default async function RentalCarDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  return <RentalCarDetail service={rental_car_detail}/>
+  console.log(id)
+  // return <RentalCarDetail service={rental_car_detail}/>
 
   try {
-    const response = await axios.get<RentalcarDetailModel>(endpoints.rental_car.detail(id));
-    const hotel = response.data;
-    return <RentalCarDetail service={hotel} />;
+    const response = await axios.get(endpoints.rental_car.detail(id));
+    const data = response.data;
+    console.log(data)
+    const car: RentalcarDetailModel = {
+      ...data,
+      review: [],
+      subtopic_ratings: data.subtopicRatings,
+      policy: {
+        breakfast: data.breakfast,
+        check_in: data.checkIn,
+        check_out: data.checkOut,
+        contact: data.contact
+      },
+      nearby_locations: data.nearbyLocations,
+      
+    }
+    return <RentalCarDetail service={car} />;
 
   } 
   catch (error: any) {

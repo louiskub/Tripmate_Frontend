@@ -50,7 +50,7 @@ type tab = {
   
   type facility = {
     label: string
-    id: 'internet' | 'food' | 'health' | 'accessibility' | 'transportation' | 'services'
+    id: 'internet' | 'food' | 'health' | 'accessibility' | 'transportation' | 'service'
     icon: ReactNode
   }
 
@@ -82,7 +82,7 @@ type tab = {
     },
     {
       label: 'Hotel Services',
-      id: 'services',
+      id: 'service',
       icon: <QuestionIcon width='16' />
     },
   ]
@@ -111,11 +111,13 @@ type tab = {
   }, []);
 
   // const service = mockHotel1
+  
   const rooms = service.room;
 
-  const starting_price = Math.min(
-    ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
-  );
+  
+  const starting_price = rooms ? Math.min(
+      ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
+  ) : 1000;
 
   const first_comment: string | undefined = service.review[0]?.comment;
 
@@ -310,10 +312,9 @@ type tab = {
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1.5'>
             <QuestionIcon width='16' className='text-custom-gray self-center'/>
-            <SubBody className='font-semibold col-start-2'>Breakfast</SubBody>
             <span className='col-start-2 flex gap-1'>
-              <SubBody className='text-custom-gray'>Opening hours:</SubBody>
-              <SubBody className='font-semibold'>{service.policy.breakfast}</SubBody>
+              <SubBody className='font-semibold col-start-2'>Breakfast</SubBody>
+              <SubBody className='text-custom-gray'>{service.policy.breakfast}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1'>
