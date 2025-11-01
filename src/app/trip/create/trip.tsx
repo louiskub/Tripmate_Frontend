@@ -29,10 +29,11 @@ import {
   Languages,
   MapPinned,
   Minus,
+  DollarSign, // <-- เพิ่ม 1
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react" // <-- เพิ่ม 2 (useMemo)
 import { useRouter } from "next/navigation"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
@@ -40,6 +41,8 @@ import "maplibre-gl/dist/maplibre-gl.css"
 import FinalMap from "./map"
 import TripRouteDisplay from "./trip-route"
 import TextareaAutosize from "react-textarea-autosize"
+
+// --- INTERFACES ---
 
 interface EventRowProps {
   time: string
@@ -57,11 +60,13 @@ interface ServiceItem {
   id: string
   type: "hotel" | "guide" | "car"
   name: string
-  details: string
-  price: string
+  details: string // ใช้ 'details' เพื่อเก็บข้อมูลราคาและรายละเอียดย่อย (เช่น ประเภทห้อง)
+  price: string // ใช้ 'price' สำหรับราคารายวัน (ไกด์, รถ)
   quantity?: number
   icon: React.ComponentType<{ className?: string }>
   chipLabel: string
+  roomId?: string
+  packageId?: string
 }
 
 interface TripDay {
@@ -109,6 +114,25 @@ interface ServiceCategory {
   guides: Service[]
   cars: Service[]
 }
+
+// --- NEW INTERFACES (Added) ---
+
+interface HotelDetail {
+  description: string
+  generalAmenities: string[]
+  images: string[]
+  address: string
+}
+
+interface TourPackage {
+  id: string
+  title: string
+  description: string
+  pricePerTrip: string
+  maxGuests: number
+}
+
+// --- MOCK DATA ---
 
 const mockServices: ServiceCategory = {
   hotels: [
@@ -405,6 +429,82 @@ const mockCarDetails: Record<string, CarDetail> = {
   },
 }
 
+// --- NEW MOCK DATA (Added) ---
+
+const mockHotelDetails: Record<string, HotelDetail> = {
+  h1: {
+    description: "โรงแรมหรูระดับ 5 ดาวใจกลางเมือง พร้อมสระว่ายน้ำและฟิตเนสครบครัน",
+    generalAmenities: ["สระว่ายน้ำ", "ฟิตเนส", "ห้องอาหาร", "สปา", "Wi-Fi ฟรี"],
+    images: ["https://placehold.co/600x400", "https://placehold.co/600x400"],
+    address: "123 ถ.สุขุมวิท, กรุงเทพฯ",
+  },
+  h2: {
+    description: "รีสอร์ทติดชายหาด บรรยากาศเงียบสงบ เหมาะแก่การพักผ่อน",
+    generalAmenities: ["สระว่ายน้ำติดหาด", "ห้องอาหารริมทะเล", "Wi-Fi ฟรี"],
+    images: ["https://placehold.co/600x400"],
+    address: "456 หาดจอมเทียน, พัทยา",
+  },
+  h3: {
+    description: "บ้านพักบนภูเขา บรรยากาศอบอุ่น",
+    generalAmenities: ["เตาผิง", "ครัวส่วนกลาง", "Wi-Fi ฟรี"],
+    images: ["https://placehold.co/600x400"],
+    address: "789 ดอยสุเทพ, เชียงใหม่",
+  },
+  h4: {
+    description: "โรงแรมราคาประหยัดใจกลางเมือง เดินทางสะดวก",
+    generalAmenities: ["Wi-Fi ฟรี", "Lobby"],
+    images: ["https://placehold.co/600x400"],
+    address: "101 ถ.สีลม, กรุงเทพฯ",
+  },
+  h5: {
+    description: "โรงแรมบูทีคดีไซน์เก๋ ย่านทองหล่อ",
+    generalAmenities: ["Rooftop Bar", "Wi-Fi ฟรี", "คาเฟ่"],
+    images: ["https://placehold.co/600x400"],
+    address: "202 ซ.ทองหล่อ, กรุงเทพฯ",
+  },
+}
+
+const mockGuideTours: Record<string, TourPackage[]> = {
+  g1: [
+    {
+      id: "g1t1",
+      title: "ทัวร์วัดพระแก้วและพระบรมมหาราชวัง (ครึ่งวัน)",
+      description: "เจาะลึกประวัติศาสตร์และสถาปัตยกรรมที่สวยงาม",
+      pricePerTrip: "฿2,500/ทริป",
+      maxGuests: 6,
+    },
+    {
+      id: "g1t2",
+      title: "ทัวร์ตลาดน้ำดำเนินสะดวก (เต็มวัน)",
+      description: "สัมผัสวิถีชีวิตริมคลองและของกินอร่อยๆ",
+      pricePerTrip: "฿4,000/ทริป",
+      maxGuests: 4,
+    },
+  ],
+  g2: [], // No specific tours for Sarah
+  g3: [], // No specific tours for Mike
+  g4: [
+    {
+      id: "g4t1",
+      title: "ทัวร์ Street Food ย่านเยาวราช (ช่วงค่ำ)",
+      description: "ตะลุยกินร้านเด็ด มิชลินไกด์",
+      pricePerTrip: "฿2,000/ทริป",
+      maxGuests: 8,
+    },
+  ],
+}
+
+// --- HELPER FUNCTION --- (เพิ่ม 3)
+const parsePrice = (priceString: string): number => {
+  if (!priceString) return 0
+  // ใช้ regex เพื่อหาตัวเลขที่ตามหลัง "฿" และตัด comma ออก
+  const priceMatch = priceString.match(/฿([\d,]+)/)
+  if (!priceMatch || !priceMatch[1]) return 0
+  return Number.parseInt(priceMatch[1].replace(/,/g, ""), 10)
+}
+
+// --- TRIP EDITOR COMPONENT ---
+
 export default function TripEditor() {
   const router = useRouter()
   const [isPublic, setIsPublic] = useState(false)
@@ -428,7 +528,7 @@ export default function TripEditor() {
   const [startDate, endDate] = dateRange
 
   const [peopleCount, setPeopleCount] = useState(2)
-  const [roomCount, setRoomCount] = useState(1)
+  const [roomCount, setRoomCount] = useState(1) // This one is for the sidebar, leave as is.
 
   const [startTime, setStartTime] = useState("10.00")
   const [endTime, setEndTime] = useState("18.00")
@@ -441,7 +541,37 @@ export default function TripEditor() {
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [showServiceDetail, setShowServiceDetail] = useState(false)
 
-  const [roomQuantity, setRoomQuantity] = useState(1)
+  // --- Bug Fix 2: Changed state for room quantity ---
+  const [roomQuantities, setRoomQuantities] = useState<Record<string, number>>({})
+
+  // --- NEW: CALCULATE TOTAL BUDGET --- (เพิ่ม 4)
+  const totalBudget = useMemo(() => {
+    return days.reduce((total, day) => {
+      const dayTotal = day.services.reduce((daySum, service) => {
+        let itemCost = 0
+
+        if (service.type === "hotel") {
+          // สำหรับโรงแรม, ราคาอยู่ใน 'details' (เช่น "Deluxe Room - ฿3,500/night...") และต้องคูณ 'quantity'
+          const pricePerNight = parsePrice(service.details)
+          itemCost = pricePerNight * (service.quantity || 1)
+        } else if (service.type === "guide") {
+          if (service.packageId) {
+            // ถ้าเป็นแพ็คเกจทัวร์, ราคาอยู่ใน 'details' (เป็นราคาต่อทริป)
+            itemCost = parsePrice(service.details)
+          } else {
+            // ถ้าเป็นไกด์รายวัน, ราคาอยู่ใน 'price'
+            itemCost = parsePrice(service.price)
+          }
+        } else if (service.type === "car") {
+          // สำหรับรถเช่า, ราคาอยู่ใน 'price'
+          itemCost = parsePrice(service.price)
+        }
+
+        return daySum + itemCost
+      }, 0)
+      return total + dayTotal
+    }, 0)
+  }, [days]) // คำนวณใหม่ทุกครั้งที่ 'days' (และ services ภายใน) เปลี่ยนแปลง
 
   const formatDate = (date: Date | null): string => {
     if (!date) return "Select date"
@@ -453,6 +583,7 @@ export default function TripEditor() {
     })
   }
 
+  // --- แก้ไข useEffect (บัควันที่) ---
   useEffect(() => {
     if (startDate && endDate) {
       const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
@@ -470,9 +601,11 @@ export default function TripEditor() {
         }
         return newDays
       })
-    } else {
+    } else if (!startDate && !endDate) {
       setDays([])
     }
+    // ถ้ามีแค่ startDate หรือ endDate อย่างใดอย่างหนึ่ง จะไม่ทำอะไร
+    // (ป้องกันข้อมูลหายตอนกำลังเลือก)
   }, [startDate, endDate])
 
   useEffect(() => {
@@ -608,57 +741,14 @@ export default function TripEditor() {
     }
   }
 
-  const handleSaveTrip = async () => {
-    setIsSaving(true)
-
-    const tripData = {
-      title: tripTitle,
-      isPublic: isPublic,
-      startDate: startDate,
-      endDate: endDate,
-      peopleCount: peopleCount,
-      roomCount: roomCount,
-      days: days,
-    }
-
-    console.log("Saving trip data:", JSON.stringify(tripData, null, 2))
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      alert("Trip saved successfully!")
-    } catch (error) {
-      console.error("Failed to save trip:", error)
-      alert("Failed to save trip. Please try again.")
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const openServicePopup = (dayIndex: number) => {
-    setActiveDayForService(dayIndex)
-    setServicePopupOpen(true)
-    setServiceSearchQuery("")
-    setActiveServiceTab("hotels")
-    setShowServiceDetail(false)
-    setSelectedService(null)
-    setRoomQuantity(1)
-  }
-
-  const closeServicePopup = () => {
-    setServicePopupOpen(false)
-    setActiveDayForService(null)
-    setServiceSearchQuery("")
-    setShowServiceDetail(false)
-    setSelectedService(null)
-    setRoomQuantity(1)
-  }
-
-  const handleSelectService = (service: Service) => {
-    setSelectedService(service)
-    setShowServiceDetail(true)
-  }
-
-  const handleAddServiceToTrip = (service: Service, details: string, quantity?: number) => {
+  // --- อัปเดตฟังก์ชัน `handleAddServiceToTrip` ---
+  const handleAddServiceToTrip = (
+    service: Service,
+    details: string,
+    quantity?: number,
+    roomId?: string,
+    packageId?: string, // <-- เพิ่ม parameter
+  ) => {
     if (activeDayForService === null) return
 
     let icon: React.ComponentType<{ className?: string }>
@@ -683,11 +773,13 @@ export default function TripEditor() {
       id: `${service.id}-${Date.now()}`,
       type,
       name: service.name,
-      details,
-      price: service.price || "",
+      details, // รายละเอียด (รวมราคาห้อง)
+      price: service.price || "", // ราคารายวัน (สำหรับไกด์/รถ)
       quantity,
       icon,
       chipLabel,
+      roomId,
+      packageId, // <-- เพิ่ม field นี้
     }
 
     const updatedDays = [...days]
@@ -696,10 +788,34 @@ export default function TripEditor() {
     closeServicePopup()
   }
 
+  const openServicePopup = (dayIndex: number) => {
+    setActiveDayForService(dayIndex)
+    setServicePopupOpen(true)
+    setServiceSearchQuery("")
+    setActiveServiceTab("hotels")
+    setShowServiceDetail(false)
+    setSelectedService(null)
+    setRoomQuantities({})
+  }
+
+  const closeServicePopup = () => {
+    setServicePopupOpen(false)
+    setActiveDayForService(null)
+    setServiceSearchQuery("")
+    setShowServiceDetail(false)
+    setSelectedService(null)
+    setRoomQuantities({})
+  }
+
+  const handleSelectService = (service: Service) => {
+    setSelectedService(service)
+    setShowServiceDetail(true)
+  }
+
   const handleBackToServiceList = () => {
     setShowServiceDetail(false)
     setSelectedService(null)
-    setRoomQuantity(1)
+    setRoomQuantities({})
   }
 
   const handleDeleteService = (dayIndex: number, serviceIndex: number) => {
@@ -716,6 +832,98 @@ export default function TripEditor() {
     return services.filter(
       (service) => service.name.toLowerCase().includes(query) || service.description.toLowerCase().includes(query),
     )
+  }
+
+  // --- อัปเดตฟังก์ชัน `handleSaveTrip` (แปลง JSON output) ---
+  const handleSaveTrip = async () => {
+    setIsSaving(true)
+
+    const transformedDays = days.map((day, dayIndex) => {
+      // แปลง Events
+      const transformedEvents = day.events.map((event) => {
+        let simpleLabel = event.chip?.label || ""
+        if (event.chip?.label && (event.chip?.lat || event.chip?.lng)) {
+          const labelMatch = event.chip.label.match(/^(.*?)\s*\(/)
+          if (labelMatch && labelMatch[1]) {
+            simpleLabel = labelMatch[1].trim()
+          } else {
+            simpleLabel = event.chip.label
+          }
+        }
+
+        return {
+          title: event.title,
+          desc: event.desc,
+          time: event.time,
+          location:
+            event.chip && event.chip.lat && event.chip.lng
+              ? {
+                  label: simpleLabel,
+                  lat: event.chip.lat,
+                  lng: event.chip.lng,
+                }
+              : null,
+        }
+      })
+
+      // แปลง Services
+      const transformedServices = day.services.map((service) => {
+        const baseService: any = {
+          id: service.id,
+          type: service.type,
+        }
+
+        // ถ้าเป็นโรงแรม
+        if (service.type === "hotel") {
+          baseService.roomId = service.roomId
+          baseService.quantity = service.quantity
+        }
+
+        // ถ้าเป็นไกด์
+        if (service.type === "guide") {
+          // ถ้ามี packageId (เช่น "g1t1") ให้เพิ่ม
+          if (service.packageId) {
+            baseService.packageId = service.packageId
+          }
+          // ถ้าไม่มี (จ้างรายวัน) ก็ไม่ต้องเพิ่ม field นี้
+        }
+
+        return baseService
+      })
+
+      // คืนค่า Day ที่แปลงแล้ว
+      return {
+        day: dayIndex,
+        dayLabel: day.dayLabel,
+        dateOffset: day.dateOffset,
+        events: transformedEvents,
+        services: transformedServices,
+      }
+    })
+
+    // ใช้ transformedDays แทน
+    const tripData = {
+      title: tripTitle,
+      isPublic: isPublic,
+      startDate: startDate,
+      endDate: endDate,
+      peopleCount: peopleCount,
+      roomCount: roomCount,
+      totalBudget: totalBudget, // <-- เพิ่ม 5 (totalBudget)
+      days: transformedDays,
+    }
+
+    console.log("Saving trip data:", JSON.stringify(tripData, null, 2))
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      alert("Trip saved successfully!")
+    } catch (error) {
+      console.error("Failed to save trip:", error)
+      alert("Failed to save trip. Please try again.")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -780,7 +988,7 @@ export default function TripEditor() {
         </div>
       </header>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-[14rem_1fr] gap-2.5">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-[14rem_1fr_14rem] gap-2.5">
         <aside className="w-full px-2 py-2.5 border-r lg:border-r border-neutral-200 flex flex-col items-center gap-2.5">
           <div className="w-full flex justify-center px-2">
             <DatePicker
@@ -892,6 +1100,18 @@ export default function TripEditor() {
                 </div>
               </div>
             </div>
+
+            {/* --- NEW BUDGET DISPLAY --- (เพิ่ม 6) */}
+            <div className="w-full px-1 py-2.5 border-t border-neutral-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-custom-black" />
+                <span className="text-custom-black text-sm font-medium font-[Manrope]">Total Budget (Est.)</span>
+              </div>
+              <span className="text-custom-black text-lg font-bold font-[Manrope]">
+                ฿{totalBudget.toLocaleString("en-US")}
+              </span>
+            </div>
+            {/* --- END NEW BUDGET DISPLAY --- */}
           </div>
 
           <div className="w-full h-44 rounded-xl outline-neutral-200 flex flex-col gap-1.5">
@@ -995,7 +1215,14 @@ export default function TripEditor() {
                               <div className="font-semibold text-custom-black">{service.name}</div>
                               <div className="text-sm text-gray-600 mt-0.5">{service.details}</div>
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-sm font-medium text-dark-blue">{service.price}</span>
+                                <span className="text-sm font-medium text-dark-blue">
+                                  {/* แสดงราคาที่ถูกต้องตามประเภท */}
+                                  {service.type === "hotel"
+                                    ? "" // ราคาอยู่ใน details แล้ว
+                                    : service.type === "guide" && service.packageId
+                                      ? "" // ราคาอยู่ใน details แล้ว
+                                      : service.price}
+                                </span>
                                 {service.quantity && (
                                   <span className="text-xs px-2 py-0.5 bg-white rounded-full text-gray-600">
                                     x{service.quantity}
@@ -1022,6 +1249,19 @@ export default function TripEditor() {
             </motion.section>
           ))}
         </main>
+        
+        {/* Right rail – People */}
+        <aside className="w-full p-2.5 border-l lg:border-l border-neutral-200 flex flex-col gap-3">
+          <div className="w-full flex flex-col gap-2">
+            <div className="w-full pb-1.5 border-b border-neutral-200 inline-flex items-center gap-2.5">
+              <h3 className="flex-1 text-custom-black text-base font-bold font-[Manrope]">People in trip (2)</h3>
+              <Users className="w-5 h-5 text-custom-black" />
+            </div>
+
+            <PersonRow name="full name" role="head" you />
+            <PersonRow name="full name" role="member" />
+          </div>
+        </aside>
       </div>
 
       {/* Event Popup */}
@@ -1268,83 +1508,133 @@ export default function TripEditor() {
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    {/* --- Change 1: Hotel Details Added --- */}
                     {activeServiceTab === "hotels" && selectedService && mockHotelRooms[selectedService.id] && (
                       <div className="space-y-3">
-                        <h4 className="font-semibold text-custom-black text-lg">เลือกประเภทห้อง</h4>
-                        {mockHotelRooms[selectedService.id].map((room) => (
-                          <motion.div
-                            key={room.id}
-                            className="p-4 border border-neutral-200 rounded-lg hover:border-dark-blue transition-all"
-                            whileHover={{ scale: 1.01 }}
-                          >
-                            <div className="flex gap-4">
-                              <img
-                                src={room.image || "/placeholder.svg"}
-                                alt={room.type}
-                                className="w-32 h-24 rounded-lg object-cover"
-                              />
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-2">
-                                  <h5 className="font-semibold text-custom-black">{room.type}</h5>
-                                  <span className="text-dark-blue font-semibold">{room.price}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                                  <Users className="w-4 h-4" />
-                                  <span>{room.capacity} guests</span>
-                                </div>
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                  {room.amenities.map((amenity, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="px-2 py-1 bg-pale-blue text-dark-blue text-xs rounded-full flex items-center gap-1"
-                                    >
-                                      {amenity.includes("WiFi") && <Wifi className="w-3 h-3" />}
-                                      {amenity.includes("Air") && <Wind className="w-3 h-3" />}
-                                      {amenity.includes("TV") && <Tv className="w-3 h-3" />}
-                                      {amenity.includes("Bar") && <Coffee className="w-3 h-3" />}
-                                      {amenity}
-                                    </span>
-                                  ))}
-                                </div>
+                        {/* --- Hotel General Details (Added) --- */}
+                        {mockHotelDetails[selectedService.id] && (
+                          <div className="mb-4 p-3 bg-pale-blue/30 rounded-lg">
+                            <h5 className="font-semibold text-custom-black mb-2">เกี่ยวกับโรงแรม</h5>
+                            <img
+                              src={
+                                (mockHotelDetails[selectedService.id].images[0] ||
+                                  selectedService.image ||
+                                  "/placeholder.svg")
+                              }
+                              alt={selectedService.name}
+                              className="w-full h-40 rounded-lg object-cover mb-2"
+                            />
+                            <p className="text-sm text-gray-700 mb-2">
+                              {mockHotelDetails[selectedService.id].description}
+                            </p>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                              <MapPin className="w-4 h-4" />
+                              <span>{mockHotelDetails[selectedService.id].address}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {mockHotelDetails[selectedService.id].generalAmenities.map((amenity, idx) => (
+                                <span key={idx} className="px-2 py-1 bg-white text-dark-blue text-xs rounded-full">
+                                  {amenity}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* --- End of Hotel General Details --- */}
 
-                                {/* Room Quantity Input */}
-                                <div className="flex items-center gap-3 mt-3 pt-3 border-t border-neutral-200">
-                                  <span className="text-sm font-medium text-gray-700">จำนวนห้อง:</span>
-                                  <div className="flex items-center gap-2">
+                        <h4 className="font-semibold text-custom-black text-lg">เลือกประเภทห้อง</h4>
+                        {mockHotelRooms[selectedService.id].map((room) => {
+                          // --- Bug Fix 2: Get quantity for this specific room ---
+                          const quantity = roomQuantities[room.id] || 1
+                          return (
+                            <motion.div
+                              key={room.id}
+                              className="p-4 border border-neutral-200 rounded-lg hover:border-dark-blue transition-all"
+                              whileHover={{ scale: 1.01 }}
+                            >
+                              <div className="flex gap-4">
+                                <img
+                                  src={room.image || "/placeholder.svg"}
+                                  alt={room.type}
+                                  className="w-32 h-24 rounded-lg object-cover"
+                                />
+                                <div className="flex-1">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h5 className="font-semibold text-custom-black">{room.type}</h5>
+                                    <span className="text-dark-blue font-semibold">{room.price}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                                    <Users className="w-4 h-4" />
+                                    <span>{room.capacity} guests</span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    {room.amenities.map((amenity, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="px-2 py-1 bg-pale-blue text-dark-blue text-xs rounded-full flex items-center gap-1"
+                                      >
+                                        {amenity.includes("WiFi") && <Wifi className="w-3 h-3" />}
+                                        {amenity.includes("Air") && <Wind className="w-3 h-3" />}
+                                        {amenity.includes("TV") && <Tv className="w-3 h-3" />}
+                                        {amenity.includes("Bar") && <Coffee className="w-3 h-3" />}
+                                        {amenity}
+                                      </span>
+                                    ))}
+                                  </div>
+
+                                  {/* --- Bug Fix 2: Room Quantity Input (Modified) --- */}
+                                  <div className="flex items-center gap-3 mt-3 pt-3 border-t border-neutral-200">
+                                    <span className="text-sm font-medium text-gray-700">จำนวนห้อง:</span>
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={() =>
+                                          setRoomQuantities((prev) => ({
+                                            ...prev,
+                                            [room.id]: Math.max(1, (prev[room.id] || 1) - 1),
+                                          }))
+                                        }
+                                        className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+                                      <span className="w-12 text-center font-semibold">{quantity}</span>
+                                      <button
+                                        onClick={() =>
+                                          setRoomQuantities((prev) => ({
+                                            ...prev,
+                                            [room.id]: (prev[room.id] || 1) + 1,
+                                          }))
+                                        }
+                                        className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                    {/* --- อัปเดตการเรียก `handleAddServiceToTrip` (สำหรับ Hotel) --- */}
                                     <button
-                                      onClick={() => setRoomQuantity(Math.max(1, roomQuantity - 1))}
-                                      className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                                      onClick={() =>
+                                        handleAddServiceToTrip(
+                                          selectedService,
+                                          `${room.type} - ${room.price} (${room.capacity} guests)`,
+                                          quantity,
+                                          room.id,
+                                          undefined, // <-- เพิ่ม undefined สำหรับ packageId
+                                        )
+                                      }
+                                      className="ml-auto px-4 py-2 bg-dark-blue text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
                                     >
-                                      <Minus className="w-4 h-4" />
-                                    </button>
-                                    <span className="w-12 text-center font-semibold">{roomQuantity}</span>
-                                    <button
-                                      onClick={() => setRoomQuantity(roomQuantity + 1)}
-                                      className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
-                                    >
-                                      <Plus className="w-4 h-4" />
+                                      เลือกห้องนี้
                                     </button>
                                   </div>
-                                  <button
-                                    onClick={() =>
-                                      handleAddServiceToTrip(
-                                        selectedService,
-                                        `${room.type} - ${room.price} (${room.capacity} guests)`,
-                                        roomQuantity,
-                                      )
-                                    }
-                                    className="ml-auto px-4 py-2 bg-dark-blue text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
-                                  >
-                                    เลือกห้องนี้
-                                  </button>
                                 </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        ))}
+                            </motion.div>
+                          )
+                        })}
                       </div>
                     )}
 
+                    {/* --- Change 3: Guide Details & Tour Packages --- */}
                     {activeServiceTab === "guides" && selectedService && mockGuideDetails[selectedService.id] && (
                       <div className="space-y-4">
                         <div className="flex items-start gap-4">
@@ -1423,20 +1713,75 @@ export default function TripEditor() {
                           </div>
                         </div>
 
-                        <button
-                          onClick={() =>
-                            handleAddServiceToTrip(
-                              selectedService,
-                              `${selectedService.description} - ${selectedService.price}`,
-                            )
-                          }
-                          className="w-full py-3 bg-dark-blue text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
-                        >
-                          เลือกไกด์นี้
-                        </button>
+                        {/* --- Tour Packages (Added) --- */}
+                        {mockGuideTours[selectedService.id] && mockGuideTours[selectedService.id].length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-neutral-200">
+                            <h5 className="font-semibold text-custom-black text-lg mb-2">แพ็คเกจทัวร์</h5>
+                            <div className="space-y-3">
+                              {mockGuideTours[selectedService.id].map((tour) => (
+                                <div key={tour.id} className="p-3 border border-neutral-200 rounded-lg">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <h6 className="font-semibold text-custom-black">{tour.title}</h6>
+                                      <p className="text-sm text-gray-600 mt-1">{tour.description}</p>
+                                    </div>
+                                    {/* --- อัปเดตการเรียก `handleAddServiceToTrip` (สำหรับ Guide Tour) --- */}
+                                    <button
+                                      onClick={() =>
+                                        handleAddServiceToTrip(
+                                          selectedService,
+                                          `Tour: ${tour.title} - ${tour.pricePerTrip} (สูงสุด ${tour.maxGuests} คน)`,
+                                          undefined, // quantity
+                                          undefined, // roomId
+                                          tour.id, // <-- เพิ่ม tour.id เป็น packageId
+                                        )
+                                      }
+                                      className="px-3 py-1.5 bg-dark-blue text-white rounded-lg font-semibold hover:opacity-90 text-sm shrink-0 ml-2"
+                                    >
+                                      เลือกทัวร์นี้
+                                    </button>
+                                  </div>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    <span className="text-sm font-medium text-dark-blue">{tour.pricePerTrip}</span>
+                                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                                      <Users className="w-4 h-4" />
+                                      <span>สูงสุด {tour.maxGuests} คน</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* --- End of Tour Packages --- */}
+
+                        {/* --- Daily Hire Button (Modified) --- */}
+                        <div className="mt-4 pt-4 border-t border-neutral-200">
+                          <p className="text-sm text-gray-600 mb-2">
+                            {mockGuideTours[selectedService.id] && mockGuideTours[selectedService.id].length > 0
+                              ? "หรือเลือกจ้างไกด์แบบรายวัน:"
+                              : "เลือกจ้างไกด์แบบรายวัน:"}
+                          </p>
+                          {/* --- อัปเดตการเรียก `handleAddServiceToTrip` (สำหรับ Guide Daily) --- */}
+                          <button
+                            onClick={() =>
+                              handleAddServiceToTrip(
+                                selectedService,
+                                `จ้างรายวัน - ${selectedService.description} - ${selectedService.price}`,
+                                undefined, // quantity
+                                undefined, // roomId
+                                undefined, // <-- เพิ่ม undefined สำหรับ packageId
+                              )
+                            }
+                            className="w-full py-3 bg-white border border-dark-blue text-dark-blue rounded-lg font-semibold hover:bg-pale-blue/30 transition-colors"
+                          >
+                            จ้างไกด์รายวัน ({selectedService.price})
+                          </button>
+                        </div>
                       </div>
                     )}
 
+                    {/* --- Car Details (Unchanged) --- */}
                     {activeServiceTab === "cars" && selectedService && mockCarDetails[selectedService.id] && (
                       <div className="space-y-4">
                         <div className="flex items-start gap-4">
@@ -1520,6 +1865,9 @@ export default function TripEditor() {
                             handleAddServiceToTrip(
                               selectedService,
                               `${selectedService.description} - ${selectedService.price}`,
+                              undefined, // quantity
+                              undefined, // roomId
+                              undefined, // packageId
                             )
                           }
                           className="w-full py-3 bg-dark-blue text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
@@ -1580,4 +1928,22 @@ export default function TripEditor() {
       )}
     </section>
   )
+}
+
+
+function PersonRow({ name, role, you = false }: { name: string; role: string; you?: boolean }) {
+  return (
+    <div className="w-full inline-flex items-center gap-2">
+      <img className="w-7 h-7 rounded-full object-cover" src="https://placehold.co/28x28" alt={name} />
+      <div className="flex-1 flex flex-col">
+        <div className="w-full inline-flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-custom-black text-sm font-medium font-[Manrope] truncate">{name}</span>
+          </div>
+          <span className="text-gray text-xs font-normal font-[Manrope] shrink-0">{you ? "(You)" : ""}</span>
+        </div>
+        <span className="text-gray text-xs font-normal font-[Manrope]">{role}</span>
+      </div>
+    </div>
+  );
 }
