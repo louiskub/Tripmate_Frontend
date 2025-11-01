@@ -18,6 +18,7 @@ export const paths = {
     group: '/account/my-group',
     trip: '/account/my-trip',
   },
+  other_profile: (id: string) => `/users/${id}`,
   trip: {
     all: '/trip',
   },
