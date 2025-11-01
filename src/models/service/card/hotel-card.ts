@@ -8,7 +8,7 @@ type HotelCardProps = {
     type: string
     pictures: Array<string>
     favorite: boolean
-    hotel_id: string
+    id: string
 }
 
 export default HotelCardProps

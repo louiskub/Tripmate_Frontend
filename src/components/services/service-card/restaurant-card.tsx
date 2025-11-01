@@ -24,9 +24,9 @@ const RestaurantCard = (restaurant: RestaurantCardProps) => {
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5
                     hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(paths.restaurant.detail(restaurant.restaurant_id))}>
+            onClick={() => router.push(paths.restaurant.detail(restaurant.id))}>
             <ImageSlide pictures={restaurant.pictures}>
-                <FavoriteButton favorite={restaurant.favorite} id={restaurant.restaurant_id} type='restaurant'/>
+                <FavoriteButton favorite={restaurant.favorite} id={restaurant.id} type='restaurant'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">

@@ -1,3 +1,5 @@
+import GuideCardProps from "./service/card/guide-card";
+import RentalCarCardProps from "./service/card/rental-car-card";
 import Review from "./service/reviews";
 
 export type ProfileData = {
@@ -12,14 +14,14 @@ export type ProfileData = {
 }
 
 export type OtherProfileData = {
-    profile_pic?: string;
+    profileImg?: string;
     username: string;
     fname: string;
     lname: string;
     gender?: "female" | "male" | "Other" | null;
-    trip_count: number;
-    review_count: number;
-    booking_count: number;
+    tripCount: number;
+    reviewCount: number;
+    bookingCount: number;
     role?: string;
-    trips?: string[];
+    service?: RentalCarCardProps[] | GuideCardProps[] | null
 }
