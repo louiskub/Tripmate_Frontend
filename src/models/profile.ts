@@ -1,14 +1,14 @@
 import Review from "./service/reviews";
 
 export type ProfileData = {
-    profile_pic?: string;
+    profileImg?: string;
     username: string;
     fname: string;
     lname: string;
     email: string;
     phone?: string;
     birthDate?: string;
-    gender?: "Female" | "Male" | "Other" | null;
+    gender?: "female" | "male" | "Other" | null;
 }
 
 export type OtherProfileData = {
@@ -16,7 +16,7 @@ export type OtherProfileData = {
     username: string;
     fname: string;
     lname: string;
-    gender?: "Female" | "Male" | "Other" | null;
+    gender?: "female" | "male" | "Other" | null;
     trip_count: number;
     review_count: number;
     booking_count: number;

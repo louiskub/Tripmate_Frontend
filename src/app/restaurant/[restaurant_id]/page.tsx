@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { endpoints } from '@/config/endpoints.config';
 import RestaurantDetailModel from '@/models/service/detail/restaurant-detail';
-import RestaurantDetail from '@/components/services/pages/restaurant-detail.tsx';
+import RestaurantDetail from '@/components/services/pages/restaurant-detail';
 import { restaurant_detail } from '@/mocks/restaurants';
 
 export default async function RestaurantDetailPage({ params }: { params: { id: string } }) {
