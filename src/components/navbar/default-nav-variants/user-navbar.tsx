@@ -15,8 +15,6 @@ import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
 
-import { ConfirmDialog } from '@/components/other/confirm';
-
 export default function UserNavbar() {
     const showDropdown = useBoolean(false);
     return (
@@ -74,6 +72,7 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
     const clickLogout = () => {
         document.cookie = "token=; max-age=0; path=/";
         window.location.href = "/login"; // redirect ไปหน้า login
+        localStorage.clear();
     }
 
     return (

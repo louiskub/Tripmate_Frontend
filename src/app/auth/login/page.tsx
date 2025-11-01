@@ -1,3 +1,4 @@
+"use client"
 import Navbar from '@/components/navbar/navbar';
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
@@ -29,6 +30,9 @@ export default function LoginPage() {
             const jsonPayload = Buffer.from(base64, "base64").toString("utf8");
             const data = JSON.parse(jsonPayload);
             
+            localStorage.setItem("username", data.username)
+            localStorage.setItem("userId", data.sub)
+
             if (data.userRole == "hotel-manager")
                 localStorage.setItem("userRole", "hotel")
             else if (data.userRole == "car-manager")
