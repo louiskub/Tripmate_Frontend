@@ -21,7 +21,7 @@ interface PaymentInfo { bank: string; account: string; promptPay: string }
 interface Member { id: string; name: string; role: "head" | "member"; avatar?: string; paymentInfo?: PaymentInfo }
 interface Expense { id: string; description: string; amount: number; paidBy: string; splitBetween: string[]; avatar?: string }
 interface Transaction { from: Member; to: Member; amount: number; status: 'unpaid' | 'pending' | 'paid'; slipUrl?: string }
-interface StoredGroup { id: string; code: string; name: string; description: string; imageUrl?: string; hostName: string; members: Member[]; expenses: Expense[]; contacts?: Contacts }
+interface StoredGroup { id: string; code: string; name: string; description: string; imageUrl?: string; hostName: string; members: Member[]; expenses: Expense[]; contacts?: Contacts; tripId?: string; }
 
 export default function GroupDetailPage() {
   const params = useParams()
@@ -207,11 +207,30 @@ export default function GroupDetailPage() {
                   <Users className="w-5 h-5" />
                   <span>{group.members.length}</span>
                 </div>
+                <button onClick={() => setIsInviteOpen(true)} className="p-1 text-black hover:scale-110">
+                  <UserPlus className="w-5 h-5" />
+                </button>
               </div>
             </div>
-            <button onClick={() => setIsInviteOpen(true)} className="p-1 text-black hover:scale-110">
-                <UserPlus className="w-7 h-7" />
-            </button>
+
+            {group.tripId ? (
+              <button
+                onClick={() => router.push(`/trip/${group.tripId}`)}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-semibold text-base transition-all hover:scale-105"
+                title="View Trip"
+              >
+                <span>View Trip</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push(`/trip/create?groupId=${groupId}`)}
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold text-base transition-all hover:scale-105"
+                title="Create Trip"
+              >
+                <span>Create Trip</span>
+              </button>
+            )}
+
           </div>
           <div className="space-y-3">
             {group.members.map(member => (
