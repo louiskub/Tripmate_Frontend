@@ -13,7 +13,7 @@ type RentalCarCardProps = {
     type: string
     pictures: Array<string>
     favorite: boolean
-    rental_car_id: string
+    id: string
 }
 
 export default RentalCarCardProps

@@ -22,7 +22,7 @@ import GuideCardProps from '@/models/service/card/guide-card';
 
 const GuideCard = (service: GuideCardProps) => {
     const router = useRouter();
-    const duration = formatDurationHHMM(service.duration);
+    // const duration = formatDurationHHMM(service.duration);
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5
                     hover:bg-dark-white hover:cursor-pointer"
@@ -49,10 +49,10 @@ const GuideCard = (service: GuideCardProps) => {
                     
                     <div className="inline-flex items-center gap-1">
                         <Tag text={service.type}/>
-                        <div className="inline-flex items-center gap-1 pl-1 text-dark-gray">
+                        {/* <div className="inline-flex items-center gap-1 pl-1 text-dark-gray">
                             <ClockIcon width='10'/>
                             <Caption>{duration}</Caption>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className="inline-flex items-center gap-[3px] mt-2">

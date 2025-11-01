@@ -14,10 +14,10 @@ import { Button, TextButton } from '@/components/buttons/buttons'
 import { useEffect, useState } from 'react';
 import { paths } from '@/config/paths.config'
 
-import ProfileIcon from '@/assets/icons/profile.svg'
-
 import CustomerIcon from '@/assets/icons/person.svg'
 import ProfilePic from '@/assets/icons/profile-filled.svg';
+import MaleIcon from '@/assets/icons/male.svg'
+import FemaleIcon from '@/assets/icons/female.svg'
 
 import DefaultLayout from '@/components/layout/default-layout';
 
@@ -69,80 +69,86 @@ export default function OtherProfile(){
         const data = res.data
         console.log(res.data)
 
-        const service = data.service?.map((s: any) => {
-          switch (data.role) {
-            // case 'user':
-            //   const trip: TripCardProps = {
-            //     name: '',
-            //     owner: {
-            //       user_id: '',
-            //       profile_pic: undefined,
-            //       first_name: '',
-            //       last_name: ''
-            //     },
-            //     rating: 0,
-            //     rating_count: 0,
-            //     location: '',
-            //     price: 0,
-            //     type: '',
-            //     pictures: [],
-            //     favorite: false,
-            //     rental_car_id: '',
-            //     ...s
-            //   };
-            //   return trip;
-            // }
-            case 'car_manager': {
-              const car: RentalCarCardProps = {
-                name: '',
-                owner: {
-                  user_id: '',
-                  profile_pic: undefined,
-                  first_name: '',
-                  last_name: ''
-                },
-                rating: 0,
-                rating_count: 0,
-                location: '',
-                price: 0,
-                type: '',
-                pictures: [],
-                favorite: false,
-                rental_car_id: '',
-                ...s
-              };
-              return car;
-            }
-            case 'guide':
-              const guide: GuideCardProps = {
-                name: '',
-                guider: {
-                  username: '',
-                  profile_pic: undefined,
-                  first_name: '',
-                  last_name: ''
-                },
-                duration: '',
-                rating: 0,
-                rating_count: 0,
-                location: '',
-                price: 0,
-                type: '',
-                pictures: [],
-                favorite: false,
-                id: '',
-                ...s
-              };
-              return guide;
-            default:
-              return s;
-          }
-        });
-
         setProfile(prev => ({
         ...prev,       // keep existing default values
-        ...res.data,   // overwrite only the fields present in res.data
-      }));
+        ...data,   // overwrite only the fields present in res.data
+        }));
+
+        if (data.role === 'guide') {
+          setProfile(prev => ({
+            ...prev,
+            service: data.service?.filter((s:any) => s.type === 'guide') // only keep guide services
+              .map((s:any) => ({
+                name: s.name,
+                guider: {
+                  user_id: id,
+                  profile_pic: prev.profileImg,
+                  first_name: prev.fname,
+                  last_name: prev.lname
+                },
+                rating: s.rating || 0,
+                rating_count: s.ratingCount || 0,
+                location: '',
+                price: 0,
+                type: '',
+                pictures: [s.serviceImg],
+                favorite: s.favorite,
+                id: s.id,
+                ...s
+              } as GuideCardProps))
+          }));
+        }
+        
+        else if (data.role === 'car-manager') {
+          setProfile(prev => ({
+            ...prev,
+            service: data.service?.filter((s:any) => s.type === 'car_rental_center') // only keep guide services
+              .map((s:any) => ({
+                name: s.name,
+                owner: {
+                  user_id: id,
+                  profile_pic: prev.profileImg,
+                  first_name: prev.fname,
+                  last_name: prev.lname
+                },
+                rating: s.rating || 0,
+                rating_count: s.ratingCount || 0,
+                location: '',
+                price: s.rating || 0,
+                type: '',
+                pictures: [s.serviceImg],
+                favorite: s.favorite,
+                id: s.id,
+                ...s
+              } as RentalCarCardProps))
+          }));
+        }
+
+        else if (data.role === 'user') {
+          setProfile(prev => ({
+            ...prev,
+            service: data.service?.filter((s:any) => s.type === 'guide') // only keep guide services
+              .map((s:any) => ({
+                name: s.name,
+                owner: {
+                  user_id: id,
+                  profile_pic: prev.profileImg,
+                  first_name: prev.fname,
+                  last_name: prev.lname
+                },
+                rating: s.rating || 0,
+                rating_count: s.ratingCount || 0,
+                location: '',
+                price: 0,
+                type: '',
+                pictures: [s.serviceImg],
+                favorite: s.favorite,
+                id: s.id,
+                ...s
+              } as RentalCarCardProps))
+          }));
+        }
+
     } catch (err) {
         console.error("Failed to fetch profile", err);
     }
@@ -150,11 +156,6 @@ export default function OtherProfile(){
 
     getProfile();
 }, []);
-
-  switch (profile.role){
-    case 'user':
-      
-  }
 
 //   {
 //     // "username": "aaasss@example.com",
@@ -201,8 +202,10 @@ export default function OtherProfile(){
             }
           </div>
           <div className="min-w-0 flex flex-col justify-center gap-0.5 ">
-            <Title className='px-0.5 flex items-center truncate overflow-hidden whitespace-nowrap'>
+            <Title className='px-0.5 gap-2 flex items-center truncate overflow-hidden whitespace-nowrap'>
               {profile.fname} {profile.lname}
+              {profile.gender === "female" && <FemaleIcon className='w-4 text-pink-400' />}
+              {profile.gender === "male" && <MaleIcon className='w-4 text-dark-blue'/>}
             </Title>
             <div className="flex gap-0.5">
               <Body className='text-gray inline-flex'>@</Body>
@@ -210,7 +213,11 @@ export default function OtherProfile(){
             </div>
             <div className="inline-flex items-center gap-0.5">
               <CustomerIcon width='16'/>
-              <Body className='text-dark-gray inline-flex'>{profile.role}</Body>
+              <Body className='text-dark-gray inline-flex'>
+                {profile.role === "user" && "Customer"}
+                {profile.role === "car-manager" && "Car Rental"}
+                {profile.role === "guide" && "Guide"}
+              </Body>
             </div>
           </div>
         </div>
@@ -232,13 +239,13 @@ export default function OtherProfile(){
       <div className="px-7 py-5 rounded-2xl bg-white shadow-[var(--light-shadow)] flex flex-col justify-center gap-4">
         <Subtitle>
           { profile.role === 'user' && 'Planned Trips'}
-          { profile.role === 'car_manager' && 'Rental Cars'}
+          { profile.role === 'car-manager' && 'Rental Cars'}
           { profile.role === 'guide' && 'Traveling Guides'}
           </Subtitle>
         <div className='flex flex-wrap'>
           {profile.service?.map((service, idx) => {
             // if (profile.role === 'user') return <TripCard key={idx} {...service} />;
-            if (profile.role === 'car_manager') return <RentalCarCard key={idx} {...service as RentalCarCardProps} />;
+            if (profile.role === 'car-manager') return <RentalCarCard key={idx} {...service as RentalCarCardProps} />;
             if (profile.role === 'guide') return <GuideCard key={idx} {...service as GuideCardProps} />;
             return null; // fallback
           })}

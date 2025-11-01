@@ -7,6 +7,8 @@ import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { hotels } from '@/mocks/hotels';
 
+
+
 export default function AllHotel() {
   return (
     <DefaultPage current_tab='hotel'>

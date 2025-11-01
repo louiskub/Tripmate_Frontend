@@ -23,7 +23,7 @@ const rental_cars: RentalCarCardProps[] =
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",
         ],
         favorite: false,
-        rental_car_id: '1'
+        id: '1'
     },
     {
         name: 'Cheap Car for Rent',
@@ -44,7 +44,7 @@ const rental_cars: RentalCarCardProps[] =
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",
         ],
         favorite: false,
-        rental_car_id: '1'
+        id: '1'
     },
 ]
 
