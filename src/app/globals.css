@@ -103,7 +103,7 @@ button {
   transition: all 0.2s ease-in-out;
 }
 
-button:hover {
+button:hover:not(.default-btn) {
   cursor: pointer;
   scale: 1.03;
   @apply shadow-sm;
@@ -140,4 +140,17 @@ button:hover {
 
 .custom-scroll-bar::-webkit-scrollbar-thumb:hover {
   background-color: var(--color-dark-blue); /* darker on hover */
+}
+
+.rdrDefinedRangesWrapper {
+  display: none !important;
+}
+
+.rdrDateDisplayWrapper {
+  display: none !important;
+}
+
+/* make the calendar take full width */
+.rdrCalendarWrapper {
+  width: 100% !important;
 }

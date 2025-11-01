@@ -8,9 +8,9 @@ import AdminNavbar from './default-nav-variants/admin-navbar'
 import GuestNavbar from './default-nav-variants/guest-navbar'
 import UserNavbar from './default-nav-variants/user-navbar'
 import BookNavbar from './default-nav-variants/book-navbar'
+import { isAuthenticated } from '@/utils/service/authen'
 
 const Navbar = () => {
-  const isAuthenticated: boolean = false;
   const pathname = usePathname()
 
   switch (pathname) {

@@ -7,10 +7,12 @@ import { useBoolean } from '@/hooks/use-boolean';
 
 type FavoriteButtonProps = {
     favorite: boolean
-    hotel_id: string
+    id: string
+    type: "hotel" | "restaurant" | "rental_car" | "guide" | "attraction"
+    large?: boolean
 }
 
-const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
+const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps) => {
     const isFavorite = useBoolean(favorite)
     const [loading, setLoading] = useState(false);
     const [animate, setAnimate] = useState(false);
@@ -19,11 +21,11 @@ const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
         setAnimate(false);
     };
 
-    async function handleFavoriteHotel() {
+    async function handleFavorite() {
         if (loading) return;
         setLoading(true)
         try {
-        const response = await fetch(`/api/hotels/${hotel_id}/favorite`, {
+        const response = await fetch(`/api/hotels/${id}/favorite`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ favorite: !isFavorite }),
@@ -42,15 +44,17 @@ const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
 
     return (
         <Button 
-            onClick={handleFavoriteHotel}
-            className='absolute z-10 right-1.5 top-1.5 w-6 bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full'>
+            onClick={handleFavorite}
+            className={`absolute top-0 left-0 z-10 ${large ? 'w-[35px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
+        >
             { isFavorite.value ? 
                 <HeartFilledIcon 
-                    className={`${ animate ? 'filled-heart' : ''}`} 
-                    width='12'
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`}
+                    width = {large ? '18' : '12'} 
                     onAnimationEnd={handleAnimationEnd} />:
-                <HeartIcon className={`${ animate ? 'filled-heart' : ''}`} 
-                    width='12'
+                <HeartIcon 
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`} 
+                    width = {large ? '18' : '12'}
                     onAnimationEnd={handleAnimationEnd} />
             }
         </Button>

@@ -6,11 +6,11 @@ import ServiceNavTab from '@/components/services/tabs/service-nav-tab'
 import { useState, useEffect, ReactNode } from 'react';
 
 import {Title, Caption, SubBody, Subtitle, Body, ButtonText, SmallTag} from '@/components/text-styles/textStyles'
-import ServicePictures from '@/components/services/other/service-pictures'
+import ServicePictures, { PicturePopup } from '@/components/services/other/service-pictures'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
-import { RatingOverview, Rating } from '@/components/services/other/rating';
+import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
 import MiniMap from '@/components/other/mini-map';
 import LargeMap from '@/components/other/large-map';
 import RoomDetail from '@/components/services/other/room-detail'
@@ -26,8 +26,9 @@ import ImageSlide from '@/components/services/other/image-slide';
 
 import { restaurantRatingMeta } from '@/utils/service/rating';
 
-export default function AllHotel() {
+export default function RestaurantDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
+  const [PicturePopUp, setPicturePopUp] = useState(false);
 
 type tab = {
     label: string
@@ -64,9 +65,9 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
-  const restaurant = restaurant_detail
+  const service = restaurant_detail
 
-  const first_comment: string | undefined = restaurant.review[0]?.comment;
+  const first_comment: string | undefined = service.review[0]?.comment;
 
   const handleBookRestaurant = () => {
   
@@ -78,20 +79,29 @@ type tab = {
       <ServiceNavTab current_tab={currentTab} onSelect={setCurrentTab} tabs={tabs}/>
       <div className="p-2 flex justify-between items-center">
         <Body> 
-          {`Restaurant > ${restaurant.location} > `} 
-          <TextButton className='text-dark-blue'>{restaurant.name}</TextButton>
+          {`Restaurant > ${service.location} > `} 
+          <TextButton className='text-dark-blue'>{service.name}</TextButton>
         </Body>
-        <ButtonText className='text-dark-blue font-medium'>See all restaurants in {restaurant.location}</ButtonText>
+        <ButtonText className='text-dark-blue font-medium'>See all restaurants in {service.location}</ButtonText>
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
-        <ServicePictures pictures={restaurant.pictures}>
-          <FavoriteButton favorite={false} hotel_id={'1'}/>
+        <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
+          <FavoriteButton favorite={false} id={'1'} type='restaurant' large/>
         </ServicePictures>
+        {PicturePopUp && 
+          <PicturePopup pictures={service.pictures}
+            name={service.name}
+            Close={() => setPicturePopUp(false)}>
+            <RatingPopup 
+            rating={service.rating}
+            rating_count={service.rating_count}
+            reviews={service.review}/>
+        </PicturePopup>}
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
-            <Title className=''>{restaurant.name}</Title>
+            <Title className=''>{service.name}</Title>
             <div>
-              <Tag text={restaurant.tag} />
+              <Tag text={service.tag} />
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
                 <Button
@@ -105,10 +115,10 @@ type tab = {
           <div className='grid grid-cols-[1fr_auto] grid-rows-[1fr_auto] p-2.5 gap-2.5'>
             <RatingOverview 
               className=' row-start-1 col-start-1' 
-              rating={restaurant.rating} 
-              rating_count={restaurant.rating_count} 
-              subtopic_ratings={restaurant.subtopic_ratings} 
-              comment={first_comment} 
+              rating={service.rating} 
+              rating_count={service.rating_count} 
+              subtopic_ratings={service.subtopic_ratings} 
+              comment={first_comment}
               rating_meta={restaurantRatingMeta}
             />
 
@@ -116,7 +126,7 @@ type tab = {
                 <MiniMap location_link=''/>
                 <ul>
                   {
-                    restaurant.nearby_locations.slice(0, 4).map((location,idx) => (
+                    service.nearby_locations.slice(0, 4).map((location,idx) => (
                       <li key={idx} className='flex gap-1.5'>
                         <LocationIcon width='12'/>
                         <Caption>{location}</Caption>
@@ -129,7 +139,7 @@ type tab = {
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-2 col-span-2'>
               <ButtonText className='text-dark-blue'>Description</ButtonText>
-              <Caption>{restaurant.description}</Caption>
+              <Caption>{service.description || 'no description for this rentaurant'}</Caption>
             </div>
 
           </div>
@@ -139,17 +149,17 @@ type tab = {
       <section id='menu' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Menu</Title>
         <div className='flex justify-center px-4 py-2 gap-y-6'>
-          <ImageSlide className='w-3/4 aspect-5/3' pictures={restaurant.menu} />
+          <ImageSlide className='w-3/4 aspect-5/3' pictures={service.menu} />
         </div>
       </section>
 
       <section id='review' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className=' py-1.5 px-4'>Reviews</Title>
         <Rating 
-          rating={restaurant.rating}
-          rating_count={restaurant.rating_count}
-          subtopic_ratings={restaurant.subtopic_ratings}
-          reviews={restaurant.review} 
+          rating={service.rating}
+          rating_count={service.rating_count}
+          subtopic_ratings={service.subtopic_ratings}
+          reviews={service.review} 
           rating_meta={restaurantRatingMeta}/>
       </section>
 
@@ -163,7 +173,7 @@ type tab = {
           <div className='basis-2/5'>
             <ul className='grid grid-cols-2 w-full py-2 gap-2.5'>
               {
-                restaurant.nearby_locations.map((location,idx) => (
+                service.nearby_locations.map((location,idx) => (
                   <li key={idx} className='flex gap-1.5'>
                     <LocationIcon width='12'/>
                     <Caption>{location}</Caption>

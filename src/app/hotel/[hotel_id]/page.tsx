@@ -10,7 +10,7 @@ import ServicePictures from '@/components/services/other/service-pictures'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
-import { RatingOverview, Rating } from '@/components/services/other/rating';
+import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
 import MiniMap from '@/components/other/mini-map';
 import LargeMap from '@/components/other/large-map';
 import RoomDetail from '@/components/services/other/room-detail'
@@ -23,9 +23,11 @@ import ClockIcon from '@/assets/icons/Clock.svg'
 
 import { mockHotel1 } from '@/mocks/hotels'
 import { hotelRatingMeta } from '@/utils/service/rating';
+import { PicturePopup } from '@/components/services/other/service-pictures';
 
-export default function AllHotel() {
+export default function HotelDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
+  const [PicturePopUp, setPicturePopUp] = useState(false);
 
 type tab = {
     label: string
@@ -103,18 +105,15 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
-  const hotel = mockHotel1
+  const service = mockHotel1
 
-  const rooms = hotel.rooms;
+  const rooms = service.rooms;
 
   const starting_price = Math.min(
     ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
   );
 
-  const first_comment: string | undefined = hotel.review[0]?.comment;
-
-
-  console.log(starting_price)
+  const first_comment: string | undefined = service.review[0]?.comment;
 
   return (
     <DefaultPage current_tab='hotel'>
@@ -122,22 +121,33 @@ type tab = {
       <ServiceNavTab current_tab={currentTab} onSelect={setCurrentTab} tabs={tabs}/>
       <div className="p-2 flex justify-between items-center">
         <Body> 
-          {`Hotel > ${hotel.location} > `} 
-          <TextButton className='text-dark-blue'>{hotel.name}</TextButton>
+          {`Hotel > ${service.location} > `} 
+          <TextButton className='text-dark-blue'>{service.name}</TextButton>
         </Body>
-        <ButtonText className='text-dark-blue font-medium'>See all hotels in {hotel.location}</ButtonText>
+        <ButtonText className='text-dark-blue font-medium'>See all hotels in {service.location}</ButtonText>
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
-        <ServicePictures pictures={hotel.pictures}>
-          <FavoriteButton favorite={false} hotel_id={'1'}/>
+        <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
+          <FavoriteButton favorite={false} id={'1'} type='hotel' large/>
         </ServicePictures>
-        <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
+        {PicturePopUp && 
+          <PicturePopup pictures={service.pictures}
+            name={service.name}
+            Close={() => setPicturePopUp(false)}>
+            <RatingPopup 
+            rating={service.rating}
+            rating_count={service.rating_count}
+            subtopic_ratings={service.subtopic_ratings}
+            reviews={service.review}
+            rating_meta={hotelRatingMeta} />
+        </PicturePopup>}
+        <div className='rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
-            <Title className=''>{hotel.name}</Title>
-              <div className='text-dark-blue  items-center flex gap-1'>
-                <Tag className='border border-light-blue bg-pale-blue' text={hotel.type} />
-                <span className='flex'>
-                    {Array.from({ length: hotel.star }).map((_, i) => (
+            <Title className=''>{service.name}</Title>
+              <div className='text-dark-blue items-center flex gap-1'>
+                <Tag className='border border-light-blue bg-pale-blue self-center!' text={service.type} />
+                <span className='flex items-center'>
+                    {Array.from({ length: service.star }).map((_, i) => (
                         <StarIcon key={i} width="14" />
                     ))}
                 </span>
@@ -149,8 +159,10 @@ type tab = {
                     <Title className='text-dark-blue'>{starting_price}</Title>
                 </span>
                 <Button
+                  as='button'
+                  onClick={() => document.getElementById('room')?.scrollIntoView({ behavior: "smooth", block: "center" })}
                   text='Select Rooms'
-                  className='bg-dark-blue rounded-[10px] px-2.5! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
+                  className='bg-dark-blue rounded-[10px] !px-2.5 text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
                 />
               </div>
           </header>
@@ -160,7 +172,7 @@ type tab = {
               <ButtonText className='text-dark-blue'>Facilities</ButtonText>
               <ul className='grid grid-cols-2 gap-2 mt-2'>
               {facilitiesMeta.map((meta) => {
-                const items = hotel.facilities[meta.id].slice(0,2);
+                const items = service.facilities[meta.id].slice(0,2);
                 if (!items) return null;
 
                 return items.map((item) => (
@@ -174,9 +186,9 @@ type tab = {
 
             <RatingOverview 
               className='col-start-2' 
-              rating={hotel.rating} 
-              rating_count={hotel.rating_count} 
-              subtopic_ratings={hotel.subtopic_ratings} 
+              rating={service.rating} 
+              rating_count={service.rating_count} 
+              subtopic_ratings={service.subtopic_ratings} 
               comment={first_comment} 
               rating_meta={hotelRatingMeta}
             />
@@ -185,7 +197,7 @@ type tab = {
                 <MiniMap location_link=''/>
                 <ul>
                   {
-                    hotel.nearby_locations.slice(0, 4).map((location,idx) => (
+                    service.nearby_locations.slice(0, 4).map((location,idx) => (
                       <li key={idx} className='flex gap-1.5'>
                         <LocationIcon width='12'/>
                         <Caption>{location}</Caption>
@@ -198,7 +210,7 @@ type tab = {
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-2 col-span-3'>
               <ButtonText className='text-dark-blue'>Description</ButtonText>
-              <Caption>{hotel.description}</Caption>
+              <Caption>{service.description}</Caption>
             </div>
 
           </div>
@@ -208,10 +220,11 @@ type tab = {
       <section id='room' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Rooms</Title>
         {
-          hotel.rooms.map((room) => (
+          service.rooms.map((room) => (
             <RoomDetail 
               key={room.name}
-              room={room}/>
+              room={room}
+            />
           ))
         }
       </section>
@@ -221,7 +234,7 @@ type tab = {
         <div className='flex flex-wrap px-4 py-2 gap-y-6'>
           {
             facilitiesMeta.map((meta) => {
-              const items = hotel.facilities[meta.id];
+              const items = service.facilities[meta.id];
               if (!items || items.length === 0) return null;
               return (
                 <div key={meta.id}  className="flex flex-col items-start basis-1/3 gap-2">
@@ -246,10 +259,10 @@ type tab = {
       <section id='review' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className=' py-1.5 px-4'>Reviews</Title>
         <Rating 
-          rating={hotel.rating}
-          rating_count={hotel.rating_count}
-          subtopic_ratings={hotel.subtopic_ratings}
-          reviews={hotel.review}
+          rating={service.rating}
+          rating_count={service.rating_count}
+          subtopic_ratings={service.subtopic_ratings}
+          reviews={service.review}
           rating_meta={hotelRatingMeta} />
       </section>
 
@@ -263,7 +276,7 @@ type tab = {
           <div className='basis-2/5'>
             <ul className='grid grid-cols-2 w-full py-2 gap-2.5'>
               {
-                hotel.nearby_locations.map((location,idx) => (
+                service.nearby_locations.map((location,idx) => (
                   <li key={idx} className='flex gap-1.5'>
                     <LocationIcon width='12'/>
                     <Caption>{location}</Caption>
@@ -286,9 +299,9 @@ type tab = {
             <SubBody className='font-semibold col-start-2'>Check-in/Check-out</SubBody>
             <span className='col-start-2 flex  gap-1.5'>
               <SubBody className='text-custom-gray'>Check-in:</SubBody>
-              <SubBody className='font-semibold'>{hotel.policy.check_in}</SubBody>
+              <SubBody className='font-semibold'>{service.policy.check_in}</SubBody>
               <SubBody className='text-custom-gray'>Check-out:</SubBody>
-              <SubBody className='font-semibold'>{hotel.policy.check_out}</SubBody>
+              <SubBody className='font-semibold'>{service.policy.check_out}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1.5'>
@@ -296,21 +309,21 @@ type tab = {
             <SubBody className='font-semibold col-start-2'>Breakfast</SubBody>
             <span className='col-start-2 flex gap-1'>
               <SubBody className='text-custom-gray'>Opening hours:</SubBody>
-              <SubBody className='font-semibold'>{hotel.policy.breakfast}</SubBody>
+              <SubBody className='font-semibold'>{service.policy.breakfast}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1'>
             <QuestionIcon width='16' className='text-custom-gray self-center'/>
             <span className='col-start-2 flex gap-1.5'>
               <SubBody className='font-semibold'>Pets</SubBody>
-              <SubBody className='text-custom-gray'>{hotel.policy.pet_allow ? 'allowed' : 'not allowed'}</SubBody>
+              <SubBody className='text-custom-gray'>{service.policy.pet_allow ? 'allowed' : 'not allowed'}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1'>
             <QuestionIcon width='16' className='text-custom-gray self-center'/>
             <span className='col-start-2 flex gap-1.5'>
               <SubBody className='font-semibold'>Contact</SubBody>
-              <SubBody className='text-custom-gray'>{hotel.policy.contact}</SubBody>
+              <SubBody className='text-custom-gray'>{service.policy.contact}</SubBody>
             </span>
           </div>
         </div>

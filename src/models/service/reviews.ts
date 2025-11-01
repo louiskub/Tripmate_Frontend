@@ -1,4 +1,4 @@
-type Reviews = {
+type Review = {
     user: string
     user_profile?: string
     rating: number
@@ -7,4 +7,4 @@ type Reviews = {
     date: string
 }
 
-export default Reviews
+export default Review
