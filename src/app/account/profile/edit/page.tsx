@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { paths } from '@/config/paths.config'
 import ProfilePageLayout from '@/components/layout/profile-page-layout';
 import EditIcon from '@/assets/icons/edit.svg'
+import ProfilePic from '@/assets/icons/profile-filled.svg';
 
 type ProfileData = {
     username: string;
@@ -31,8 +32,8 @@ export default function EditProfile(profile: ProfileData) {
     });
 
     const handleSaveProfile = () => {
-      console.log("Saved!", profileData);
-      window.location.href = paths.account.profile;
+        console.log("Saved!", profileData);
+        window.location.href = paths.account.profile;
     }
 
     return (
@@ -60,14 +61,20 @@ export default function EditProfile(profile: ProfileData) {
         
         <div className="flex flex-col items-center gap-1">
             <div className="w-28 h-28 relative">
-                <img className="w-28 h-28 rounded-full border border-dark-gray" src={profile.profile_pic || "https://placehold.co/120x120"} />
+            {profile.profile_pic ? 
+                <img className="w-28 h-28 rounded-full border border-dark-gray" 
+                    src={profile.profile_pic} 
+                />
+                :
+                <ProfilePic />
+            }                
                 <label className='flex items-center justify-center cursor-pointer absolute border hover:bg-custom-black hover:text-custom-white !h-7 bottom-0 right-0 bg-dark-white aspect-square rounded-full'>
-                  <EditIcon width='16'/>
+                    <EditIcon width='16'/>
                 <FieldInput
-                  type='file'
-                  className='hidden'
-                  value={profileData.profile_pic}
-                  onChange={(e) => setProfileData((f) => ({ ...f, profile_pic: e.target.value }))}
+                    type='file'
+                    className='hidden'
+                    value={profileData.profile_pic}
+                    onChange={(e) => setProfileData((f) => ({ ...f, profile_pic: e.target.value }))}
                 >
                 </FieldInput>
                 </label>
