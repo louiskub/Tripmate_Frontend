@@ -8,6 +8,12 @@ import AddNewCarModal from "@/components/car-manage/AddNewCarModal"
 import CarDetailModal from "@/components/car-manage/CarDetailModal"
 import ManageCarNav from "@/components/car-manage/rentalcars/ManageCarNav"
 
+import { endpoints } from "@/config/endpoints.config"
+import { getCookieFromName } from "@/utils/service/cookie"
+import { uploadBlobUrls } from "@/utils/service/upload"
+import axios from "axios"
+import { img } from 'framer-motion/client';
+
 const initialCars = [
   {
     name: "Toyota Yaris Ativ",
@@ -128,6 +134,22 @@ const initialCars = [
   },
 ]
 
+const uploadImg = async (img: Array, id: int) => {
+    console.log("img", typeof(img[0]), img)
+        
+    const formdata = await uploadBlobUrls(img)
+    const res = await axios.post(endpoints.serviceManage.car.uploadImg(id), formdata, {
+      headers: {
+        'Authorization': `Bearer ${getCookieFromName("token")}`,
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    console.log("Upload Img success:", res.data)
+    console.log("Slice", res.data.pictures.slice(-img.length))
+    return res.data.pictures.slice(-img.length)
+}
+
+
 export default function RentalCarsPage() {
   const [cars, setCars] = useState(initialCars)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -135,7 +157,20 @@ export default function RentalCarsPage() {
   const [selectedCar, setSelectedCar] = useState<any>(null)
   const [activeFilter, setActiveFilter] = useState("total")
 
-  const handleCreateCar = (data: any) => {
+  // call api in In Component
+  const handleCreateCar = async (data: any) => {
+    console.log("click create")
+    const img = data.pictures
+    data.pictures = []
+    const res = await axios.post(endpoints.serviceManage.car.addCar, data, {
+      headers: {
+        'Authorization': `Bearer ${getCookieFromName("token")}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log("create success", res)
+
+    data.pictures = await uploadImg(img, data.id)
     console.log("Data from AddNewCarModal:", data)
     const newCar = {
       ...data,
@@ -159,16 +194,47 @@ export default function RentalCarsPage() {
   }
 
   const handleViewDetails = (car: any) => {
+    console.log("open", car)
     setSelectedCar(car)
     setIsDetailModalOpen(true)
   }
 
-  const handleSaveCar = (updatedCar: any) => {
+  const handleSaveCar = async (updatedCar: any) => {
+    // updatedCar.
+    const img = updatedCar.pictures
+    updatedCar.pictures = await uploadImg(img, updatedCar.id)
+
+    const res = await axios.patch(endpoints.serviceManage.car.editCar(updatedCar.id), updatedCar, {
+      headers: {
+        'Authorization': `Bearer ${getCookieFromName("token")}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log("Update success:", res.data)
+
+    // upload Img section
+    
+    // const img = updatedCar.pictures
+    // console.log("img", typeof(img[0]), img)
+        
+    // const formdata = await uploadBlobUrls(img)
+    // res = await axios.post(endpoints.serviceManage.car.uploadImg(updatedCar.id), formdata, {
+    //   headers: {
+    //     'Authorization': `Bearer ${getCookieFromName("token")}`,
+    //     "Content-Type": "multipart/form-data",
+    //   },
+    // })
+    // console.log("Upload Img success:", res.data)
+    
+    // const 
+    // console.log(updatedCar)
+    // console.log("update success", res)
     setCars((prevCars) => prevCars.map((car) => (car.id === updatedCar.id ? updatedCar : car)))
   }
 
-  const handleRemoveCar = (carToRemove: any) => {
-    setCars((prevCars) => prevCars.filter((c) => c.id !== carToRemove.id))
+  const handleRemoveCar = async (car: any) => {
+    const res = await axios.delete(endpoints.serviceManage.car.deleteCar(car.id))
+    setCars((prevCars) => prevCars.filter((c) => c.id !== car.id))
   }
 
   const filteredCars = cars.filter((car) => {

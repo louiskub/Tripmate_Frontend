@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { X, UploadCloud, ChevronLeft, ChevronRight } from "lucide-react"
 import type React from "react"
-
+import { endpoints } from "@/config/endpoints.config"
+import { getCookieFromName } from "@/utils/service/cookie"
+import axios from "axios"
 // --- Component ย่อยสำหรับ Input Field ---
 const FormField = ({ label, id, type = "text", placeholder, value, onChange, required = false }) => (
   <div className="w-full">
@@ -63,7 +65,7 @@ export default function AddNewCarModal({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     name: "",
     id: "",
-    crcId: "",
+    // crcId: "",
     model: "",
     description: "",
     seats: "",
@@ -168,12 +170,12 @@ export default function AddNewCarModal({ isOpen, onClose, onSubmit }) {
     onClose()
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Convert string values to appropriate types and format features array
     const formattedData = {
       name: formData.name,
       id: formData.id,
-      crcId: formData.crcId,
+      crcId: localStorage.getItem("serviceId"),
       model: formData.model,
       description: formData.description,
       seats: Number.parseInt(formData.seats) || 0,
@@ -220,14 +222,6 @@ export default function AddNewCarModal({ isOpen, onClose, onSubmit }) {
                 id="id"
                 placeholder="e.g., ดด5678"
                 value={formData.id}
-                onChange={handleChange}
-                required
-              />
-              <FormField
-                label="CRC ID"
-                id="crcId"
-                placeholder="e.g., svc-003"
-                value={formData.crcId}
                 onChange={handleChange}
                 required
               />

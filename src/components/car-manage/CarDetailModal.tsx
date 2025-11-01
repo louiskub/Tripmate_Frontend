@@ -182,7 +182,29 @@ export default function CarDetailModal({ isOpen, onClose, car, onSave, onRemove 
   }
 
   const handleSave = () => {
-    onSave(editedCar)
+    const formattedData = {
+      name: editedCar.name,
+      id: editedCar.id,
+      crcId: localStorage.getItem("serviceId"),
+      model: editedCar.model,
+      description: editedCar.description,
+      seats: Number.parseInt(editedCar.seats) || 0,
+      pricePerDay: Number.parseFloat(editedCar.pricePerDay) || 0,
+      pricePerHour: Number.parseFloat(editedCar.pricePerHour) || 0,
+      brand: editedCar.brand,
+      currency: editedCar.currency,
+      deposit: Number.parseFloat(editedCar.deposit) || 0,
+      doors: Number.parseInt(editedCar.doors) || 0,
+      features: editedCar.features,
+      fuelType: editedCar.fuelType,
+      luggage: Number.parseInt(editedCar.luggage) || 0,
+      mileageLimitKm: Number.parseInt(editedCar.mileageLimitKm) || 0,
+      pictures: editedCar.pictures,
+      insurance: editedCar.insurance,
+      transmission: editedCar.transmission,
+      year: Number.parseInt(editedCar.year) || new Date().getFullYear(),
+    }
+    onSave(formattedData)
     setIsEditing(false)
     onClose()
   }
@@ -359,14 +381,7 @@ export default function CarDetailModal({ isOpen, onClose, car, onSave, onRemove 
                 name="id"
                 value={editedCar?.id || ""}
                 onChange={handleChange}
-                isEditing={isEditing}
-              />
-              <EditableField
-                label="CRC ID"
-                name="crcId"
-                value={editedCar?.crcId || ""}
-                onChange={handleChange}
-                isEditing={isEditing}
+                isEditing={0}
               />
               {isEditing ? (
                 <div>
