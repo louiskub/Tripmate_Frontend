@@ -15,6 +15,8 @@ import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
 
+import { ConfirmDialog } from '@/components/other/confirm';
+
 export default function UserNavbar() {
     const showDropdown = useBoolean(false);
     return (
@@ -69,6 +71,11 @@ type ProfileDropdownProps = {
 }
 
 export const ProfileDropdown = ({first_name = "first", last_name = "last", username = "username", profile_pic = "https://placehold.co/36x36"}: ProfileDropdownProps) => {
+    const clickLogout = () => {
+        document.cookie = "token=; max-age=0; path=/";
+        window.location.href = "/login"; // redirect ไปหน้า login
+    }
+
     return (
         <div className='w-[280px] rounded-xl shadow-[var(--boxshadow-lifted)] top-12 right-7.5 self-stretch bg-custom-white border border-pale-blue flex flex-col gap-2 absolute'>
             <div className="self-stretch h-15 px-2.5 border-b border-light-gray inline-flex justify-start items-center gap-1.5">
@@ -112,7 +119,9 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
                 </PageOptionDropdown>
             </div>
             <div>
-                <PageOptionDropdown text='Log out'href='' className='text-red hover:bg-dark-whit h-10 hover:text-red hover:bg-dark-white'>
+                <PageOptionDropdown 
+                    onclick={() => {clickLogout()}}
+                    text='Log out'href='' className='text-red hover:bg-dark-whit h-10 hover:text-red hover:bg-dark-white'>
                     <LogOutIcon />
                 </PageOptionDropdown>
             </div>

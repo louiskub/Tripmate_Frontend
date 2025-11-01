@@ -4,12 +4,11 @@ import Navbar from '@/components/navbar/navbar';
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
 import { Button, TextButton } from '@/components/buttons/buttons'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { paths } from '@/config/paths.config'
 import { endpoints } from '@/config/endpoints.config';
 import { useRouter } from "next/navigation"
 import axios from "axios";
-
 
 export default function LoginPage() {
     const [username, setUsername] = useState("")
@@ -26,6 +25,19 @@ export default function LoginPage() {
             const token = response.data.access_token;
 
             document.cookie = `token=${token}; max-age=3600; path=/`;
+            
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/"); // convert base64url → base64
+            const jsonPayload = Buffer.from(base64, "base64").toString("utf8");
+            const data = JSON.parse(jsonPayload);
+            
+            if (data.userRole == "hotel-manager")
+                localStorage.setItem("userRole", "hotel")
+            else if (data.userRole == "car-manager")
+                localStorage.setItem("userRole", "car")
+            else
+                localStorage.setItem("userRole", data.userRole)
+            
             router.push(paths.home)
         } catch (error: any) {
             console.error("Login failed:", error.response?.data || error.message);
