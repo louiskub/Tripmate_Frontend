@@ -1,19 +1,22 @@
-// ในไฟล์ app/trip/[id]/page.tsx
+// app/trip/[id]/page.tsx
+import TripViewer from "./TripViewer"
+import type { TripData } from "./trip.types"
+import DefaultLayout from "@/components/layout/default-layout";
 
-import TripViewer, { TripData } from "./trip"; // ปรับ Path ให้ถูกต้อง
-// import { Hotel, MapPin, UserCircle } from "lucide-react"; // ต้อง Import ไอคอนที่ใช้ใน Data
 
-// --- ฟังก์ชันจำลองการดึงข้อมูล ---
+// --- ตัวอย่างดึงจริง ---
+// async function fetchTrip(id: string): Promise<TripData> {
+//   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/trip/${id}`, { cache: "no-store" })
+//   if (!res.ok) throw new Error("Failed to fetch trip")
+//   const data = (await res.json()) as TripData
+//   return data
+// }
+
+// --- Mock (JSON-safe) ---
 async function getTripData(id: string): Promise<TripData> {
-  // ในโลกจริง:
-  // const response = await fetch(`https://api.yoursite.com/trip/${id}`);
-  // const data = await response.json();
-  // return data;
-
-  // --- ข้อมูล Mockup สำหรับการทดสอบ ---
-  const mockTrip: TripData = {
-    id: id,
-    title: "Trip to Pattaya (View Mode)",
+  return {
+    id,
+    title: "Trip to Pattaya",
     isPublic: true,
     startDate: "2025-10-26T00:00:00.000Z",
     endDate: "2025-10-28T00:00:00.000Z",
@@ -34,14 +37,14 @@ async function getTripData(id: string): Promise<TripData> {
           {
             time: "09.00",
             title: "เดินทางถึงที่พัก",
-            chip: {label: "Grand Palace Hotel", lat: 13.75, lng: 100.491 }
+            place: { label: "Grand Palace Hotel", lat: 13.75, lng: 100.491, iconKey: "mapPin" },
           },
           { time: "12.00", title: "ทานอาหารกลางวัน" },
-          { 
-            time: "14.00", 
-            title: "ชมปราสาทสัจธรรม", 
-            desc: "ดูสถาปัตยกรรมไม้", 
-            chip: {label: "Sanctuary of Truth", lat: 12.973, lng: 100.889 }
+          {
+            time: "14.00",
+            title: "ชมปราสาทสัจธรรม",
+            desc: "ดูสถาปัตยกรรมไม้",
+            place: { label: "Sanctuary of Truth", lat: 12.973, lng: 100.889, iconKey: "mapPin" },
           },
         ],
         services: [
@@ -52,8 +55,8 @@ async function getTripData(id: string): Promise<TripData> {
             details: "Deluxe Room - ฿3,500/night (2 guests)",
             price: "",
             quantity: 1,
-            icon: Hotel,
-            chipLabel: "Hotel",
+            serviceLabel: "Hotel",
+            iconKey: "hotel",
           },
         ],
       },
@@ -61,12 +64,7 @@ async function getTripData(id: string): Promise<TripData> {
         dayLabel: "Day 2",
         dateOffset: 1,
         events: [
-          { 
-            time: "10.00", 
-            title: "ทัวร์เกาะล้าน (กับไกด์)", 
-            desc: "ทัวร์ครึ่งวัน", 
-            // chip: { icon: MapPin, label: "Koh Larn", lat: 12.915, lng: 100.78 }
-          },
+          { time: "10.00", title: "ทัวร์เกาะล้าน (กับไกด์)", desc: "ทัวร์ครึ่งวัน" },
           { time: "16.30", title: "กลับที่พัก" },
         ],
         services: [
@@ -74,30 +72,23 @@ async function getTripData(id: string): Promise<TripData> {
             id: "g1-1",
             type: "guide",
             name: "John Smith",
-            details: "Tour: ทัวร์เกาะล้าน (ครึ่งวัน) - ฿5,000/ทริป (สูงสุด 4 คน)",
+            details: "ทัวร์เกาะล้าน (ครึ่งวัน) - ฿5,000/ทริป (สูงสุด 4 คน)",
             price: "",
             packageId: "g1t1",
-            icon: UserCircle,
-            chipLabel: "Guide",
+            serviceLabel: "Guide",
+            iconKey: "guide",
           },
         ],
       },
     ],
-  };
-  return mockTrip;
+  }
 }
 
-
-// --- นี่คือ Page Component ---
 export default async function TripViewPage({ params }: { params: { id: string } }) {
-  
-  // 1. ดึงข้อมูล
-  const trip = await getTripData(params.id);
-
-  // 2. ส่งข้อมูลเข้า Viewer
+  const trip = await getTripData(params.id)
   return (
-    <div className="p-4"> {/* Container หลักของหน้า */}
+    <DefaultLayout>
       <TripViewer trip={trip} />
-    </div>
-  );
+    </DefaultLayout>
+  )
 }

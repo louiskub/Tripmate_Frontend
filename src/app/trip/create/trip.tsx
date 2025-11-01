@@ -1,35 +1,10 @@
 "use client"
 
 import {
-  Calendar,
-  MapPin,
-  Eye,
-  Plus,
-  Trash2,
-  Edit3,
-  X,
-  AlertCircle,
-  Clock,
-  Copy,
-  Users,
-  Star,
-  Bed,
-  Check,
-  Hotel,
-  UserCircle,
-  Car,
-  Search,
-  ArrowLeft,
-  Wifi,
-  Coffee,
-  Tv,
-  Wind,
-  Shield,
-  Award,
-  Languages,
-  MapPinned,
-  Minus,
-  DollarSign, // <-- เพิ่ม 1
+  Calendar, MapPin, Trash, Plus, Trash2, Edit3, X, AlertCircle, 
+  Clock, Copy, Users, Star, Bed, Check, Hotel, UserCircle, Car,
+  Search, ArrowLeft, Wifi, Coffee, Tv, Wind, Shield, Award,
+  Languages, MapPinned, Minus, DollarSign,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type React from "react"
@@ -48,7 +23,7 @@ interface EventRowProps {
   time: string
   title: string
   desc?: string
-  chip?: {
+  place?: {
     icon: React.ComponentType<{ className?: string }>
     label: string
     lat?: number
@@ -64,7 +39,7 @@ interface ServiceItem {
   price: string // ใช้ 'price' สำหรับราคารายวัน (ไกด์, รถ)
   quantity?: number
   icon: React.ComponentType<{ className?: string }>
-  chipLabel: string
+  serviceLabel: string
   roomId?: string
   packageId?: string
 }
@@ -649,10 +624,10 @@ export default function TripEditor() {
     setForm({
       title: event.title,
       desc: event.desc || "",
-      location: event.chip?.label || "",
+      location: event.place?.label || "",
       time: event.time,
     })
-    setSelectedCoords(event.chip?.lat && event.chip?.lng ? { lat: event.chip.lat, lng: event.chip.lng } : null)
+    setSelectedCoords(event.place?.lat && event.place?.lng ? { lat: event.place.lat, lng: event.place.lng } : null)
     setEditTarget({ dayIndex, eventIndex })
     setError(null)
     setPopupOpen(true)
@@ -680,7 +655,7 @@ export default function TripEditor() {
       title: form.title,
       desc: form.desc,
       time: form.time,
-      chip: locationLabel
+      place: locationLabel
         ? { icon: MapPin, label: locationLabel, lat: selectedCoords?.lat, lng: selectedCoords?.lng }
         : undefined,
     }
@@ -752,20 +727,20 @@ export default function TripEditor() {
     if (activeDayForService === null) return
 
     let icon: React.ComponentType<{ className?: string }>
-    let chipLabel: string
+    let serviceLabel: string
     let type: "hotel" | "guide" | "car"
 
     if (activeServiceTab === "hotels") {
       icon = Hotel
-      chipLabel = "Hotel"
+      serviceLabel = "Hotel"
       type = "hotel"
     } else if (activeServiceTab === "guides") {
       icon = UserCircle
-      chipLabel = "Guide"
+      serviceLabel = "Guide"
       type = "guide"
     } else {
       icon = Car
-      chipLabel = "Car Rental"
+      serviceLabel = "Car Rental"
       type = "car"
     }
 
@@ -777,7 +752,7 @@ export default function TripEditor() {
       price: service.price || "", // ราคารายวัน (สำหรับไกด์/รถ)
       quantity,
       icon,
-      chipLabel,
+      serviceLabel,
       roomId,
       packageId, // <-- เพิ่ม field นี้
     }
@@ -841,13 +816,13 @@ export default function TripEditor() {
     const transformedDays = days.map((day, dayIndex) => {
       // แปลง Events
       const transformedEvents = day.events.map((event) => {
-        let simpleLabel = event.chip?.label || ""
-        if (event.chip?.label && (event.chip?.lat || event.chip?.lng)) {
-          const labelMatch = event.chip.label.match(/^(.*?)\s*\(/)
+        let simpleLabel = event.place?.label || ""
+        if (event.place?.label && (event.place?.lat || event.place?.lng)) {
+          const labelMatch = event.place.label.match(/^(.*?)\s*\(/)
           if (labelMatch && labelMatch[1]) {
             simpleLabel = labelMatch[1].trim()
           } else {
-            simpleLabel = event.chip.label
+            simpleLabel = event.place.label
           }
         }
 
@@ -856,11 +831,11 @@ export default function TripEditor() {
           desc: event.desc,
           time: event.time,
           location:
-            event.chip && event.chip.lat && event.chip.lng
+            event.place && event.place.lat && event.place.lng
               ? {
                   label: simpleLabel,
-                  lat: event.chip.lat,
-                  lng: event.chip.lng,
+                  lat: event.place.lat,
+                  lng: event.place.lng,
                 }
               : null,
         }
@@ -958,20 +933,20 @@ export default function TripEditor() {
             </span>
           </button>
 
-          <button className="h-8 px-2.5 rounded-[10px] outline outline-1 outline-custom-black inline-flex items-center gap-1">
+          {/* <button className="h-8 px-2.5 rounded-[10px] outline outline-1 outline-custom-black inline-flex items-center gap-1">
             <Copy className="w-4 h-4 text-custom-black" />
             <span className="text-custom-black text-sm font-semibold font-[Manrope] whitespace-nowrap">
               Copy from trips
             </span>
-          </button>
+          </button> */}
 
           <div className="flex items-center gap-2.5">
             <button
               onClick={handleDiscard}
-              className="h-8 px-2.5 rounded-[10px] outline outline-1 outline-dark-blue inline-flex items-center gap-1 hover:bg-red-50"
+              className="h-8 px-2.5 rounded-[10px] outline outline-1 outline-red-700 inline-flex items-center gap-1 hover:bg-red-50"
             >
-              <Eye className="w-4 h-4 text-dark-blue" />
-              <span className="text-dark-blue text-sm font-semibold font-[Manrope]">Discard</span>
+              <Trash className="w-4 h-4 text-red-700" />
+              <span className="text-red-700 text-sm font-semibold font-[Manrope]">Discard</span>
             </button>
 
             <button
@@ -1103,12 +1078,12 @@ export default function TripEditor() {
 
             {/* --- NEW BUDGET DISPLAY --- (เพิ่ม 6) */}
             <div className="w-full px-1 py-2.5 border-t border-neutral-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 <DollarSign className="w-5 h-5 text-custom-black" />
                 <span className="text-custom-black text-sm font-medium font-[Manrope]">Total Budget (Est.)</span>
               </div>
-              <span className="text-custom-black text-lg font-bold font-[Manrope]">
-                ฿{totalBudget.toLocaleString("en-US")}
+              <span className="text-blue-500 text-lg font-medium font-[Manrope]">
+                ฿ {totalBudget.toLocaleString("en-US")}
               </span>
             </div>
             {/* --- END NEW BUDGET DISPLAY --- */}
@@ -1179,9 +1154,9 @@ export default function TripEditor() {
                       <div className="text-custom-black text-base font-medium">{e.title}</div>
                       {e.desc && <div className="text-gray text-sm">{e.desc}</div>}
                     </div>
-                    {e.chip && (
+                    {e.place && (
                       <span className="px-1.5 py-0.5 rounded-lg outline outline-1 outline-light-blue flex items-center gap-1 text-sm">
-                        <e.chip.icon className="w-3.5 h-3.5" /> {e.chip.label}
+                        <e.place.icon className="w-3.5 h-3.5" /> {e.place.label}
                       </span>
                     )}
                     <div className="flex items-center gap-2 ml-2">
@@ -1231,7 +1206,7 @@ export default function TripEditor() {
                               </div>
                             </div>
                             <span className="px-2 py-1 rounded-lg bg-white text-xs font-medium text-dark-blue shrink-0">
-                              {service.chipLabel}
+                              {service.serviceLabel}
                             </span>
                           </div>
                         </div>
@@ -1910,10 +1885,10 @@ export default function TripEditor() {
                 const formattedDate = formatDate(dayDate)
                 return day.events
                   .map((event) =>
-                    event.chip && event.chip.lat && event.chip.lng
+                    event.place && event.place.lat && event.place.lng
                       ? {
-                          lat: event.chip.lat,
-                          lng: event.chip.lng,
+                          lat: event.place.lat,
+                          lng: event.place.lng,
                           title: event.title,
                           time: event.time,
                           date: formattedDate,
