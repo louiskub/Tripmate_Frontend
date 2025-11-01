@@ -13,10 +13,10 @@ import { RestaurantSubtopicRating } from '@/models/service/detail/restaurant-det
 type RatingOverviewProps = {
     rating: number
     rating_count: number
-    subtopic_ratings: HotelSubtopicRating | RestaurantSubtopicRating
+    subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating
     comment?: string
     className?: string
-    rating_meta: ratingMeta[]
+    rating_meta?: ratingMeta[]
 }
 
 export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment, className, rating_meta}: RatingOverviewProps) => {
@@ -29,7 +29,7 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
                 </div>
                 <ButtonText className='text-dark-blue'>{ratingText(rating)}</ButtonText>
                 <button 
-                    className='hover:cursor-pointer col-start-2 flex justify-self-start '
+                    className='hover:cursor-pointer col-start-2 flex justify-self-start default-btn'
                     onClick={ () => {
                         document.getElementById('review')?.scrollIntoView({ behavior: "smooth" });
                     }}
@@ -42,16 +42,16 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
             </div>
 
             <ul className='flex flex-wrap'>
-                {rating_meta.map((meta) => (
+                {rating_meta?.map((meta) => (
                     <li
                         key={meta.key}
                     >
-                        <Tag text={`${meta.label} ${subtopic_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}`} />
+                        <Tag text={`${meta.label} ${subtopic_ratings?.[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}`} />
                     </li>
                 ))}
             </ul>
 
-            {comment && <div className='flex flex-col gap-2 basis-1/2'>
+            {comment && <div className={`flex flex-col gap-2 ${rating_meta? 'basis-1/2': 'basis-3/4'}`}>
                 <Caption className='text-dark-gray'>What guest says</Caption>
                 <Caption className='h-full max-h-full p-2 border border-light-blue rounded-lg overflow-auto custom-scroll-bar'>
                     {comment}
@@ -65,7 +65,7 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
 type RatingProps = {
     rating: number
     rating_count: number
-    subtopic_ratings: HotelSubtopicRating | RestaurantSubtopicRating
+    subtopic_ratings?: HotelSubtopicRating | RestaurantSubtopicRating
     reviews?: Reviews[]
     className?: string
     rating_meta: ratingMeta[]
@@ -93,16 +93,21 @@ export const Rating = (rating: RatingProps) => {
                         </Caption>
                     </button>
                 </div>
-
-                <ul className='flex flex-col gap-2.5'>
-                    {rating.rating_meta.map((meta) => (
-                        <li
-                            key={meta.key}
-                        >
-                            <SubtopicRating topic={meta.label} rating={rating.subtopic_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}/>
-                        </li>
-                    ))}
-                </ul>
+                {rating.subtopic_ratings &&
+                    <ul className='flex flex-col gap-2.5'>
+                        {rating.rating_meta.map((meta) => {
+                            const sub_ratings = rating.subtopic_ratings!;
+                            return (
+                            <li
+                                key={meta.key}
+                            >
+                                <SubtopicRating 
+                                    topic={meta.label} 
+                                    rating={sub_ratings[meta.key as keyof (HotelSubtopicRating | RestaurantSubtopicRating)]}/>
+                            </li>
+                        );})}
+                    </ul>
+                }
             </div>
             <div className='flex flex-col row-start-2 col-span-2 gap-2'>
                 {

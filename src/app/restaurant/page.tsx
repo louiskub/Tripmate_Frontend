@@ -13,9 +13,9 @@ export default function AllRestaurant() {
     <DefaultPage current_tab='restaurant'>
       <SearchServiceInput/>
       <div className='flex w-full gap-2.5 mt-2'>
-        <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] py-2.5 w-full'>
-          <span className='flex justify-between px-2'>
-            <Body>Found 9999 hotels</Body>
+        <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
+          <span className='flex justify-between  p-2.5'>
+            <Body>Found 9999 restaurants</Body>
             <Body>Sort by</Body>
           </span>
           {restaurants.map((restaurant, idx) => (

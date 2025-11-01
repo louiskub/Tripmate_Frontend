@@ -26,7 +26,7 @@ import ImageSlide from '@/components/services/other/image-slide';
 
 import { restaurantRatingMeta } from '@/utils/service/rating';
 
-export default function AllHotel() {
+export default function RestaurantDetail() {
   const [currentTab, setCurrentTab] = useState("overview");
 
 type tab = {
@@ -85,7 +85,7 @@ type tab = {
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={restaurant.pictures}>
-          <FavoriteButton favorite={false} hotel_id={'1'}/>
+          <FavoriteButton favorite={false} id={'1'} type='restaurant'/>
         </ServicePictures>
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
@@ -129,7 +129,7 @@ type tab = {
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-2 col-span-2'>
               <ButtonText className='text-dark-blue'>Description</ButtonText>
-              <Caption>{restaurant.description}</Caption>
+              <Caption>{restaurant.description || 'no description for this rentaurant'}</Caption>
             </div>
 
           </div>

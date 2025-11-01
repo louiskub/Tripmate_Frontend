@@ -12,31 +12,19 @@ import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import { useBoolean } from '@/hooks/use-boolean'
 
 import {ratingText} from '@/utils/service/rating'
-
+import HotelCardProps from '@/models/service/card/hotel-card'
 import FavoriteButton from '@/components/services/other/favorite-button'
 
-import Link from "next/link";
+import { useRouter } from "next/navigation"
 
-type HotelCardProps = {
-    name: string
-    star: number
-    rating: number
-    rating_count: number
-    location: string
-    price: number
-    type: string
-    pictures: Array<string>
-    favorite: boolean
-    hotel_id: string
-}
 
 const HotelCard = (hotel: HotelCardProps) => {
-
+    const router = useRouter();
     return (
-        // <Link href={endpoints.hotel.detail()}>
-        <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5">
+        <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5 hover:bg-dark-white hover:cursor-pointer"
+            onClick={() => router.push(endpoints.hotel.detail(hotel.hotel_id))}>
             <ImageSlide pictures={hotel.pictures}>
-                <FavoriteButton favorite={hotel.favorite} hotel_id={hotel.hotel_id}/>
+                <FavoriteButton favorite={hotel.favorite} id={hotel.hotel_id} type='hotel'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">
@@ -72,7 +60,6 @@ const HotelCard = (hotel: HotelCardProps) => {
                 </div>
             </div>
         </div>
-        // </Link>
     )
 }
 

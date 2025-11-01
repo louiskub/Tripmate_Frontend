@@ -7,10 +7,11 @@ import { useBoolean } from '@/hooks/use-boolean';
 
 type FavoriteButtonProps = {
     favorite: boolean
-    hotel_id: string
+    id: string
+    type: "hotel" | "restaurant" | "rental_car" | "guide" | "attraction"
 }
 
-const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
+const FavoriteButton = ({ favorite, id,  type}: FavoriteButtonProps) => {
     const isFavorite = useBoolean(favorite)
     const [loading, setLoading] = useState(false);
     const [animate, setAnimate] = useState(false);
@@ -19,11 +20,11 @@ const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
         setAnimate(false);
     };
 
-    async function handleFavoriteHotel() {
+    async function handleFavorite() {
         if (loading) return;
         setLoading(true)
         try {
-        const response = await fetch(`/api/hotels/${hotel_id}/favorite`, {
+        const response = await fetch(`/api/hotels/${id}/favorite`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ favorite: !isFavorite }),
@@ -42,7 +43,7 @@ const FavoriteButton = ({ favorite, hotel_id }: FavoriteButtonProps) => {
 
     return (
         <Button 
-            onClick={handleFavoriteHotel}
+            onClick={handleFavorite}
             className='absolute z-10 right-1.5 top-1.5 w-6 bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full'>
             { isFavorite.value ? 
                 <HeartFilledIcon 

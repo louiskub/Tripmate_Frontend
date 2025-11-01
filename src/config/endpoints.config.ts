@@ -1,13 +1,18 @@
 export const endpoints = {
-  baseURL: "http://blabla",
+  baseURL: "http://161.246.5.236",
   hotel: {
     all: "/hotel/all",
-    detail: (hotel_id: string) => `/hotel/${hotel_id}`,
-    book: (hotel_id: string) => `/hotel/book/${hotel_id}`,
+    detail: (id: string) => `/hotel/${id}`,
+    book: (id: string) => `/hotel/book/${id}`,
   },
   restaurant: {
     all: "/restaurant/all",
-    detail: (restaurant_id: string) => `/restaurant/${restaurant_id}`,
-    book: (restaurant_id: string) => `/restaurant/book/${restaurant_id}`,
+    detail: (id: string) => `/restaurant/${id}`,
+    book: (id: string) => `/restaurant/book/${id}`,
+  },
+  rental_car: {
+    all: "/rental_car/all",
+    detail: (id: string) => `/rental-car/${id}`,
+    book: (id: string) => `/rental-car/book/${id}`,
   },
 }
