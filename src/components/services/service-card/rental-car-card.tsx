@@ -33,6 +33,14 @@ const RentalCarCard = (car: RentalCarCardProps) => {
                     <div className='ml-1'>
                         <div className='flex gap-1 items-center text-dark-gray mb-1'>
                             <div className='w-4 aspect-square'>
+                            <div 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault()
+                                    window.location.href = paths.other_profile(car.owner.user_id)
+                                }}
+                            
+                            className='w-4 aspect-square'>
                                 {car.owner.profile_pic ?
                                     <img src={car.owner.profile_pic} className='object-cover w-full h-full rounded-full'/> :
                                     <ProfileIcon className='text-custom-gray'/>

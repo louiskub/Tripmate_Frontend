@@ -7,7 +7,7 @@ const rental_cars: RentalCarCardProps[] =
     {
         name: 'Cheap Car for Rent',
         owner: {
-        username: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
+        user_id: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
         first_name: 'Mit',
         last_name: 'Shasheep',
         profile_pic: 'https://i.redd.it/help-me-find-instagram-account-of-this-cat-he-she-looks-so-v0-9329bx84mpud1.jpg?width=1080&format=pjpg&auto=webp&s=3e69817d9d72fd45c8cd6bd3505553009b0a4b0b'
@@ -23,12 +23,12 @@ const rental_cars: RentalCarCardProps[] =
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",
         ],
         favorite: false,
-        rental_car_id: 'Hee123'
+        id: 'Hee123'
     },
     {
         name: 'Cheap Car for Rent',
         owner: {
-        username: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
+        user_id: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
         first_name: 'Mit',
         last_name: 'Shasheep',
         profile_pic: ''
@@ -44,7 +44,7 @@ const rental_cars: RentalCarCardProps[] =
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",
         ],
         favorite: false,
-        rental_car_id: '213'
+        id: '213'
     },
 ]
 

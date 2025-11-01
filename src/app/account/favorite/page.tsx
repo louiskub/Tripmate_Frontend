@@ -46,9 +46,9 @@ export default function Favorite() {
           </span>
           
           <div className="rounded-[10px] border-b border-light-gray flex flex-col">
-            {currentTab === 'hotel' && data.hotel?.map(card => <HotelCard key={card.hotel_id} {...card} />)}
-            {currentTab === 'restaurant' && data.restaurant?.map(card => <RestaurantCard key={card.restaurant_id} {...card} />)}
-            {currentTab === 'rental_car' && data.rental_car?.map(card => <RentalCarCard key={card.rental_car_id} {...card} />)}
+            {currentTab === 'hotel' && data.hotel?.map(card => <HotelCard key={card.id} {...card} />)}
+            {currentTab === 'restaurant' && data.restaurant?.map(card => <RestaurantCard key={card.id} {...card} />)}
+            {currentTab === 'rental_car' && data.rental_car?.map(card => <RentalCarCard key={card.id} {...card} />)}
             {currentTab === 'guide' && data.guide?.map(card => <GuideCard key={card.id} {...card} />)}
             {currentTab === 'attraction' && data.attraction?.map(card => <AttractionCard key={card.id} {...card} />)}
             {/* {currentTab === 'trip' && data.trip?.map((trip, i) => <TripCard key={i} trip={trip} />)} */}

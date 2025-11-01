@@ -1,7 +1,7 @@
 type GuideCardProps = {
     name: string
     guider: {
-        username: string
+        user_id: string
         profile_pic?: string
         first_name: string
         last_name: string
