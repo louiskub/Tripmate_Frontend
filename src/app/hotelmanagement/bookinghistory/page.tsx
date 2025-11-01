@@ -1,10 +1,12 @@
 import Navbar from "@/components/navbar/nav"
+import VendorSideNav from '@/components/navbar/vendorsidenav';
 
 export default function BookingHistory({ bookings = defaultBookings }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
+      <div className="flex">
+        <VendorSideNav />
       <div className="flex-1 p-4 md:p-7">
         <div className="flex bg-white rounded-lg p-2 md:p-4 shadow-sm gap-4">
           <section className="flex-1 p-3 md:p-5 flex flex-col gap-4">
@@ -91,6 +93,7 @@ export default function BookingHistory({ bookings = defaultBookings }) {
             </div>
           </section>
         </div>
+      </div>
       </div>
     </div>
   )

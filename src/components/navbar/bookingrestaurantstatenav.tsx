@@ -5,17 +5,8 @@ export default function Statenav() {
     const pathname = usePathname();
 
   const map: Array<[RegExp, number]> = [
-    [/^\/bookhotel\/confirmbooking$/, 1],
-    [/^\/bookhotel\/payment$/, 2],
-    [/^\/bookhotel\/completebooking$/, 3],
-    [/^\/bookrentalcar\/confirmbooking$/, 1],
-    [/^\/bookrentalcar\/payment$/, 2],
-    [/^\/bookrentalcar\/completebooking$/, 3],
-    [/^\/bookguide\/confirmbooking$/, 1],
-    [/^\/bookguide\/payment$/, 2],
-    [/^\/bookguide\/completebooking$/, 3],
     [/^\/bookrestaurant\/confirmbooking$/, 1],
-    [/^\/bookrestaurant\/completebooking$/, 3],
+    [/^\/bookrestaurant\/completebooking$/, 2],
   ];
 
   const currentStep = (map.find(([re]) => re.test(pathname))?.[1]) ?? 0;                                                1; // ที่เหลือถือว่าอยู่ Step 1
@@ -40,14 +31,11 @@ export default function Statenav() {
             <button className={dotClass(1)}>1</button>
             <div className="flex-1 h-px bg-gray-300" />
             <button className={dotClass(2)}>2</button>
-            <div className="flex-1 h-px bg-gray-300" />
-            <button className={dotClass(3)}>3</button>
           </div>
 
           <div className="w-44 sm:w-56 md:w-72 flex justify-between">
             <span className={labelClass(1)}>Your data</span>
-            <span className={labelClass(2)}>Payment</span>
-            <span className={labelClass(3)}>Complete</span>
+            <span className={labelClass(2)}>Complete</span>
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import { RiHotelBedFill } from "react-icons/ri";
 import { IoRestaurant } from "react-icons/io5";
 import { FaCarSide, FaMapMarkerAlt, FaMapMarkedAlt } from "react-icons/fa";
 import { BsSendFill } from "react-icons/bs";
+import Link from "next/link"
 
 export default function SideNav() {
     return (
@@ -12,6 +13,10 @@ export default function SideNav() {
                 <span className="text-base font-medium">{item.name}</span>
                 </button>
             ))}
+            <Link href="../map" className="flex items-center gap-3 h-10 px-4 rounded-md text-gray-800 hover:bg-blue-50">
+                <span className="w-5 h-5 mt-1"><FaMapMarkedAlt /></span>
+                <span className="text-base font-medium">Map</span>
+            </Link>
         </aside>
     )
 }
@@ -21,6 +26,6 @@ const logos = [
             { name: "Restaurants", icon: <IoRestaurant /> },
             { name: "Rental Cars", icon: <FaCarSide /> },
             { name: "Guides", icon: <BsSendFill /> },
-            { name: "Tourist Attractions", icon: <FaMapMarkerAlt /> },
-            { name: "Map", icon: <FaMapMarkedAlt /> },
+            { name: "Tourist Attractions", icon: <FaMapMarkerAlt /> }
+            // { name: "Map", icon: <FaMapMarkedAlt /> },
             ];
