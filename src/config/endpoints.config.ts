@@ -8,6 +8,8 @@ export const endpoints = {
   manage_account: {
     change_password: (id: string) => `${BASE_URL}/users/${id}/password`,
   },
+  profile: (id: string) => `${BASE_URL}/users/${id}`,
+  upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
   hotel: {
     all: `${BASE_URL}/hotel`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
@@ -34,7 +36,5 @@ export const endpoints = {
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
-  
-  user_profile: (id: string) => `${BASE_URL}/users/${id}`,
 
 }
