@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.24",
     "axios": "^1.13.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.544.0",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-date-range": "^2.0.1",
+    "react-datepicker": "^8.8.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
@@ -27,6 +30,7 @@
     "@types/react-date-range": "^1.4.10",
     "@types/react-dom": "^19",
     "@types/webpack": "^5.28.5",
+    "daisyui": "^5.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "prettier": "^3.6.2",
