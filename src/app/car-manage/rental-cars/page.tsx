@@ -136,6 +136,7 @@ export default function RentalCarsPage() {
   const [activeFilter, setActiveFilter] = useState("total")
 
   const handleCreateCar = (data: any) => {
+    console.log("Data from AddNewCarModal:", data)
     const newCar = {
       ...data,
       location: "Bangkok",
@@ -152,7 +153,7 @@ export default function RentalCarsPage() {
       },
       status: "available",
     }
-
+    
     setCars((prevCars) => [newCar, ...prevCars])
     setIsAddModalOpen(false)
   }
