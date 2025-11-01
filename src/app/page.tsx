@@ -1,9 +1,13 @@
 import DefaultPage from '@/components/layout/default-layout';
+import TripHeroSection from './home/page2';
+import React from "react";
 
-export default function Home() {
+const TripMateMain: React.FC = () => {
   return (
     <DefaultPage>
-      Home
+        <TripHeroSection />
     </DefaultPage>
   );
-}
+};
+
+export default TripMateMain;
