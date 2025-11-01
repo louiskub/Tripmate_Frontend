@@ -5,6 +5,9 @@ export const endpoints = {
     login: `${BASE_URL}/auth/login`,
     register: `${BASE_URL}/auth/register`
   },
+  manage_account: {
+    change_password: (id: string) => `${BASE_URL}/users/${id}/password`,
+  },
   hotel: {
     all: `${BASE_URL}/hotel`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
