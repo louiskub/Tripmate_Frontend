@@ -1,6 +1,6 @@
 type RentalCarCardProps = {
     name: string
-    renter: {
+    owner: {
         username: string
         profile_pic?: string
         first_name: string

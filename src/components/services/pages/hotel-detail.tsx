@@ -24,8 +24,13 @@ import ClockIcon from '@/assets/icons/Clock.svg'
 import { mockHotel1 } from '@/mocks/hotels'
 import { hotelRatingMeta } from '@/utils/service/rating';
 import { PicturePopup } from '@/components/services/other/service-pictures';
+import HotelDetailModel from '@/models/service/detail/hotel-detail';
 
-export default function HotelDetail() {
+type HotelDetailProps = {
+  service: HotelDetailModel
+}
+
+export default function HotelDetail({service}: HotelDetailProps) {
   const [currentTab, setCurrentTab] = useState("overview");
   const [PicturePopUp, setPicturePopUp] = useState(false);
 
@@ -105,9 +110,8 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
-  const service = mockHotel1
-
-  const rooms = service.rooms;
+  // const service = mockHotel1
+  const rooms = service.room;
 
   const starting_price = Math.min(
     ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
@@ -220,7 +224,7 @@ type tab = {
       <section id='room' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Rooms</Title>
         {
-          service.rooms.map((room) => (
+          service.room.map((room) => (
             <RoomDetail 
               key={room.name}
               room={room}

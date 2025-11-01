@@ -16,29 +16,30 @@ import getCookie from '@/utils/service/cookie'
 import { cookies } from "next/headers";
 
 
-// async function getProfile(): Promise<ProfileData | null> {
-//     const cookieStore = await cookies();
-//     const token = cookieStore.get("token")?.value;
+async function getProfile(): Promise<ProfileData | null> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
 
-//     if (!token) return null;
+    if (!token) return null;
 
-//     const res = await fetch(endpoints.user_profile(token), {
-//         headers: { Authorization: `Bearer ${token}` },
-//         cache: "no-store"
-//     });
-
-//     if (!res.ok) return null;
-//     return res.json();
-// }
-
-async function getProfile(id: string): Promise<ProfileData | null> {
-    const res = await fetch(endpoints.user_profile(id), {
-        cache: "no-store",
+    const res = await fetch(endpoints.user_profile(token), {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store"
     });
 
     if (!res.ok) return null;
     return res.json();
 }
+
+// async function getProfile(id: string): Promise<ProfileData | null> {
+//     const res = await fetch(endpoints.user_profile(id), {
+//         credentials: 'include',
+//         cache: "no-store",
+//     });
+
+//     if (!res.ok) return null;
+//     return res.json();
+// }
 
 
 export default async function Profile() {
@@ -47,7 +48,7 @@ export default async function Profile() {
 
     if (!id) return <p>Unauthorized</p>;
 
-    const profile = await getProfile(id);
+    const profile = await getProfile()  ;
     
     // const profile = ProfileEx;
     console.log(profile)

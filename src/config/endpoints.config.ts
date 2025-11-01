@@ -6,28 +6,28 @@ export const endpoints = {
     register: `${BASE_URL}/auth/register`
   },
   hotel: {
-    all: "/hotel/all",
-    detail: (id: string) => `/hotel/${id}`,
-    book: (id: string) => `/hotel/book/${id}`,
+    all: `${BASE_URL}/hotel`,
+    detail: (id: string) => `${BASE_URL}/hotel/${id}`,
+    book: (id: string) => `${BASE_URL}/hotel/book/${id}`,
   },
   restaurant: {
-    all: "/restaurant/all",
-    detail: (id: string) => `/restaurant/${id}`,
-    book: (id: string) => `/restaurant/book/${id}`,
+    all: `${BASE_URL}/restaurant`,
+    detail: (id: string) => `${BASE_URL}/restaurant/${id}`,
+    book: (id: string) => `${BASE_URL}/restaurant/book/${id}`,
   },
   rental_car: {
-    all: "/rental_car/all",
-    detail: (id: string) => `/rental-car/${id}`,
-    book: (id: string) => `/rental-car/book/${id}`,
+    all: `${BASE_URL}/rental-car`,
+    detail: (id: string) => `${BASE_URL}/rental-car/${id}`,
+    book: (id: string) => `${BASE_URL}/rental-car/book/${id}`,
   },
   attraction: {
-    all: "/attraction/all",
-    detail: (id: string) => `/attraction/${id}`,
-    book: (id: string) => `/attraction/book/${id}`,
+    all: `${BASE_URL}/place`,
+    detail: (id: string) => `${BASE_URL}/place/${id}`,
+    book: (id: string) => `${BASE_URL}/attraction/book/${id}`,
   },
   
   guide: {
-    all: "${endpoints.baseURL}/guide/all",
+    all: `${BASE_URL}/guide`,
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
