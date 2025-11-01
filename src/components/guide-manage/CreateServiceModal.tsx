@@ -1,33 +1,66 @@
 "use client"
 
 import { useState } from "react"
-// [แก้ไข] 1. import ไอคอนสำหรับเลื่อนซ้าย/ขวาเพิ่ม
 import { UploadCloud, X, ChevronLeft, ChevronRight } from "lucide-react"
 import type React from "react"
 
-// --- [TS] 1. กำหนด Type ของข้อมูลใน Form --- (เหมือนเดิม)
-interface GuideFormData {
-  postName: string
-  maxGuests: string
+// --- [TS] 1. กำหนด Type ของข้อมูลที่ API ต้องการ (Nested) ---
+interface ApiPolicyData {
+  start: string
+  end: string
+  max_guest: number // API ควรรับเป็น number
   contact: string
-  province: string
-  googleMap: string
-  duration: string
-  cost: string
-  description: string
 }
 
-// --- [TS] 2. Interface สำหรับ Props ของ FormField --- (เหมือนเดิม)
+// [ใหม่] กำหนด Type สำหรับ enum
+type GuideType = "culture" | "easy" | "nature" | "adventure" | "local" | "other"
+
+interface ApiGuideData {
+  name: string
+  type: GuideType
+  price: number // API ควรรับเป็น number
+  description: string
+  location: string
+  nearby_locations: string[] // API ควรรับเป็น array
+  policy: ApiPolicyData
+  // 'duration' ถูกลบออก (คำนวณได้จาก start/end)
+  // 'rating' ถูกลบออก (ไม่ได้สร้างตอนแรก)
+}
+
+// --- [TS] 2. กำหนด Type ของข้อมูลใน Form (ใช้ State แบบ Flat เพื่อง่ายต่อการจัดการ) ---
+interface GuideFormData {
+  name: string
+  type: GuideType
+  price: string // เก็บเป็น string ใน form
+  description: string
+  location: string
+  nearby_locations: string // ใน form ใช้ comma-separated string
+  policy_start: string
+  policy_end: string
+  policy_max_guest: string // เก็บเป็น string ใน form
+  policy_contact: string
+}
+
+// --- [TS] 3. Interface สำหรับ Props ของ FormField ---
 interface FormFieldProps {
   label: string
-  id: keyof GuideFormData
+  id: keyof GuideFormData // ใช้ key ของ flat state
   type?: string
   placeholder?: string
   value: string | number
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
-// --- 3. Component ย่อยสำหรับ Input Field (เหมือนเดิม) ---
+// --- [TS] 4. [ใหม่] Interface สำหรับ Props ของ Select Field ---
+interface FormSelectProps {
+  label: string
+  id: keyof GuideFormData
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
+  options: { value: GuideType; label: string }[]
+}
+
+// --- 5. Component ย่อยสำหรับ Input Field (เหมือนเดิม) ---
 const FormField = ({ label, id, type = "text", placeholder, value, onChange }: FormFieldProps) => (
   <div className="w-full">
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
@@ -40,7 +73,7 @@ const FormField = ({ label, id, type = "text", placeholder, value, onChange }: F
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        rows={5}
+        rows={4} // ลดขนาดลงเล็กน้อย
         className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       />
     ) : (
@@ -57,45 +90,81 @@ const FormField = ({ label, id, type = "text", placeholder, value, onChange }: F
   </div>
 )
 
-// --- [TS] 4. Interface สำหรับ Props ของ Modal (เหมือนเดิม) ---
+// --- 6. [ใหม่] Component ย่อยสำหรับ Select Field ---
+const FormSelectField = ({ label, id, value, onChange, options }: FormSelectProps) => (
+  <div className="w-full">
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <select
+      id={id}
+      name={id}
+      value={value}
+      onChange={onChange}
+      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </div>
+)
+
+// --- [TS] 7. Interface สำหรับ Props ของ Modal ---
+// [แก้ไข] onSubmit จะส่งข้อมูลที่แปลงแล้ว (ApiGuideData) และ File objects
 interface CreateServiceModalProps {
   onClose: () => void
-  onSubmit?: (formData: GuideFormData) => void
+  onSubmit?: (apiData: ApiGuideData, files: File[]) => void
 }
 
-// --- 5. Main Component ---
+// --- 8. Main Component ---
 export default function CreateServiceModal({ onClose, onSubmit = () => {} }: CreateServiceModalProps) {
-  // (States ... )
+  // [แก้ไข] 8.1. ปรับ State เริ่มต้นตาม GuideFormData (Flat)
   const [formData, setFormData] = useState<GuideFormData>({
-    postName: "",
-    maxGuests: "",
-    contact: "",
-    province: "",
-    googleMap: "",
-    duration: "",
-    cost: "",
+    name: "",
+    type: "culture", // ค่าเริ่มต้น
+    price: "",
     description: "",
+    location: "",
+    nearby_locations: "",
+    policy_start: "",
+    policy_end: "",
+    policy_max_guest: "",
+    policy_contact: "",
   })
 
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  // [ใหม่] 8.2. State สำหรับเก็บ File objects
+  const [imageFiles, setImageFiles] = useState<File[]>([])
   
-  // [ใหม่] 2. เพิ่ม State สำหรับเก็บลำดับภาพที่แสดงอยู่
+  // (States สำหรับ Carousel - เหมือนเดิม)
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
+  // 8.3. Handler สำหรับ Input/Textarea (เหมือนเดิม)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value as any }))
+  }
+  
+  // [ใหม่] 8.4. Handler สำหรับ Select
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value as GuideType }))
   }
 
-  // [แก้ไข] 3. ปรับ `handleImageChange` ให้ตั้งค่า index เมื่อเพิ่มภาพชุดแรก
+  // [แก้ไข] 8.5. ปรับ `handleImageChange` ให้เก็บ File objects ด้วย
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files)
       const newPreviews = filesArray.map((file) => URL.createObjectURL(file))
       
+      // [ใหม่] เก็บ File objects
+      setImageFiles((prev) => [...prev, ...filesArray])
+
       setImagePreviews((prev) => {
         const updatedPreviews = [...prev, ...newPreviews]
-        // ถ้าเป็นการอัปโหลดครั้งแรก (prev.length === 0) ให้ตั้งค่า index ไปที่ 0
         if (prev.length === 0 && updatedPreviews.length > 0) {
           setCurrentImageIndex(0)
         }
@@ -104,107 +173,170 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
     }
   }
 
-  // [แก้ไข] 4. เปลี่ยน `handleRemoveImage` เป็น `handleRemoveCurrentImage`
-  // เพื่อลบภาพที่ *กำลังแสดงอยู่* ใน Carousel
+  // [แก้ไข] 8.6. ปรับ `handleRemoveCurrentImage` ให้ลบ File objects ด้วย
   const handleRemoveCurrentImage = (e: React.MouseEvent) => {
-    e.stopPropagation() // ป้องกันไม่ให้ trigger การคลิกเพื่ออัปโหลด
+    e.stopPropagation()
     
     const indexToRemove = currentImageIndex
+    
+    // [ใหม่] ลบ File object
+    const newFiles = imageFiles.filter((_, i) => i !== indexToRemove)
+    setImageFiles(newFiles)
+
+    // ลบ Preview
     const newPreviews = imagePreviews.filter((_, i) => i !== indexToRemove)
     setImagePreviews(newPreviews)
     
-    // ปรับ index หลังจากลบ
     if (currentImageIndex >= newPreviews.length) {
-      // ถ้าลบภาพสุดท้าย ให้เลื่อนไปแสดงภาพก่อนหน้า (หรือ 0 ถ้าหมดแล้ว)
       setCurrentImageIndex(Math.max(0, newPreviews.length - 1))
     }
-    // ถ้าลบภาพอื่นที่ไม่ใช่ภาพสุดท้าย index จะชี้ไปที่ภาพถัดไปโดยอัตโนมัติ
   }
 
-  // [ใหม่] 5. ฟังก์ชันสำหรับเลื่อนภาพถัดไป
+  // (Carousel Handlers: 8.7 & 8.8 - เหมือนเดิม)
   const handleNextImage = (e: React.MouseEvent) => {
-    e.stopPropagation() // ป้องกันไม่ให้ trigger การคลิกเพื่ออัปโหลด
+    e.stopPropagation() 
     if (imagePreviews.length > 0) {
       setCurrentImageIndex((prev) => (prev + 1) % imagePreviews.length)
     }
   }
 
-  // [ใหม่] 6. ฟังก์ชันสำหรับเลื่อนภาพก่อนหน้า
   const handlePrevImage = (e: React.MouseEvent) => {
-    e.stopPropagation() // ป้องกันไม่ให้ trigger การคลิกเพื่ออัปโหลด
+    e.stopPropagation() 
     if (imagePreviews.length > 0) {
       setCurrentImageIndex((prev) => (prev - 1 + imagePreviews.length) % imagePreviews.length)
     }
   }
 
+  // [แก้ไข] 8.9. `handleSubmit` - แปลงข้อมูล (Flat -> Nested) และส่งออก
   const handleSubmit = () => {
-    console.log("Submitting Guide data:", formData)
-    // หมายเหตุ: คุณต้องจัดการ `imagePreviews` (ซึ่งเป็น object URLs)
-    // โดยการอัปโหลดไฟล์จริง (จาก `e.target.files` ที่ควรเก็บไว้ใน state อื่น) ไปยัง server ของคุณ
-    onSubmit(formData)
+    
+    // 1. แปลง State (Flat) ไปเป็นโครงสร้าง API (Nested)
+    const apiData: ApiGuideData = {
+      name: formData.name,
+      type: formData.type,
+      price: parseFloat(formData.price) || 0, // แปลงเป็น number
+      description: formData.description,
+      location: formData.location,
+      // แปลง "loc1, loc2" เป็น ["loc1", "loc2"]
+      nearby_locations: formData.nearby_locations.split(',').map(s => s.trim()).filter(Boolean),
+      policy: {
+        start: formData.policy_start,
+        end: formData.policy_end,
+        max_guest: parseInt(formData.policy_max_guest, 10) || 1, // แปลงเป็น number
+        contact: formData.policy_contact,
+      },
+    }
+
+    console.log("Submitting API data:", apiData)
+    console.log("Submitting Files:", imageFiles)
+    
+    // 2. ส่งข้อมูลที่แปลงแล้วและ File objects กลับไปให้ Component แม่
+    onSubmit(apiData, imageFiles)
     onClose()
   }
 
+  // [ใหม่] 8.10. ตัวเลือกสำหรับ Dropdown
+  const guideTypeOptions: { value: GuideType; label: string }[] = [
+    { value: "culture", label: "Culture" },
+    { value: "easy", label: "Easy Going" },
+    { value: "nature", label: "Nature" },
+    { value: "adventure", label: "Adventure" },
+    { value: "local", label: "Local Experience" },
+    { value: "other", label: "Other" },
+  ]
+
   return (
-    // Overlay (พื้นหลัง)
+    // Overlay
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {/* Modal Content */}
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex flex-col lg:flex-row">
+          
+          {/* === Form Section === */}
           <div className="w-full lg:w-1/2 p-8 space-y-4">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Create Guide</h2>
 
-            {/* ... FormFields ทั้งหมด (เหมือนเดิม) ... */}
+            {/* [แก้ไข] 9. อัปเดต FormFields ทั้งหมด */}
+            
             <FormField
-              label="Post Name"
-              id="postName"
+              label="Name"
+              id="name"
               placeholder="e.g., Chiang Mai Day Trip"
-              value={formData.postName}
+              value={formData.name}
               onChange={handleChange}
             />
-            <FormField
-              label="Max guests"
-              id="maxGuests"
-              type="number"
-              placeholder="e.g., 10"
-              value={formData.maxGuests}
-              onChange={handleChange}
+            
+            <FormSelectField
+              label="Type"
+              id="type"
+              value={formData.type}
+              onChange={handleSelectChange}
+              options={guideTypeOptions}
             />
+
             <FormField
-              label="Contact"
-              id="contact"
-              placeholder="e.g., 081-234-5678"
-              value={formData.contact}
-              onChange={handleChange}
-            />
-            <FormField
-              label="Province"
-              id="province"
-              placeholder="e.g., Chiang Mai"
-              value={formData.province}
-              onChange={handleChange}
-            />
-            <FormField
-              label="Google map link"
-              id="googleMap"
-              placeholder="https://maps.app.goo.gl/..."
-              value={formData.googleMap}
-              onChange={handleChange}
-            />
-            <FormField
-              label="Duration"
-              id="duration"
-              placeholder="e.g., 8 hours"
-              value={formData.duration}
-              onChange={handleChange}
-            />
-            <FormField
-              label="Cost (THB)"
-              id="cost"
+              label="Price (THB)"
+              id="price"
               type="number"
               placeholder="e.g., 2500"
-              value={formData.cost}
+              value={formData.price}
               onChange={handleChange}
             />
+
+            <FormField
+              label="Location (Google map link)"
+              id="location"
+              placeholder="https://maps.app.goo.gl/..."
+              value={formData.location}
+              onChange={handleChange}
+            />
+            
+            <FormField
+              label="Nearby Locations (comma-separated)"
+              id="nearby_locations"
+              type="textarea"
+              placeholder="e.g., Wat Chedi Luang, Tha Phae Gate"
+              value={formData.nearby_locations}
+              onChange={handleChange}
+            />
+
+            <h3 className="text-lg font-semibold text-gray-700 pt-2">Policy</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                label="Start Time"
+                id="policy_start"
+                type="time" 
+                value={formData.policy_start}
+                onChange={handleChange}
+              />
+              <FormField
+                label="End Time"
+                id="policy_end"
+                type="time"
+                value={formData.policy_end}
+                onChange={handleChange}
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                label="Max guests"
+                id="policy_max_guest"
+                type="number"
+                placeholder="e.g., 10"
+                value={formData.policy_max_guest}
+                onChange={handleChange}
+              />
+              <FormField
+                label="Contact"
+                id="policy_contact"
+                placeholder="e.g., 081-234-5678"
+                value={formData.policy_contact}
+                onChange={handleChange}
+              />
+            </div>
+            
             <FormField
               label="Description"
               id="description"
@@ -215,18 +347,13 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
             />
           </div>
 
+          {/* === Image Upload Section (Carousel) === */}
+          {/* (ส่วนนี้เหมือนเดิม ไม่มีการแก้ไข) */}
           <div className="w-full lg:w-1/2 bg-gray-50 p-8 flex flex-col">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">Upload Guide Images</h3>
 
-            {/* [แก้ไข] 7. ลบ Grid แสดงภาพตัวอย่างเดิมทิ้ง */}
-            {/* <div className="grid grid-cols-2 gap-3 mb-4">
-                ... (โค้ดเดิมถูกลบ) ...
-              </div>
-            */}
-
-            {/* [แก้ไข] 8. ปรับปรุงกล่องอัปโหลดไฟล์ */}
             <div
-              className="relative h-80 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-center cursor-pointer hover:bg-gray-100 overflow-hidden" // [แก้ไข] เพิ่ม `relative`, `overflow-hidden` และปรับ `h`
+              className="relative h-80 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-center cursor-pointer hover:bg-gray-100 overflow-hidden"
               onClick={() => (document.getElementById("imageUpload") as HTMLInputElement)?.click()}
             >
               <input
@@ -238,7 +365,6 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
                 onChange={handleImageChange}
               />
 
-              {/* [ใหม่] 9. ใช้ Conditional Rendering */}
               {imagePreviews.length === 0 ? (
                 // --- ถ้าไม่มีภาพ ---
                 <div className="text-gray-500 p-4">
@@ -249,14 +375,12 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
               ) : (
                 // --- ถ้ามีภาพ ---
                 <>
-                  {/* แสดงภาพปัจจุบัน */}
                   <img
                     src={imagePreviews[currentImageIndex]}
                     alt={`Preview ${currentImageIndex + 1}`}
-                    className="w-full h-full object-cover" // ให้ภาพเต็มพื้นที่กล่อง
+                    className="w-full h-full object-cover" 
                   />
                   
-                  {/* ปุ่มลบภาพปัจจุบัน */}
                   <button
                     onClick={handleRemoveCurrentImage}
                     className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 transition-opacity opacity-80 hover:opacity-100"
@@ -265,7 +389,6 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
                     <X size={16} />
                   </button>
 
-                  {/* ปุ่มเลื่อนซ้าย (แสดงเมื่อมีมากกว่า 1 ภาพ) */}
                   {imagePreviews.length > 1 && (
                     <button
                       onClick={handlePrevImage}
@@ -276,7 +399,6 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
                     </button>
                   )}
                   
-                  {/* ปุ่มเลื่อนขวา (แสดงเมื่อมีมากกว่า 1 ภาพ) */}
                   {imagePreviews.length > 1 && (
                     <button
                       onClick={handleNextImage}
@@ -287,7 +409,6 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
                     </button>
                   )}
 
-                  {/* ตัวนับจำนวนภาพ */}
                   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
                     {currentImageIndex + 1} / {imagePreviews.length}
                   </div>
@@ -295,6 +416,7 @@ export default function CreateServiceModal({ onClose, onSubmit = () => {} }: Cre
               )}
             </div>
 
+            {/* (ปุ่ม Submit/Cancel - เหมือนเดิม) */}
             <div className="mt-6 flex flex-col gap-3">
               <button
                 onClick={handleSubmit}
