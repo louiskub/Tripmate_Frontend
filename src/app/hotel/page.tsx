@@ -17,7 +17,7 @@ export default function AllHotel() {
             <Body>Found {hotels.length} hotels</Body>
           </span>
           {hotels.map((hotel, idx) => (
-            <HotelCard key={idx} {...hotel} hotel_id={idx.toString()}/>
+            <HotelCard key={idx} {...hotel}/>
           ))}
         </div>
         <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>

@@ -1,4 +1,5 @@
-"use client"
+'use client'
+
 import Navbar from '@/components/navbar/navbar';
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { FieldInput, PasswordInput } from '@/components/inputs/inputs'

@@ -97,7 +97,7 @@ const restaurant_detail: RestaurantDetail = {
         'https://ik.imagekit.io/tvlk/ugc-review/guys1L+Yyer9kzI3sp-pb0CG1j2bhflZGFUZOoIf1YOBAm37kEUOKR41ieUZm7ZJ/ugc-photo-ap-southeast-1-581603780057-acd24e232f75f09e/REVIEW/REVIEW_1752306697611_e5212ab8ab8a3c64?_src=imagekit&tr=c-at_max,h-1280,q-40,w-720',
         'https://ik.imagekit.io/tvlk/ugc-review/guys1L+Yyer9kzI3sp-pb0CG1j2bhflZGFUZOoIf1YOBAm37kEUOKR41ieUZm7ZJ/ugc-photo-ap-southeast-1-581603780057-acd24e232f75f09e/REVIEW/REVIEW_1752306697610_609da4c72d404c2c?_src=imagekit&tr=c-at_max,h-1280,q-40,w-720',
     ],
-    tag: "Seafood"
+    cuisine: ["Seafood", "Thai Food"]
 }
 
 export { restaurants, restaurant_detail }

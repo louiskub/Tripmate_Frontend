@@ -21,7 +21,7 @@ type HotelDetail = {
     
     favorite: boolean
 
-    rooms: Room[],
+    room: Room[],
 
     policy: HotelPolicy,
 }
