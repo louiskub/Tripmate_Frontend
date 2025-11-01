@@ -19,7 +19,7 @@ type RestaurantDetail = {
     
     favorite: boolean
 
-    tag: string
+    cuisine: string[]
 }
 
 export type RestaurantSubtopicRating = {
