@@ -24,7 +24,7 @@ async function getProfile(): Promise<ProfileData | null> {
 
     if (!token || !user_id) return null;
 
-    const res = await fetch(endpoints.user_profile(user_id), {
+    const res = await fetch(endpoints.profile(user_id), {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store"
     });

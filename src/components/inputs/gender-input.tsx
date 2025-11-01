@@ -14,7 +14,7 @@ export const GenderInput: FC<GenderInputProps> = ({onChange, selected = 'other'}
         <div className='flex gap-2'>
             <FemaleGender active={selected == 'female'} onClick={() => {onChange('female')}}/>
             <MaleGender active={selected == 'male'} onClick={() => {onChange('male')}}/>
-            <OtherGender active={selected == 'other'} onClick={() => {onChange('other')}}/>
+            <OtherGender active={selected == 'Other'} onClick={() => {onChange('Other')}}/>
         </div>
     );
 };
