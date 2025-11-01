@@ -32,7 +32,7 @@ export default function SideNav() {
 
   const navLinks = [
     { href: "/car-manage/dashboard", icon: LayoutDashboard, text: "Dashboard" },
-    { href: "/car-manage/rental-cars/total", icon: Car, text: "Rental Cars" },
+    { href: "/car-manage/rental-cars", icon: Car, text: "Rental Cars" },
     { href: "/car-manage/booking-history", icon: History, text: "Booking History" },
   ];
 
