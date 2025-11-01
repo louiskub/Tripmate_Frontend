@@ -115,14 +115,14 @@ const TripHeroSection: React.FC = () => {
           {/* Logo */}
           <div className="absolute top-4 left-6 flex items-center gap-2 text-white z-10">
             {/* <Globe2 className="w-6 h-6 text-pale-blue" /> */}
-            <h1 className="text-xl font-extrabold font-['Manrope'] tracking-tight">
+            <h1 className="text-xl font-extrabold  tracking-tight">
               TripMate
             </h1>
           </div>
 
           {/* Text Overlay */}
           <div className="absolute top-[28%] left-[8%] text-white z-10">
-            <h1 className="text-3xl md:text-5xl font-extrabold font-['Manrope'] drop-shadow-lg">
+            <h1 className="text-3xl md:text-5xl font-extrabold  drop-shadow-lg">
               Plan your trip
             </h1>
             <p className="mt-2 text-base md:text-lg font-medium drop-shadow-sm">
@@ -176,7 +176,7 @@ const TripHeroSection: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Where to?"
-                  className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 font-['Manrope']"
+                  className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 "
                 />
               </div>
 
@@ -191,7 +191,7 @@ const TripHeroSection: React.FC = () => {
                   isClearable
                   dateFormat="dd MMM yy"
                   placeholderText="Select dates"
-                  className="w-full bg-transparent outline-none text-gray-700 font-['Manrope']"
+                  className="w-full bg-transparent outline-none text-gray-700 "
                   minDate={new Date()}
                   popperClassName="!z-[9999]"
                   popperPlacement="bottom-start"
@@ -212,7 +212,7 @@ const TripHeroSection: React.FC = () => {
                 onClick={() => setShowGuest(true)}
               >
                 <Users className="w-4 h-4 text-dark-blue" />
-                <span className="text-gray-700 font-['Manrope'] select-none">
+                <span className="text-gray-700  select-none">
                   {guests} {guests === 1 ? "Guest" : "Guests"}
                 </span>
 
@@ -258,7 +258,7 @@ const TripHeroSection: React.FC = () => {
       {/* Popular Destinations */}
       <section className="w-full max-w-7xl mt-28 px-6 md:px-8 lg:px-12 flex flex-col gap-5">
         <div className="flex justify-between items-center flex-wrap gap-2">
-          <h2 className="text-xl md:text-2xl font-extrabold text-custom-black font-['Manrope']">
+          <h2 className="text-xl md:text-2xl font-extrabold text-custom-black ">
             Popular Destinations
           </h2>
           {/* [แก้ไข] 4. อัปเดตปุ่ม และเพิ่ม onClick */}
@@ -294,7 +294,7 @@ const TripHeroSection: React.FC = () => {
                 alt={dest.name}
                 className="w-full h-32 md:h-40 object-cover rounded-lg shadow-sm"
               />
-              <div className="mt-1 text-center text-custom-black text-sm md:text-base font-bold font-['Manrope'] group-hover:text-dark-blue transition-colors">
+              <div className="mt-1 text-center text-custom-black text-sm md:text-base font-bold  group-hover:text-dark-blue transition-colors">
                 {dest.name}
               </div>
             </div>
