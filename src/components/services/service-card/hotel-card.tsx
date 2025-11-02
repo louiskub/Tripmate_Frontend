@@ -1,3 +1,5 @@
+'use client'
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
 import { FemaleGender, GenderInput, MaleGender, OtherGender } from '@/components/inputs/gender-input'

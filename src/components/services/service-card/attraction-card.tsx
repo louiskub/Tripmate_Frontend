@@ -1,3 +1,4 @@
+"use client"
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { Tag } from '@/components/services/other/Tag'
@@ -32,20 +33,21 @@ const AttractionCard = (attraction: AttractionCardProps) => {
                 <div className="flex flex-col flex-1">
                     <div className='flex flex-col flex-1 gap-2'>
                         <Subtitle className='max-w-full line-clamp-2 leading-6'>{attraction.name}</Subtitle>
-                        
+{/*                         
                         <div className="inline-flex items-center gap-[3px]">
                             <Tag text={(attraction.rating).toString()} />
                             <Caption className='text-dark-blue'>{ratingText(attraction.rating)}</Caption>
-                        </div>
-                        <div className="inline-flex items-center gap-[3px] pl-1">
+                        </div> */}
+                        {attraction.type && <Tag text={attraction.type} />}
+                        {attraction.location && <div className="inline-flex items-center gap-[3px] pl-1">
                             <LocationIcon width='12'/>
                             <Caption>{attraction.location}</Caption>
-                        </div>
+                        </div>}
                     </div>
                         
-                    <Tag text={attraction.type} />
+                    
                 </div>
-                <div className="self-stretch h-full inline-flex flex-col justify-end items-end gap-2">
+                {/* <div className="self-stretch h-full inline-flex flex-col justify-end items-end gap-2">
                 <span className='flex items-baseline gap-1'>
                     {attraction.price > 0 ?
                     <>   
@@ -56,7 +58,7 @@ const AttractionCard = (attraction: AttractionCardProps) => {
                     :
                     <ButtonText className='text-dark-blue'>Free</ButtonText>}
                 </span>
-                </div>
+                </div> */}
             </div>
         </div>
     )

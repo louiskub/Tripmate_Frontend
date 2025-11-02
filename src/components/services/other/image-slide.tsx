@@ -1,3 +1,6 @@
+'use client'
+
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState, ReactNode } from 'react';
@@ -51,20 +54,20 @@ const ImageSlide = ({ pictures, children, className, onClick }: ImageSlideProps)
                 {slides.map((pic, i) => (
                 <img key={i} 
                     className="flex-shrink-0 w-full h-full object-cover"
-                    src={pic} />
+                    src={pic || '/images/placeholder.png'} />
                 ))}
             </div>
 
             <div className={`absolute z-10 inset-0 flex justify-between px-0.5 items-center pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 transition-all`}>
                 <Button
                     onClick= {prev}
-                    className='w-1/10 max-w-8 bg-translucent-white'>
+                    className='w-1/9 max-w-8 bg-translucent-white'>
                     <ArrowIcon className='w-2/3 -scale-100'/>
                 </Button>
 
                 <Button
                     onClick={next}
-                    className='w-1/10 max-w-8 bg-translucent-white'>
+                    className='w-1/9 max-w-8 bg-translucent-white'>
                     <ArrowIcon className='w-2/3'/>
                 </Button>
             </div>

@@ -1,24 +1,60 @@
-"use client"
-
 import DefaultPage from '@/components/layout/default-layout';
 import SearchServiceInput from '@/components/inputs/search-service-input'
 import HotelCard from '@/components/services/service-card/hotel-card'
 import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
-import { hotels } from '@/mocks/hotels';
+// import { hotels } from '@/mocks/hotels';
+import { cookies } from 'next/headers';
+import { endpoints } from '@/config/endpoints.config';
+import HotelCardProps from '@/models/service/card/hotel-card';
+import axios from 'axios';
 
+async function getHotel(): Promise<HotelCardProps[] | null> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    try {
+      
+      const response = await axios.get(endpoints.hotel.all, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = response.data;
+      console.log(data)
+            
+      const hotels: HotelCardProps[] = data.map((d: any) => {
+        const prices = d.rooms?.flatMap((r: any) => r.room_options?.map((opt: any) => opt.price) ?? []) ?? [];
 
+        return {
+          ...d,
+          rating_count: d.service?.reviews?.length ?? 0,
+          location: d.service.location.zone ?? '',
+          price: prices.length ? Math.min(...prices) : 0, // fallback to 0 if no price
+          pictures: d.pictures?.slice(0, 3) ?? [],
+          favorite: d.favorite ?? false,
+        };
+      });
 
-export default function AllHotel() {
+      return hotels
+    } 
+    catch (error: any) {
+      console.log("API Error:", error.response?.data || error.message);
+      return null
+    } 
+}
+
+export default async function AllHotel() {
+  const hotels = await getHotel()
+  console.log(hotels)
   return (
     <DefaultPage current_tab='hotel'>
       <SearchServiceInput/>
       <div className='flex w-full gap-2.5 mt-2'>
         <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
           <span className='flex justify-between p-2.5'>
-            <Body>Found {hotels.length} hotels</Body>
+            <Body>Found {hotels ? hotels.length : 0} hotels</Body>
           </span>
-          {hotels.map((hotel, idx) => (
+          {hotels?.map((hotel, idx) => (
             <HotelCard key={idx} {...hotel}/>
           ))}
         </div>

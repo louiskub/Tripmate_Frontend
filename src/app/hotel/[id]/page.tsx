@@ -6,7 +6,6 @@ import { mockHotel1 } from '@/mocks/hotels';
 
 export default async function HotelDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  // return <HotelDetail service={mockHotel1}/>
 
   try {
     

@@ -117,7 +117,7 @@ type tab = {
   
   const starting_price = rooms ? Math.min(
       ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
-  ) : 1000;
+  ) : 0;
 
   const first_comment: string | undefined = service.review[0]?.comment;
 
@@ -178,7 +178,7 @@ type tab = {
               <ButtonText className='text-dark-blue'>Facilities</ButtonText>
               <ul className='grid grid-cols-2 gap-2 mt-2'>
               {facilitiesMeta.map((meta) => {
-                const items = service.facilities[meta.id].slice(0,2);
+                const items = service.facilities[meta.id]?.slice(0,2);
                 if (!items) return null;
 
                 return items.map((item) => (

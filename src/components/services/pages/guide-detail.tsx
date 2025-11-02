@@ -28,6 +28,7 @@ import ProfileIcon from '@/assets/icons/profile.svg'
 import { PicturePopup } from '@/components/services/other/service-pictures';
 
 import GuideDetailModel from '@/models/service/detail/guide-detail';
+import { paths } from '@/config/paths.config';
 
 type GuideDetailProps = {
   service: GuideDetailModel
@@ -107,18 +108,28 @@ type tab = {
         </PicturePopup>}
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
           <header className='grid px-4 py-3 grid-cols-2 gap-1 grid-rows-[auto_auto] border-b border-light-gray'>
-            <div className='flex gap-1 items-center text-dark-gray'>
+            <div
+              onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault()
+                  window.location.href = paths.other_profile(service.guider.user_id)
+              }} 
+              className='flex gap-1 items-center text-dark-gray hover:cursor-pointer'>
               <div className='w-4 aspect-square'>
                 {service.guider.profile_pic ?
                     <img src={service.guider.profile_pic} className='object-cover w-full h-full rounded-full'/> :
                     <ProfileIcon className='text-custom-gray'/>
                 }
               </div>
-              <Caption>{service.guider.first_name} {service.guider.last_name}</Caption>
+              <Caption>{service.guider.name}</Caption>
             </div>
             <Title className=''>{service.name}</Title>
             <div className='items-center'>
-              <Tag text={service.type} />
+              {
+                service.type?.map((tag, idx) =>
+                    <Tag text={tag} key={idx}/>
+                )
+              }
               {/* <div className="inline-flex items-center gap-1 pl-1 text-dark-gray">
                 <ClockIcon width='10'/>
                 <Caption>{duration}</Caption>
@@ -128,6 +139,7 @@ type tab = {
               <span className='flex items-baseline gap-1'>
                   <Title className='text-dark-blue font-medium'>฿</Title>
                   <Title className='text-dark-blue'>{formatPrice(service.price)}</Title>
+                  <Body className='text-gray'>/day</Body>
               </span>
               <Button
                 text='Book'
@@ -220,19 +232,21 @@ type tab = {
         <div className='flex flex-col px-4 py-2 gap-3'>
           <div className='grid grid-cols-[auto_1fr] gap-1'>
             <ClockIcon width='16' className='text-custom-gray self-center'/>
-            <SubBody className='font-semibold col-start-2'>Start/End</SubBody>
-            <span className='col-start-2 flex  gap-1.5'>
-              <SubBody className='text-custom-gray'>Start:</SubBody>
-              <SubBody className='font-semibold'>{service.policy.start}</SubBody>
-              <SubBody className='text-custom-gray'>End:</SubBody>
-              <SubBody className='font-semibold'>{service.policy.end}</SubBody>
+            <SubBody className='font-semibold col-start-2'>Availability</SubBody>
+            <span className='col-start-2 flex gap-1.5'>
+              <SubBody className='text-custom-gray'>Monday - Friday:</SubBody>
+              <SubBody className='font-semibold'>{service.policy.mon_fri}</SubBody>
+            </span>
+            <span className='col-start-2 flex gap-1.5'>
+              <SubBody className='text-custom-gray'>Weekend:</SubBody>
+              <SubBody className='font-semibold'>{service.policy.weekend}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1.5'>
-            <GuestIcon width='16' className='text-custom-gray self-center'/>
+            <ClockIcon width='16' className='text-custom-gray self-center'/>
             <span className='col-start-2 flex gap-1.5'>
-              <SubBody className='font-semibold'>Max Guests</SubBody>
-              <SubBody className='text-custom-gray'>{service.policy.max_guest ? service.policy.max_guest : '-'}</SubBody>
+              <SubBody className='font-semibold'>Overtime rate</SubBody>
+              <SubBody className='text-custom-gray'>฿{service.policy.overtime ? service.policy.overtime : '-'}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1'>

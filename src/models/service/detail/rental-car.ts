@@ -3,14 +3,14 @@ import Review from '@/models/service/reviews';
 type RentalcarDetail = {
     name: string,
 
-    renter: {
-        username: string
+    owner: {
+        id: string
         profile_pic?: string
-        first_name: string
-        last_name: string
+        name: string
     },
     
-    type?: string,
+    brand?: string,
+    model?: string,
 
     price: number,
 
@@ -38,9 +38,11 @@ type RentalcarDetail = {
         pick_up?: string
         drop_off?: string
         fuel?: boolean
-        pet_allow?: boolean
+        seats?: number
         contact?: string
     }
+
+    id: string
     
     favorite: boolean
 }

@@ -30,11 +30,11 @@ export const endpoints = {
     detail: (id: string) => `${BASE_URL}/place/${id}`,
     book: (id: string) => `${BASE_URL}/attraction/book/${id}`,
   },
-  
   guide: {
     all: `${BASE_URL}/guide`,
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
+  car_center: (id: string) => `${BASE_URL}/car-rental-center/${id}`
 
 }

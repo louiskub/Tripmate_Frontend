@@ -50,13 +50,13 @@ const rental_cars: RentalCarCardProps[] =
 
 const rental_car_detail: RentalCarDetail = {
     name: 'Cheap Car for Rent',
-    renter: {
-        username: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
+    owner: {
+        id: '37f66c3b-2edd-4a36-b6db-5dabd2a783c1',
         profile_pic: 'https://i.redd.it/help-me-find-instagram-account-of-this-cat-he-she-looks-so-v0-9329bx84mpud1.jpg?width=1080&format=pjpg&auto=webp&s=3e69817d9d72fd45c8cd6bd3505553009b0a4b0b',
-        first_name: 'Mit',
-        last_name: 'Shasheep'
+        name: 'Mit Shasheep',
     },
-    type: 'Luxury car',
+    brand: 'Luxury',
+    model: 'car',
     price: 9999,
     pictures: [
         "https://www.motoringresearch.com/wp-content/uploads/2025/03/000-Best-Luxury-Cars-to-Buy.jpg",

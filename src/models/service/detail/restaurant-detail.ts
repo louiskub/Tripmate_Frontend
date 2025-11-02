@@ -12,14 +12,15 @@ type RestaurantDetail = {
     rating_count: number,
     review: Reviews[],
 
-    menu: string[],
+    menu: string,
 
     location: string,
     nearby_locations: string[]
     
     favorite: boolean
 
-    cuisine: string[]
+    cuisine: string
+    id: string
 }
 
 export type RestaurantSubtopicRating = {

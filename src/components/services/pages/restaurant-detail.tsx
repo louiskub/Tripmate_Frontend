@@ -104,16 +104,14 @@ type tab = {
           <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
             <Title className=''>{service.name}</Title>
             <div className='flex gap-2'>
-              {service.cuisine.map((tag, idx) => 
-                <Tag text={tag} key={idx} />
-              )}
+                <Tag text={service.cuisine} />
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
-                <Button
+                {/* <Button
                   text='Book'
                   className='bg-dark-blue rounded-[10px] px-6! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
                   onClick={handleBookRestaurant}
-                />
+                /> */}
               </div>
           </header>
 
@@ -154,7 +152,13 @@ type tab = {
       <section id='menu' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Menu</Title>
         <div className='flex justify-center px-4 py-2 gap-y-6'>
-          <ImageSlide className='w-3/4 aspect-5/3' pictures={service.menu} />
+          {/* <ImageSlide className='w-3/4 aspect-5/3' pictures={service.menu} /> */}
+          <iframe
+            src={service.menu}
+            width="100%"
+            height="800px"
+            style={{ border: "none" }}
+          ></iframe>
         </div>
       </section>
 

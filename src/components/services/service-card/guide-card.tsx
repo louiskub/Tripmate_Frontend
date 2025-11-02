@@ -1,4 +1,6 @@
-import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
+"use client"
+
+import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption, Title} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { Tag } from '@/components/services/other/Tag'
 import { useState } from 'react';
@@ -34,21 +36,31 @@ const GuideCard = (service: GuideCardProps) => {
             <div className="w-full flex overflow-hidden">
                 <div className='flex flex-col flex-1 gap-2'>
                     <div className='ml-1'>
-                        <div className='flex gap-1 items-center text-dark-gray mb-1'>
+                        <div 
+                        onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault()
+                                window.location.href = paths.other_profile(service.guider.user_id)
+                            }}
+                            className='flex gap-1 items-center text-dark-gray mb-1'>
                             <div className='w-4 aspect-square'>
                                 {service.guider.profile_pic ?
                                     <img src={service.guider.profile_pic} className='object-cover w-full h-full rounded-full'/> :
                                     <ProfileIcon className='text-custom-gray'/>
                                 }
                             </div>
-                            <Caption>{service.guider.first_name} {service.guider.last_name}</Caption>
+                            <Caption>{service.guider.name}</Caption>
                         </div>
                         <Subtitle className='max-w-full line-clamp-2 leading-6'>{service.name}</Subtitle>
                     </div>
                     
                     
                     <div className="inline-flex items-center gap-1">
-                        <Tag text={service.type}/>
+                        {
+                            service.type.map((tag, idx) =>
+                                <Tag text={tag} key={idx}/>
+                            )
+                        }
                         {/* <div className="inline-flex items-center gap-1 pl-1 text-dark-gray">
                             <ClockIcon width='10'/>
                             <Caption>{duration}</Caption>
@@ -67,8 +79,9 @@ const GuideCard = (service: GuideCardProps) => {
                 </div>
                 <div className="self-stretch h-full inline-flex flex-col justify-end items-end gap-2">
                 <span className='flex items-baseline gap-1'>
-                    <SubBody className='text-dark-blue'>฿</SubBody>
-                    <ButtonText className='text-dark-blue'>{service.price}</ButtonText>
+                    <Body className='text-dark-blue'>฿</Body>
+                    <Title className='text-dark-blue'>{service.price}</Title>
+                    <Body className='text-gray'>/day</Body>
                 </span>
                 </div>
             </div>
