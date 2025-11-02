@@ -17,7 +17,6 @@ import { getUserIdFromToken } from '@/utils/service/cookie'
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
-
 export default function ManageAccount() {
     const showChangePasswordPopup = useBoolean(false);
     const showDeleteAccountPopup = useBoolean(false);

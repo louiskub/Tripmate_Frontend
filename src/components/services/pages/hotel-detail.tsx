@@ -27,6 +27,7 @@ import { hotelRatingMeta } from '@/utils/service/rating';
 import { PicturePopup } from '@/components/services/other/service-pictures';
 import HotelDetailModel from '@/models/service/detail/hotel-detail';
 
+
 type HotelDetailProps = {
   service: HotelDetailModel
 }
@@ -231,6 +232,7 @@ type tab = {
             <RoomDetail 
               key={room.name}
               room={room}
+              service_id={service.id}
             />
           ))
         }

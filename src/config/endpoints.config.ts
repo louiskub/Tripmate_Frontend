@@ -46,6 +46,8 @@ export const endpoints = {
       deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
       uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
     }
-  }
+  },
+
+  user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
 
 }
