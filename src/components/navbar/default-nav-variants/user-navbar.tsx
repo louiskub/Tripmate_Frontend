@@ -65,6 +65,7 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
         e?.preventDefault(); // 🧠 stop <a> navigation
         document.cookie = "token=; max-age=0; path=/";
         localStorage.clear();
+        window.location.reload();
         router.replace(paths.home);
     }
 
