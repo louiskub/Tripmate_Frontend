@@ -40,7 +40,16 @@ export default function LoginPage() {
                 localStorage.setItem("userRole", "car")
             else
                 localStorage.setItem("userRole", data.userRole)
-            
+
+            if (data.userRole != "user"){
+                const res = await axios.get(endpoints.auth.owner, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                localStorage.setItem("serviceId", res.data[0].id)
+            }
             router.push(paths.home)
         } catch (error: any) {
             console.error("Login failed:", error.response?.data || error.message);
