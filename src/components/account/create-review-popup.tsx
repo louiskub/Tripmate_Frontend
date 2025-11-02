@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { StarIcon } from "lucide-react";
 import LocationIcon from "@/assets/icons/location-point.svg";
+import axios from "axios"
+import {endpoints} from "@/config/endpoints.config"
+import {authJsonHeader} from "@/utils/service/get-header"
+import {uploadBlobUrls, uploadFile} from "@/utils/service/upload"
+import { getCookieFromName } from "@/utils/service/cookie"
 
 interface CreateReviewPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  // initialData?: {
+  //   name: string;
+  //   location: string;
+  //   type: string;          // ✅ เพิ่ม type เช่น "hotel" | "restaurant" | "attraction" | "rental car"
+  //   star?: number;
+  //   coverImg?: string;
+  // } | null;
   initialData?: {
     name: string;
     location: string;
     type: string;          // ✅ เพิ่ม type เช่น "hotel" | "restaurant" | "attraction" | "rental car"
     star?: number;
     coverImg?: string;
+
+    serviceId: string; 
+    bookingId: string;
   } | null;
 }
 
@@ -61,10 +76,11 @@ const RatingGroup: React.FC<RatingGroupProps> = ({ label, value, onChange }) => 
 
 // ✅ ฟังก์ชันกำหนดหัวข้อคะแนนตามประเภท
 const RatingGroupByType = (type: string) => {
-  if (type === "hotel") return ["Cleanliness", "Service", "Location", "Value for Money"];
-  if (type === "restaurant") return ["Food Quality", "Service", "Ambiance", "Value for Money"];
-  if (type === "attraction") return ["Overall"];
-  if (type === "rental car") return ["Cleanliness", "Service", "Value for Money"];
+  if (type === "Hotel") return ["cleanliness", "comfort", "meal", "location", "service", "facilities"];
+  // if (type === "restaurant") return ["Food Quality", "Service", "Ambiance", "Value for Money"];
+  if (type === "attraction") return ["overall"];
+  if (type === "Rental car") return ["overall"];
+  if (type === "Guide") return ["knowledge", "communication", "punctuality", "safety", "route_planning", "local_insights"];
   return [];
 };
 
@@ -115,28 +131,54 @@ const CreateReviewPopup: React.FC<CreateReviewPopupProps> = ({
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append("name", initialData?.name ?? "");
-      formData.append("location", initialData?.location ?? "");
-      formData.append("type", initialData?.type ?? "unknown");
-      formData.append("comment", comment);
-
-      Object.entries(ratings).forEach(([key, value]) => {
-        formData.append(`score[${key}]`, value.toString());
-      });
-
-      images.forEach((image) => {
-        formData.append("images", image);
-      });
-
-      const response = await fetch("/api/reviews", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save review");
+      const formData = {
+        "userId": localStorage.getItem("userId"),
+        // "placeId": initialData?.bookingId,
+        "placeId": null,
+        "comment": comment,
+        "serviceId": initialData?.serviceId,
+        "status": initialData?.type.toLowerCase()
       }
+
+      Object.entries(ratings).forEach(([label, value], index) => {
+        formData[`score${index + 1}`] =  value.toString();
+      });
+      const res = await axios.post(endpoints.review.create, formData, authJsonHeader())
+      const reviewId = res.data.id
+
+      const formImg = await uploadFile(images)
+      const resImg = await axios.post(endpoints.review.uploadImg(reviewId), formImg, {
+        headers: {
+          Authorization: `Bearer ${getCookieFromName("token")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      // console.log("Upload Img success:", res.data)
+      // console.log("Slice", res.data.pictures.slice(-images.length))
+      // console.log("res", res)
+      // const formData = new FormData();
+      // formData.append("name", initialData?.name ?? "");
+      // formData.append("location", initialData?.location ?? "");
+      // formData.append("type", initialData?.type ?? "unknown");
+      // formData.append("comment", comment);
+
+      // Object.entries(ratings).forEach(([key, value]) => {
+      //   formData.append(`score[${key}]`, value.toString());
+      // });
+
+      // images.forEach((image) => {
+      //   formData.append("images", image);
+      // });
+
+      // const response = await fetch("/api/reviews", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+
+      // if (!response.ok) {
+      //   throw new Error("Failed to save review");
+      // }
 
       onClose();
     } catch (error) {

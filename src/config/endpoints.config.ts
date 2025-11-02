@@ -6,6 +6,11 @@ export const endpoints = {
     register: `${BASE_URL}/auth/register`,
     owner: `${BASE_URL}/user-services/owner`,
   },
+  user: {
+    history: {
+      booking: (vendorType: string) => `${BASE_URL}/transaction?type=${vendorType}`
+    }
+  },
   manage_account: {
     change_password: (id: string) => `${BASE_URL}/users/${id}/password`,
   },
@@ -15,6 +20,7 @@ export const endpoints = {
     all: (key?: string) => `${BASE_URL}/search/hotels?${key}`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
     book: (id: string) => `${BASE_URL}/hotel/book/${id}`,
+    room: (roomId: string, hotelId: string) => `${BASE_URL}/room/${roomId}/${hotelId}`,
   },
   restaurant: {
     all: (key?: string) => `${BASE_URL}/search/rentaurants?${key}`,
@@ -46,6 +52,10 @@ export const endpoints = {
       deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
       uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
     }
+  },
+  review: {
+    create: `${BASE_URL}/review`,
+    uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
   }
 
 }

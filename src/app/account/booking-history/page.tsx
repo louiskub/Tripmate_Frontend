@@ -9,8 +9,11 @@ import { BsSendFill } from "react-icons/bs";
 import axios from "axios";
 import dayjs from "dayjs";
 import {endpoints} from "@/config/endpoints.config"
+import DefaultPage from "@/components/layout/default-layout";
+import ProfileNavbar from "@/components/navbar/side-nav-variants/profile-side-navbar";
 
 import CreateReviewPopup from "@/components/account/create-review-popup"
+import {authJsonHeader} from "@/utils/service/get-header"
 
 // 1. import useState และ useEffect
 import React, { useState, useEffect } from "react";
@@ -28,12 +31,128 @@ type ReviewPopupData = {
 };
 
 
+function findRoom(rooms: Array<any>, roomId: string){
+    for(let i=0; i<rooms.length; i++){
+        if(rooms[i].id === roomId){
+            return rooms[i]
+        }
+    }
+    return null
+}
+
+
+async function getHotel(){
+    const res = await axios.get(endpoints.user.history.booking("hotel"), authJsonHeader()); // แก้เป็น endpoint จริง
+    const rawData = res.data;
+    const mapped = rawData.map(async (item: any) => {
+        const b = item.booking;
+        const nights = dayjs(b.endBookingDate).diff(dayjs(b.startBookingDate), "day");
+        const checkIn = dayjs(b.startBookingDate).format("ddd, DD MMM YYYY");
+        const checkOut = dayjs(b.endBookingDate).format("ddd, DD MMM YYYY");
+
+        let hotelData = await axios.get(endpoints.hotel.detail(b.serviceId))
+        hotelData = hotelData.data
+        const rooomData = findRoom(hotelData.rooms, b.subServiceId)
+        console.log("roomData", item)
+        return {
+        id: item.id,
+        serviceId: b.serviceId,
+        bookingId: item.bookingId,
+        type: b.service.type === "hotel"
+            ? "Hotel"
+            : b.service.type === "carRentalCenter"
+            ? "Rental Car"
+            : "Guide",
+        // title: `${b.serviceId.toUpperCase()} (${b.subServiceId})`,
+        title: `${hotelData.name} - ${rooomData.name}`,
+        img: rooomData.pictures[0],
+        // location: b.groupId,
+        checkIn,
+        checkOut,
+        nights,
+        status: b.status,
+        amount: item.amount,
+        location: hotelData.service.location.name
+        };
+})
+    return mapped
+}
+
+async function getRental(){
+    const res = await axios.get(endpoints.user.history.booking("car_rental_center"), authJsonHeader()); // แก้เป็น endpoint จริง
+    const rawData = res.data;
+    const mapped = rawData.map(async (item: any) => {
+        const b = item.booking;
+        const nights = dayjs(b.endBookingDate).diff(dayjs(b.startBookingDate), "day");
+        const checkIn = dayjs(b.startBookingDate).format("ddd, DD MMM YYYY");
+        const checkOut = dayjs(b.endBookingDate).format("ddd, DD MMM YYYY");
+
+        let hotelData = await axios.get(endpoints.hotel.detail(b.serviceId))
+        hotelData = hotelData.data
+        const rooomData = findRoom(hotelData.rooms, b.subServiceId)
+        console.log("roomData", hotelData)
+        return {
+        id: item.id,
+        type: b.service.type === "hotel"
+            ? "Hotel"
+            : b.service.type === "restaurant"
+            ? "Restaurant"
+            : b.service.type === "carRentalCenter"
+            ? "Rental Car"
+            : "Guide",
+        // title: `${b.serviceId.toUpperCase()} (${b.subServiceId})`,
+        title: `${hotelData.name} - ${rooomData.name}`,
+        img: rooomData.pictures[0],
+        location: b.groupId,
+        checkIn,
+        checkOut,
+        nights,
+        status: b.status,
+        amount: item.amount,
+        };
+})
+    return mapped
+}
+
+async function getGuide(){
+    const res = await axios.get(endpoints.user.history.booking("guide"), authJsonHeader()); // แก้เป็น endpoint จริง
+    const rawData = res.data;
+    const mapped = rawData.map(async (item: any) => {
+        const b = item.booking;
+        const nights = dayjs(b.endBookingDate).diff(dayjs(b.startBookingDate), "day");
+        const checkIn = dayjs(b.startBookingDate).format("ddd, DD MMM YYYY");
+        const checkOut = dayjs(b.endBookingDate).format("ddd, DD MMM YYYY");
+
+        let hotelData = await axios.get(endpoints.hotel.detail(b.serviceId))
+        hotelData = hotelData.data
+        const rooomData = findRoom(hotelData.rooms, b.subServiceId)
+        console.log("roomData", hotelData)
+        return {
+        id: item.id,
+        type: b.service.type === "hotel"
+            ? "Hotel"
+            : b.service.type === "restaurant"
+            ? "Restaurant"
+            : b.service.type === "carRentalCenter"
+            ? "Rental Car"
+            : "Guide",
+        // title: `${b.serviceId.toUpperCase()} (${b.subServiceId})`,
+        title: `${hotelData.name} - ${rooomData.name}`,
+        img: rooomData.pictures[0],
+        location: b.groupId,
+        checkIn,
+        checkOut,
+        nights,
+        status: b.status,
+        amount: item.amount,
+        };
+})
+    return mapped
+}
 
 
 
-
-
-const filters = ["Hotel", "Restaurant", "Rental Car", "Guide"];
+const filters = ["Hotel", "Rental Car", "Guide"];
 
 export default function BookingHistory() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -45,41 +164,15 @@ export default function BookingHistory() {
   
   const [isEditing, setIsEditing] = useState(false);
 
-//   const [initialData, setInitialData] = useState({});
+  const [initialData, setInitialData] = useState<ReviewPopupData>();
 
 // fetch api
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await axios.get("/api/payments"); // แก้เป็น endpoint จริง
-        const rawData = res.data;
+        const hotelJa = await getHotel();
 
-        const mapped = rawData.map((item: any) => {
-          const b = item.booking;
-          const nights = dayjs(b.endBookingDate).diff(dayjs(b.startBookingDate), "day");
-          const checkIn = dayjs(b.startBookingDate).format("ddd, DD MMM YYYY");
-          const checkOut = dayjs(b.endBookingDate).format("ddd, DD MMM YYYY");
-
-          return {
-            id: item.id,
-            type: b.service.type === "hotel"
-              ? "Hotel"
-              : b.service.type === "restaurant"
-              ? "Restaurant"
-              : b.service.type === "carRentalCenter"
-              ? "Rental Car"
-              : "Guide",
-            title: `${b.serviceId.toUpperCase()} (${b.subServiceId})`,
-            location: b.groupId,
-            checkIn,
-            checkOut,
-            nights,
-            status: b.status,
-            amount: item.amount,
-          };
-        });
-
-        setBookings(mapped);
+        setBookings(await Promise.all(hotelJa));
       } catch (err) {
         console.error("Error fetching bookings:", err);
       }
@@ -111,7 +204,12 @@ export default function BookingHistory() {
   }, [bookings, activeFilter, sortOption]); // dependencies: ทำงานใหม่เมื่อค่าเหล่านี้เปลี่ยน
 
   return (
-    <div className="flex-1 p-7">
+    <DefaultPage>
+      <div className="bg-custom-white -m-1 p-2 pt-5 rounded-lg">
+        <div className="flex gap-5">
+          <ProfileNavbar />
+          <div className="flex-1 flex flex-col gap-4 ">
+                <div className="flex-1 p-7">
       <div className="flex bg-white rounded-lg p-2 shadow-sm gap-4">
         <section className="flex-1 p-5 flex flex-col gap-4">
           <h1 className="text-2xl font-extrabold">Booking History</h1>
@@ -141,21 +239,12 @@ export default function BookingHistory() {
             <div className="flex gap-4">
               <select
                 value={sortOption}
-                className="text-custom-black d-select w-fit" // ใช้ class จาก review-history
+                className="text-custom-black d-select pr-5 pl-2 w-[15rem]" // ใช้ class จาก review-history
                 onChange={(e) => setSortOption(e.target.value)}
               >
                 {/* <option value="" disabled>Sort by option</option> */}
                 <option value="date">Sort by date (Newest)</option>
                 <option value="nights">Sort by nights (Most)</option>
-              </select>
-              <select
-                value={viewOption}
-                className="text-custom-black d-select w-fit" // ใช้ class จาก review-history
-                onChange={(e) => setViewOption(e.target.value)}
-              >
-                {/* <option value="" disabled>View</option> */}
-                <option value="List">List</option>
-                <option value="Grid">Grid</option>
               </select>
             </div>
           </div>
@@ -182,7 +271,7 @@ export default function BookingHistory() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-44 h-44 bg-gradient-to-b from-black/0 to-black/30 rounded-lg" />
+                  <img className="w-44 h-44 bg-gradient-to-b from-black/0 to-black/30 rounded-lg" src={b.img}/>
 
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
@@ -192,10 +281,10 @@ export default function BookingHistory() {
                       {/* ... (รายละเอียดอื่นๆ) ... */}
                       <div className="mt-2 flex items-center gap-3">
                         <div className="flex items-center gap-1">
-                          <div className="w-2.5 h-3 bg-black" />
-                          <span className="text-xs text-gray-600">
+                          {/* <div className="w-2.5 h-3 bg-black" /> */}
+                          {/* <span className="text-xs text-gray-600">
                             location
-                          </span>
+                          </span> */}
                         </div>
 
                         <div className="ml-4 px-3 py-2 bg-sky-50 rounded-lg inline-flex items-center gap-4">
@@ -228,7 +317,23 @@ export default function BookingHistory() {
 
                     <div className="flex gap-3 mt-3">
                       <button 
-                        onClick={() => {setIsEditing(true)}}
+                        onClick={() => {setInitialData({
+                            name: b.title,
+                            coverImg: b.img,
+                            bookingId: b.bookingId,
+                            serviceId: b.serviceId,
+                            location: b.location,
+                            star: 5,
+                            type: b.type,
+                        });setIsEditing(true); console.log("click", {
+                            name: b.title,
+                            coverImg: b.img,
+                            bookingId: b.bookingId,
+                            serviceId: b.serviceId,
+                            location: b.location,
+                            star: 5,
+                            type: b.type,
+                        })}}
                         className="flex-1 h-10 rounded-2xl border border-sky-600 text-sky-700 font-bold">
                         Review
                       </button>
@@ -249,6 +354,10 @@ export default function BookingHistory() {
                 onClose={() => setIsEditing(false)} 
             /> 
     </div>
+          </div>
+        </div>
+    </div>
+    </DefaultPage>
   );
 }
 
