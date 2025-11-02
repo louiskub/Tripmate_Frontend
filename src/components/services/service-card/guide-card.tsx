@@ -28,7 +28,7 @@ const GuideCard = (service: GuideCardProps) => {
                     hover:bg-dark-white hover:cursor-pointer"
             onClick={() => router.push(paths.guide.detail(service.id))}>
             <ImageSlide pictures={service.pictures}>
-                <FavoriteButton favorite={service.favorite} id={service.id} type='rental_car'/>
+                <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='rental_car'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">

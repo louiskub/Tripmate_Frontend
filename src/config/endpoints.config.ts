@@ -11,6 +11,7 @@ export const endpoints = {
   },
   profile: (id: string) => `${BASE_URL}/users/${id}`,
   upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
+  favorite: (id: string) => `${BASE_URL}/bookmark/${id}`,
   hotel: {
     all: `${BASE_URL}/hotel`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
@@ -37,6 +38,7 @@ export const endpoints = {
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
+  
 
   serviceManage: {
     car: {
@@ -46,6 +48,7 @@ export const endpoints = {
       deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
       uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
     }
-  }
+  },
+
 
 }

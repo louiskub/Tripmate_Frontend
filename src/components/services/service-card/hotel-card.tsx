@@ -24,7 +24,7 @@ const HotelCard = (hotel: HotelCardProps) => {
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5 hover:bg-dark-white hover:cursor-pointer"
             onClick={() => router.push(paths.hotel.detail(hotel.id))}>
             <ImageSlide pictures={hotel.pictures}>
-                <FavoriteButton favorite={hotel.favorite} id={hotel.id} type='hotel'/>
+                <FavoriteButton favorite={service.favorite ?? false} id={hotel.id} type='hotel'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">

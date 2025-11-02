@@ -25,7 +25,7 @@ const AttractionCard = (attraction: AttractionCardProps) => {
                     hover:bg-dark-white hover:cursor-pointer"
             onClick={() => router.push(paths.attraction.detail(attraction.id))}>
             <ImageSlide pictures={attraction.pictures}>
-                <FavoriteButton favorite={attraction.favorite} id={attraction.id} type='rental_car'/>
+                <FavoriteButton favorite={service.favorite ?? false} id={attraction.id} type='rental_car'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">

@@ -25,7 +25,7 @@ const RentalCarCard = (car: RentalCarCardProps) => {
                     hover:bg-dark-white hover:cursor-pointer"
             onClick={() => router.push(paths.rental_car.detail(car.rental_car_id))}>
             <ImageSlide pictures={car.pictures}>
-                <FavoriteButton favorite={car.favorite} id={car.rental_car_id} type='rental_car'/>
+                <FavoriteButton favorite={service.favorite ?? false} id={car.rental_car_id} type='rental_car'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">

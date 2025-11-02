@@ -4,6 +4,9 @@ import { useState } from 'react';
 import HeartIcon from '@/assets/icons/heart.svg'
 import HeartFilledIcon from '@/assets/icons/heart-filled.svg'
 import { useBoolean } from '@/hooks/use-boolean';
+import axios from 'axios';
+import { endpoints } from '@/config/endpoints.config';
+import Cookies from 'js-cookie';
 
 type FavoriteButtonProps = {
     favorite: boolean
@@ -24,19 +27,21 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
     async function handleFavorite() {
         if (loading) return;
         setLoading(true)
+        // try {
+        // const response = await fetch(`/api/hotels/${id}/favorite`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ favorite: !isFavorite }),
+        // });
+        const token = Cookies.get("token");
         try {
-        const response = await fetch(`/api/hotels/${id}/favorite`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ favorite: !isFavorite }),
-        });
-
-        setAnimate(true);
-
-        if (response.ok) throw new Error('Failed to update');
+            const response = await axios.patch(endpoints.favorite(id), {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setAnimate(true);
             isFavorite.toggle();
-        } catch (error) {
-        console.error(error);
+        } catch (err) {
+            console.error("Failed Favorite", err);
         } finally {
         setLoading(false);
         }
