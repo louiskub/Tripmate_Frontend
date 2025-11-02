@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Statenav from "@/components/navbar/statenav";
+import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
 import Link from "next/link";
 
 /* =========================
@@ -149,7 +149,7 @@ export default function RentalCarBookingCompletePage() {
    * ========================= */
   return (
     <div className="min-h-screen bg-gray-50">
-      <Statenav />
+      <BookNavbar book_state={3}/>
 
       <main className="w-full h-full mx-auto bg-gray-50 px-4 sm:px-6 md:px-12 xl:px-24 pt-4 md:pt-7 pb-2.5">
         <div className="max-w-[1440px] mx-auto w-full px-6 md:px-10 lg:px-24">

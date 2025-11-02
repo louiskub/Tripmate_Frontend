@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Statenav from "@/components/navbar/statenav";
+import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
 
 /* ---------- types ---------- */
 type PaymentMethod = "card" | "qr";
@@ -161,9 +161,12 @@ export default function HotelPaymentPage() {
     }
   };
 
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Statenav />
+      <BookNavbar book_state={2}/>
 
       <main className="px-4 md:px-6 lg:px-24 pt-7 pb-10">
         {/* Header */}
@@ -321,24 +324,20 @@ export default function HotelPaymentPage() {
                             {formatTHB(total)}
                           </span>
                         </div>
+                        <img src="/images/qrcode.jpg" alt="QR Code" className="w-60 h-60 object-cover rounded-lg"/>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowSuccessPopup(true)}
+                          className="inline-flex h-10 items-center justify-center rounded-md bg-sky-600 px-4 text-white text-sm font-semibold shadow hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        >
+                          I have paid
+                        </button>
+                      </div>
 
-                        <div className="w-48 h-48 sm:w-60 sm:h-60 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                          {qrUrl ? (
-                            // ถ้า backend ส่ง QR จริงกลับมา
-                            <img src={qrUrl} alt="QR Code" className="w-full h-full object-cover rounded-lg" />
-                          ) : (
-                            // placeholder ก่อนสร้าง intent
-                            <img
-                              src="/placeholder.svg?height=240&width=240"
-                              alt="QR Code"
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          )}
-                        </div>
-
-                        <p className="text-xs sm:text-sm font-medium text-slate-900 text-center">
-                          Your payment will be confirmed automatically.
-                        </p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-900 text-center">
+                        Your payment will be confirmed automatically after scanning. You can click &quot;I have paid&quot; when done.
+                      </p>
                       </div>
                     )}
                   </div>
@@ -512,6 +511,27 @@ export default function HotelPaymentPage() {
             {submitting ? "Processing..." : "Complete Booking"}
           </button>
         </div>
+
+        {showSuccessPopup && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 flex flex-col items-center gap-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Payment Success</h3>
+              <p className="text-center text-gray-600 text-sm">Your payment has been processed successfully.</p>
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="w-full h-10 bg-sky-600 text-white rounded-md font-semibold hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

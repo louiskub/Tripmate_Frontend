@@ -1,14 +1,14 @@
 "use client"
 
-import Navbar from '@/components/navbar/nav';
+import Navbar from '@/components/navbar/navbar';
 import StatCard from '@/components/hotelmanagement/StatCard';
 import ChartCard from '@/components/hotelmanagement/ChartCard';
-import VendorSideNav from '@/components/navbar/vendorsidenav';
+import VendorSideNav from '@/components/navbar/hotelvendorsidenav';
 
 // --- Mock Data สำหรับ Stat Cards ---
 const statCardsData = [
-  { title: "Total Restaurants", value: 18 },
-  { title: "Available Restaurants", value: 10 },
+  { title: "Total Hotels", value: 18 },
+  { title: "Available", value: 10 },
   { title: "Unavailable", value: 0 },
   { title: "Full Booking", value: 8 },
 ];

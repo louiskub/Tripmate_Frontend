@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
-import Navbar from '@/components/navbar/nav';
-import VendorSideNav from '@/components/navbar/vendorsidenav';
+import Navbar from '@/components/navbar/navbar';
+import VendorSideNav from '@/components/navbar/hotelvendorsidenav';
 import Link from "next/link";
 
 export default function RoomsPage() {
@@ -47,9 +47,9 @@ export default function RoomsPage() {
             {/* Header with New Room button */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Room</h1>
-              <Link href="/hotelmanagement/createroom/" className="px-4 py-2 bg-sky-700 text-white text-base font-bold rounded-[10px] shadow-lg hover:bg-sky-800">
+              {/* <Link href="/hotelmanagement/createroom/" className="px-4 py-2 bg-sky-700 text-white text-base font-bold rounded-[10px] shadow-lg hover:bg-sky-800">
                 New Room
-              </Link>
+              </Link> */}
             </div>
 
             {/* Room Cards */}

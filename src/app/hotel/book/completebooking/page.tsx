@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Statenav from "@/components/navbar/statenav";
+import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
 
 /* -------------------- types -------------------- */
 type PriceRow = { label: string; amount: number; discount?: boolean; strong?: boolean };
@@ -161,7 +161,7 @@ export default function CompleteBookingHotelPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Statenav />
+      <BookNavbar book_state={3}/>
 
       <main className="max-w-[1240px] mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 space-y-4 md:space-y-5">
         <h1 className="text-gray-900 text-xl md:text-2xl font-extrabold">Hotel Booking</h1>
