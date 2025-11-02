@@ -12,7 +12,6 @@ type SideNavBarProps = {
 }
 
 const SideNavbar = ( { current } : SideNavBarProps) => {
-  const isAuthenticated: boolean = true;
   const pathname = usePathname()
 
   if (pathname.startsWith(paths.admin)) return <AdminSideNavbar />

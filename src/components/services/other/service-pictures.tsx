@@ -29,7 +29,11 @@ const ServicePictures = ({ pictures, children, onClick }: ServicePicturesProps) 
             
             <div className="rounded-[10px] h-full flex-1 overflow-hidden">
                 <img 
-                    src={pictures[0]}
+                    src={pictures[0] || '/images/placeholder.png'}
+                    onError={(e) => {
+                        e.currentTarget.onerror = null; // prevent infinite loop
+                        e.currentTarget.src = "/images/placeholder.png"; // fallback immediately
+                    }}
                     className="w-full h-full object-cover hover:scale-102 transition-transform  hover:cursor-pointer" 
                 />
             </div>
@@ -37,7 +41,11 @@ const ServicePictures = ({ pictures, children, onClick }: ServicePicturesProps) 
                 {pictures.slice(1, 5).map((pic, idx) => (
                     <div key={idx} className="w-full h-full overflow-hidden rounded-[10px]">
                         <img
-                        src={pic}
+                        onError={(e) => {
+                            e.currentTarget.onerror = null; // prevent infinite loop
+                            e.currentTarget.src = "/images/placeholder.png"; // fallback immediately
+                        }}
+                        src={pic || '/images/placeholder.png'}
                         className="w-full h-full object-cover overflow-hidden hover:scale-105 hover:cursor-pointer transition-transform"
                         />
                     </div>
@@ -50,7 +58,7 @@ const ServicePictures = ({ pictures, children, onClick }: ServicePicturesProps) 
 type PicturePopupProps = {
     pictures: string[]
     name: string
-    children: ReactNode
+    children?: ReactNode
     Close: () => void
 }
 
@@ -102,7 +110,13 @@ export const PicturePopup = ({ pictures, name, children, Close }: PicturePopupPr
                                 key={pictureIdx}
                                 onClick={() => setPictureIdx(pictureIdx)}
                             >
-                                <img className="w-full h-full object-cover" src={pictures[pictureIdx]} />
+                                <img
+                                    onError={(e) => {
+                                        e.currentTarget.onerror = null; // prevent infinite loop
+                                        e.currentTarget.src = "/images/placeholder.png"; // fallback immediately
+                                    }}
+                                    className="w-full h-full object-cover" 
+                                    src={pictures[pictureIdx] || '/images/placeholder.png'} />
                                 <Body className='bg-translucent-white px-3 rounded-lg text-center absolute left-1/2 -translate-x-1/2 bottom-1'>{pictureIdx + 1}/{pictures.length}</Body>
                             </div>
                             <Button
@@ -136,7 +150,7 @@ export const PicturePopup = ({ pictures, name, children, Close }: PicturePopupPr
                                     key={idx}
                                     onClick={() => setPictureIdx(idx)}
                                 >
-                                    <img className="hover:scale-105 transition-all object-cover w-full h-full" src={picture} />
+                                    <img className="hover:scale-105 transition-all object-cover w-full h-full" src={picture || '/images/placeholder.png'} />
                                 </div>
                             )
                         }
@@ -166,7 +180,13 @@ export const PictureListItem = ({picture, idx, onClick, active = false}: Picture
             className={`h-18 w-18 overflow-hidden rounded-[10px] hover:cursor-pointer ${active? 'border-3 border-dark-blue box-content': ''}`}
             onClick={() => onClick(idx)}
         >
-            <img className={`w-full h-full hover:scale-103 transition-all object-cover ${active? '': 'opacity-50 hover:opacity-100'}`} src={picture} />
+            <img 
+                onError={(e) => {
+                    e.currentTarget.onerror = null; // prevent infinite loop
+                    e.currentTarget.src = "/images/placeholder.png"; // fallback immediately
+                }}
+                className={`w-full h-full hover:scale-103 transition-all object-cover ${active? '': 'opacity-50 hover:opacity-100'}`}
+                src={picture || "/images/placeholder.png"} />
         </div>
     )
 }

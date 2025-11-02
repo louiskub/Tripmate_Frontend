@@ -11,7 +11,8 @@ import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
 import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
+import MiniMap from '@/components/map/minimap';
 import LargeMap from '@/components/other/large-map';
 import RoomDetail from '@/components/services/other/room-detail'
 
@@ -50,7 +51,7 @@ type tab = {
   
   type facility = {
     label: string
-    id: 'internet' | 'food' | 'health' | 'accessibility' | 'transportation' | 'services'
+    id: 'internet' | 'food' | 'health' | 'accessibility' | 'transportation' | 'service'
     icon: ReactNode
   }
 
@@ -82,7 +83,7 @@ type tab = {
     },
     {
       label: 'Hotel Services',
-      id: 'services',
+      id: 'service',
       icon: <QuestionIcon width='16' />
     },
   ]
@@ -111,11 +112,13 @@ type tab = {
   }, []);
 
   // const service = mockHotel1
+  
   const rooms = service.room;
 
-  const starting_price = Math.min(
-    ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
-  );
+  
+  const starting_price = rooms ? Math.min(
+      ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
+  ) : 0;
 
   const first_comment: string | undefined = service.review[0]?.comment;
 
@@ -176,7 +179,7 @@ type tab = {
               <ButtonText className='text-dark-blue'>Facilities</ButtonText>
               <ul className='grid grid-cols-2 gap-2 mt-2'>
               {facilitiesMeta.map((meta) => {
-                const items = service.facilities[meta.id].slice(0,2);
+                const items = service.facilities[meta.id]?.slice(0,2);
                 if (!items) return null;
 
                 return items.map((item) => (
@@ -198,7 +201,7 @@ type tab = {
             />
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px]'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (
@@ -310,10 +313,9 @@ type tab = {
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1.5'>
             <QuestionIcon width='16' className='text-custom-gray self-center'/>
-            <SubBody className='font-semibold col-start-2'>Breakfast</SubBody>
             <span className='col-start-2 flex gap-1'>
-              <SubBody className='text-custom-gray'>Opening hours:</SubBody>
-              <SubBody className='font-semibold'>{service.policy.breakfast}</SubBody>
+              <SubBody className='font-semibold col-start-2'>Breakfast</SubBody>
+              <SubBody className='text-custom-gray'>{service.policy.breakfast}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1'>

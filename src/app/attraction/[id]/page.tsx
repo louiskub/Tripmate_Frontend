@@ -5,14 +5,23 @@ import AttractionDetail from '@/components/services/pages/attraction-detail';
 import { attraction_detail } from '@/mocks/attractions';
 
 export default async function RentalCarDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
-  return <AttractionDetail service={attraction_detail}/>
-
+  const { id } = await params;
   try {
-    const response = await axios.get<AttractionDetailModel>(endpoints.attraction.detail(id));
-    const hotel = response.data;
-    return <AttractionDetail service={hotel} />;
-
+    const response = await axios.get(endpoints.attraction.detail(id));
+    const data = response.data;
+    const service: AttractionDetailModel = {
+      name: data.name ?? '',
+      type: data.type ?? '',
+      location: data.zone ?? '',
+      pictures: data.pictures?.slice(0, 3) ?? [],
+      favorite: data.favorite ?? false,
+      id: data.id,
+      description: data.description ?? '',
+      nearby_locations: [],
+      lat: 0,
+      long: 0
+    }
+    return <AttractionDetail service={service} />;
   } 
   catch (error: any) {
     if (axios.isAxiosError(error)) {
@@ -20,6 +29,6 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
     } else {
       console.error("Unexpected Error:", error);
     }
-    throw error; // rethrow if you want caller to handle
-  } 
+    throw error;
+  }
 }

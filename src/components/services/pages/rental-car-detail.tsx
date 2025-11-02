@@ -11,13 +11,14 @@ import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
 import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
+import MiniMap from '@/components/map/minimap';
 import LargeMap from '@/components/other/large-map';
 
 import QuestionIcon from '@/assets/icons/question.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import ClockIcon from '@/assets/icons/Clock.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 
 
 import { restaurantRatingMeta } from '@/utils/service/rating';
@@ -105,16 +106,17 @@ type tab = {
           <header className='grid px-4 py-3 gap-1 grid-cols-2 grid-rows-[auto_auto_auto] border-b border-light-gray'>
             <div className='flex gap-1 items-center text-dark-gray'>
               <div className='w-4 aspect-square'>
-                {service.renter.profile_pic ?
-                    <img src={service.renter.profile_pic} className='object-cover w-full h-full rounded-full'/> :
+                {service.owner.profile_pic ?
+                    <img src={service.owner.profile_pic} className='object-cover w-full h-full rounded-full'/> :
                     <ProfileIcon className='text-custom-gray'/>
                 }
               </div>
-              <Caption>{service.renter.first_name} {service.renter.last_name}</Caption>
+              <Caption>{service.owner.name}</Caption>
             </div>
             <Title className=''>{service.name}</Title>
-            <div>
-              <Tag text={service.type} />
+            <div className='flex'>
+              <Tag text={service.brand} />
+              <Tag text={service.model} />
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
                 <span className='flex items-baseline'>
@@ -139,7 +141,7 @@ type tab = {
             />
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (
@@ -166,7 +168,7 @@ type tab = {
         <Title className='border-b border-light-gray py-1.5 px-4'>Additional Services</Title>
         <div className='flex justify-center px-4 py-5'>
           <div className='px-10'>
-            <PriceCard name={'Deposit'} price={1000} />
+            <PriceCard name={'Deposit'} price={service.services.deposit} />
           </div>
           <div className='flex flex-col gap-4 border-x border-light-gray px-10'>
             <PriceCard name={'Delivery'} description='in local area' price={500} />
@@ -215,7 +217,7 @@ type tab = {
       <section id='policy' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Policy</Title>
         <div className='flex flex-col px-4 py-2 gap-3'>
-          <div className='grid grid-cols-[auto_1fr] gap-1'>
+          {/* <div className='grid grid-cols-[auto_1fr] gap-1'>
             <ClockIcon width='16' className='text-custom-gray self-center'/>
             <SubBody className='font-semibold col-start-2'>Pick-up/Drop-off</SubBody>
             <span className='col-start-2 flex  gap-1.5'>
@@ -224,7 +226,7 @@ type tab = {
               <SubBody className='text-custom-gray'>Drop-off:</SubBody>
               <SubBody className='font-semibold'>{service.policy.drop_off}</SubBody>
             </span>
-          </div>
+          </div> */}
           <div className='grid grid-cols-[auto_1fr] gap-1.5'>
             <QuestionIcon width='16' className='text-custom-gray self-center'/>
             <span className='col-start-2 flex gap-1.5'>
@@ -235,8 +237,8 @@ type tab = {
           <div className='grid grid-cols-[auto_1fr] gap-1'>
             <QuestionIcon width='16' className='text-custom-gray self-center'/>
             <span className='col-start-2 flex gap-1.5'>
-              <SubBody className='font-semibold'>Pets</SubBody>
-              <SubBody className='text-custom-gray'>{service.policy.pet_allow ? 'allowed' : 'not allowed'}</SubBody>
+              <SubBody className='font-semibold'>Seats</SubBody>
+              <SubBody className='text-custom-gray'>{service.policy.seats || '-'}</SubBody>
             </span>
           </div>
           <div className='grid grid-cols-[auto_1fr] gap-1'>

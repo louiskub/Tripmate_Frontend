@@ -8,9 +8,9 @@ import { useEffect, useState } from "react";
 import AuthNavbar from './default-nav-variants/auth-navbar'
 import AdminNavbar from './default-nav-variants/admin-navbar'
 import GuestNavbar from './default-nav-variants/guest-navbar'
-import UserNavbar from './default-nav-variants/user-navbar'
 import BookNavbar from './default-nav-variants/book-navbar'
 import { checkAuth } from '@/utils/service/authen'
+import UserNavbar from './default-nav-variants/user-navbar';
 
 const Navbar = () => {
   const pathname = usePathname()
@@ -35,7 +35,7 @@ const Navbar = () => {
     return <BookNavbar book_state={1} restaurant/>
   default:
     return auth ? 
-    <UserNavbar /> : <GuestNavbar />
+    <UserNavbar/> : <GuestNavbar />
   }
 }
 

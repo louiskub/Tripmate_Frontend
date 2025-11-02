@@ -6,11 +6,28 @@ import { mockHotel1 } from '@/mocks/hotels';
 
 export default async function HotelDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  return <HotelDetail service={mockHotel1}/>
 
   try {
-    const response = await axios.get<HotelDetailModel>(endpoints.hotel.detail(id));
-    const hotel = response.data;
+    
+    const response = await axios.get(endpoints.hotel.detail(id));
+    const data = response.data;
+    console.log(data)
+    const hotel: HotelDetailModel = {
+      ...data,
+      review: [],
+      subtopic_ratings: data.subtopicRatings,
+      policy: {
+        breakfast: data.breakfast,
+        check_in: data.checkIn,
+        check_out: data.checkOut,
+        contact: data.contact
+      },
+      nearby_locations: data.nearbyLocations,
+      room: mockHotel1.room,
+      lat: data.service.location.lat,
+      long: data.service.location.long,
+
+    }
     return <HotelDetail service={hotel} />;
 
   } 

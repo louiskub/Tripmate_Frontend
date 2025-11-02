@@ -4,15 +4,14 @@ type GuideDetail = {
     name: string,
 
     guider: {
-        username: string
+        user_id: string
         profile_pic?: string
-        first_name: string
-        last_name: string
+        name: string
     },
 
-    duration: string,
+    // duration: string,
     
-    type?: string,
+    type?: string[],
 
     price: number,
 
@@ -29,13 +28,16 @@ type GuideDetail = {
     nearby_locations: string[]
 
     policy: {
-        start?: string
-        end?: string
-        max_guest?: number
+        mon_fri?: string
+        weekend?: string
+        overtime?: number
         contact?: string
     }
     
+    id:string
     favorite: boolean
+    lat: number,
+    long: number,
 }
 
 export type GuideSubtopicRating = {

@@ -14,44 +14,51 @@ import GroupIcon from '@/assets/icons/group.svg'
 import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
+import { useUser } from '@/context/userContext';
 
 import { useRouter } from "next/navigation"
 
 export default function UserNavbar() {
+    const {user} = useUser();
     const showDropdown = useBoolean(false);
     
     return (
         <nav className="w-full h-14 px-7 sticky top-0 z-20 bg-white border-b border-light-gray inline-flex justify-between items-center">
             <a href={paths.home} className="flex items-center gap-[3px]">
-                <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
             </a>
-            <div className="flex justify-end items-center gap-2.5">
+            <div className="flex justify-end items-center gap-5">
                 <Button as='a' href={paths.account.notification}>
                     <BellIcon className="w-7.5" />
                 </Button>
                 <Button
+                    className="w-10 h-10 rounded-full overflow-hidden border border-light-gray"
                     onClick={showDropdown.toggle}>
-                    <ProfileIcon className="w-7.5" />
+                    
+                    {user?.profileImg 
+                        ? <img 
+                            src={user?.profileImg || '/images/placeholder.png'}
+                            className="w-full h-full object-over" />
+                        : <ProfileIcon className="w-7.5" />}
                 </Button>
             </div>
             <div className="-translate-x-1/2 left-1/2 absolute flex justify-center items-center gap-2.5">
                 <MenuButton text='Trip' href={paths.trip.all}></MenuButton>
                 <MenuButton text='Group' href={paths.group.all} />
             </div>
-            {showDropdown.value && <ProfileDropdown />}
+            {showDropdown.value && <ProfileDropdown first_name={user?.fname || ''} last_name={user?.lname || ''} username={user?.username || ''} profile_pic={user?.profileImg}  />}
         </nav>
     )
 }
 
 type ProfileDropdownProps = {
-    first_name?: string;
-    last_name?: string;
-    username?: string;
+    first_name: string;
+    last_name: string;
+    username: string;
     profile_pic?: string;
 }
 
-export const ProfileDropdown = ({first_name = "first", last_name = "last", username = "username", profile_pic = "https://placehold.co/36x36"}: ProfileDropdownProps) => {
+export const ProfileDropdown = ({first_name = "first", last_name = "last", username = "username", profile_pic = "/images/placeholder.png"}: ProfileDropdownProps) => {
     const router = useRouter();
     
     const clickLogout = (e?: React.MouseEvent) => {
@@ -63,10 +70,16 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
 
     return (
         <div className='w-[280px] rounded-xl shadow-[var(--boxshadow-lifted)] top-12 right-7.5 self-stretch bg-custom-white border border-pale-blue flex flex-col gap-2 absolute overflow-hidden'>
-            <div className="self-stretch h-15 px-2.5 border-b border-light-gray inline-flex justify-start items-center gap-1.5">
-                <img className="w-9 h-9 rounded-[100px] shadow" src={profile_pic} />
-                <div className="flex-1 inline-flex flex-col">
-                    <ButtonText className='translate-y-0.5'>{first_name} {last_name}</ButtonText>
+            <div className="self-stretch h-16 px-2.5 border-b border-light-gray inline-flex justify-start items-center gap-1.5">
+                <img
+                    onClick={() => router.push(paths.account.profile)}
+                    className="w-11 h-11 rounded-[100px] shadow object-cover border border-light-gray hover:cursor-pointer" 
+                    src={profile_pic || '/images/placeholder.png'} />
+                <div
+                    className="flex-1 inline-flex flex-col gap-1">
+                    <ButtonText
+                        onClick={() => router.push(paths.account.profile)}
+                        className='translate-y-0.5 hover:cursor-pointer'>{first_name} {last_name}</ButtonText>
                     <div className="self-stretch flex items-center -translate-y-0.5">
                             <SubBody className='text-custom-gray'>@</SubBody>
                             <SubBody className='text-custom-black'>{username}</SubBody>

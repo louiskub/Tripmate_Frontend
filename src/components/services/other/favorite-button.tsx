@@ -1,3 +1,5 @@
+'use client'
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState } from 'react';
@@ -55,11 +57,11 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
             { isFavorite.value ? 
                 <HeartFilledIcon 
                     className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`}
-                    width = {large ? '18' : '12'} 
+                    width = {large ? '18' : '14'} 
                     onAnimationEnd={handleAnimationEnd} />:
                 <HeartIcon 
                     className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`} 
-                    width = {large ? '18' : '12'}
+                    width = {large ? '18' : '14'}
                     onAnimationEnd={handleAnimationEnd} />
             }
         </Button>

@@ -58,12 +58,15 @@ export default function OtherProfile(){
   useEffect(() => {
 
     const token = Cookies.get("token");
-    if (!token) return;
+
+    if (!token) return
 
     const getProfile = async () => {
     try {
         const res = await axios.get(endpoints.profile(id.toString()), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         });
 
         const data = res.data
