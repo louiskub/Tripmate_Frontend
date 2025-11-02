@@ -94,7 +94,7 @@ type tab = {
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
-          <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='guide' large/>
+          <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='service' large/>
         </ServicePictures>
         {PicturePopUp && 
           <PicturePopup pictures={service.pictures}

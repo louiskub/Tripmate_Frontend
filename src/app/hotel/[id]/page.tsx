@@ -71,7 +71,7 @@ export default async function HotelDetailPage({ params }: { params: { id: string
         service: data.facilities.service,
         transportation: data.facilities.transportation,
       },
-      favorite: data.service.bookmarks.length > 0 ? true : false
+      favorite: data.service.bookmarks?.length > 0 ? true : false
     }
 
     console.log(hotel)

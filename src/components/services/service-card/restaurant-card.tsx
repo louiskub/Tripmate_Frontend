@@ -28,7 +28,7 @@ const RestaurantCard = (service: RestaurantCardProps) => {
                     hover:bg-dark-white hover:cursor-pointer"
             onClick={() => router.push(paths.restaurant.detail(service.id))}>
             <ImageSlide pictures={service.pictures}>
-                <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='restaurant'/>
+                <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='service'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">
