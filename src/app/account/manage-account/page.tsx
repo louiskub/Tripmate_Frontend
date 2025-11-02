@@ -11,6 +11,11 @@ import EditIcon from '@/assets/icons/edit.svg'
 import PasswordValidate from '@/components/other/password-validate';
 import XIcon from '@/assets/icons/X.svg'
 import { useBoolean } from '@/hooks/use-boolean'
+import axios from 'axios'
+import { endpoints } from '@/config/endpoints.config'
+import { getUserIdFromToken } from '@/utils/service/cookie'
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 
 export default function ManageAccount() {
@@ -60,11 +65,30 @@ const ChangePasswordPopup = ( { Close }: PopupProps ) => {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
 
+    const token = Cookies.get("token");
+    const user_id = getUserIdFromToken(token)
+
+    if (!user_id) return null;
+
     const [isPasswordValid, setIsPasswordValid] = useState(false)
 
-    const handleChangePassword = () => {
-        console.log("password changed")
-        Close();
+    const handleChangePassword = async () => {
+        try {
+            await axios.patch(endpoints.manage_account.change_password(user_id), {
+                oldPassword,
+                newPassword,
+            });
+
+        toast.success("Password changed successfully!");
+        Close()
+
+        } catch (error: any) {
+        console.error("Change password failed:", error.response?.data || error.message);
+
+        toast.error(
+            error.response?.data?.message || "Failed to change password. Please check your inputs."
+        );
+    }
     }
 
     return (
@@ -73,8 +97,9 @@ const ChangePasswordPopup = ( { Close }: PopupProps ) => {
         <div className="self-stretch flex flex-col justify-center items-center">
             <ButtonText>Change Password</ButtonText>
             <Button
-                onClick={Close}>
-                <XIcon className="absolute top-5 right-5 text-custom-gray" width='16' />
+                onClick={Close}
+                className='absolute top-5 right-5 text-custom-gray'>
+                <XIcon className="" width='16' />
             </Button>
         </div>
         <div className="flex flex-col gap-2.5">

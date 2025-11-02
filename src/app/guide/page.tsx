@@ -1,75 +1,85 @@
-"use client"
-
 import DefaultPage from '@/components/layout/default-layout';
 import SearchServiceInput from '@/components/inputs/search-service-input'
-import HotelCard from '@/components/services/service-card/hotel-card'
+import GuideCard from '@/components/services/service-card/guide-card';
 import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
+import { guides } from '@/mocks/guide';
+import GuideCardProps from '@/models/service/card/guide-card';
+import { getProfile } from '@/utils/service/profile(server)';
 
-type HotelCardProps = {
-    name: string
-    star: number
-    rating: number
-    rating_count: number
-    location: string
-    price: number
-    type: string
-    pictures: string[]
-    favorite: boolean
+import { cookies } from 'next/headers';
+import { endpoints } from '@/config/endpoints.config';
+import axios from 'axios';
+
+async function getService(key: string): Promise<GuideCardProps[] | null> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    try {
+      
+      const response = await axios.get(endpoints.guide.all(key), {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const data = response.data;
+      console.log(data)
+
+      const services: GuideCardProps[] = await Promise.all(
+        data.map(async (d: any) => {
+          const profile = await getProfile(d.service.ownerId);
+
+          return {
+            name: d.name,
+            guider: {
+              user_id: d.service.ownerId,
+              profile_pic: profile?.profileImg,
+              name: `${profile?.fname} ${profile?.lname}`
+            },
+            rating: d.rating,
+            rating_count: d.service?.reviews?.length ?? 0,
+            location: d.service.location.zone ?? '',
+            price: d.dayRate || 0,
+            type: d.specialties,
+            pictures: d.pictures?.slice(0, 3) ?? [],
+            favorite: d.favorite ?? false,
+            id: d.id,
+          };
+        })
+      );
+      return services
+    } 
+    catch (error: any) {
+      console.log("API Error:", error.response?.data || error.message);
+      return null
+    } 
 }
 
-const hotels: HotelCardProps[] = [
-  {
-    name: 'Centre Point Prime Hotel Pattaya',
-    star: 5,
-    rating: 8.7,
-    rating_count: 1808,
-    location: 'South Pattaya, Pattaya',
-    price: 1809.33,
-    type: 'hotel',
-    pictures: 
-      ['https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-6d207fe600a2de57f0b4e8f7bd0dc74d.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
-        'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-48dbaff76038a1598d6460554dd16bf2.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
-        'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
-      ],
-    favorite: true
-  },
-  {
-    name: 'Centre Point Prime Hotel Pattaya',
-    star: 5,
-    rating: 8.7,
-    rating_count: 1808,
-    location: 'South Pattaya, Pattaya',
-    price: 1809.33,
-    type: 'hotel',
-    pictures: 
-      ['https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-6d207fe600a2de57f0b4e8f7bd0dc74d.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
-        'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-48dbaff76038a1598d6460554dd16bf2.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
-        'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
-      ],
-    favorite: false
-  },
-]
+interface PageProps {
+  searchParams: {
+    q?: string;
+  };
+}
 
-export default function AllHotel() {
+export default async function AllGuides({ searchParams }: PageProps) {
+  const key = await searchParams.q ?? ''
+  const services = await getService(key)
   return (
-    <DefaultPage current_tab='hotel'>
+    <DefaultPage current_tab='guide'>
       <SearchServiceInput/>
       <div className='flex w-full gap-2.5 mt-2'>
-        <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] py-2.5 w-full'>
-          <span className='flex justify-between px-2'>
-            <Body>Found 9999 hotels</Body>
-            <Body>Sort by</Body>
+        <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
+          <span className='flex justify-between  p-2.5'>
+            <Body>Found {services ? services.length : 0} attractions</Body>
           </span>
-          {hotels.map((hotel, idx) => (
-            <HotelCard key={idx} {...hotel} hotel_id={idx.toString()}/>
+          {services?.map((guide, idx) => (
+            <GuideCard key={idx} {...guide} />
           ))}
         </div>
-        <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
+        {/* <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
           <ServiceFilter/>
           <ServiceFilter/>
           <ServiceFilter/>
-        </div>
+        </div> */}
       </div>
       
     </DefaultPage>

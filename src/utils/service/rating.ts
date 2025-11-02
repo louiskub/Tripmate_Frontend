@@ -29,3 +29,12 @@ export const restaurantRatingMeta: ratingMeta[] = [
     { key: 'location', label: 'Location' },
     { key: 'vibe', label: 'Vibe' },
 ]
+
+export const guideRatingMeta: ratingMeta[] = [
+    { key: 'knowledge', label: 'Knowledge' },
+    { key: 'communication', label: 'Communication' },
+    { key: 'punctuality', label: 'Punctuality' },
+    { key: 'safety', label: 'Safety' },
+    { key: 'route_planning', label: 'Route planning' },
+    { key: 'local_insights', label: 'Local insights' },
+]

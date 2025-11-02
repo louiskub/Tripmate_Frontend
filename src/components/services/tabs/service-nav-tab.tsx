@@ -25,7 +25,7 @@ const ServiceNavTab = ({current_tab, onSelect, tabs}: HotelNavTabProps) => {
                 <Button 
                     onClick={ () => {
                         onSelect(tab.id)
-                        document.getElementById(tab.id)?.scrollIntoView({ behavior: "smooth" });
+                        document.getElementById(tab.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
                     }}
                     className={`h-7! rounded-md px-4! ${
                         current_tab === tab.id 

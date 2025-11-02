@@ -3,6 +3,7 @@ import React, { FC, ReactNode } from "react";
 type TextProps = {
     children: ReactNode;
     className?: string;
+    onClick?: () => void
 };
 
 // Variants as separate components
