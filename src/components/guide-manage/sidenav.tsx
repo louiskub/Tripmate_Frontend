@@ -34,7 +34,6 @@ export default function SideNav() {
   // ✅ Updated the navLinks array with new icons
   const navLinks = [
     { href: "/guide-manage/dashboard", icon: LayoutDashboard, text: "Dashboard" },
-    { href: "/guide-manage/services", icon: Briefcase, text: "Services" },
     { href: "/guide-manage/history", icon: CalendarClock, text: "Booking History" },
     { href: "/guide-manage/reviews", icon: Star, text: "Reviews" },
     { href: "/guide-manage/profile", icon: UserCircle, text: "Profile" },
