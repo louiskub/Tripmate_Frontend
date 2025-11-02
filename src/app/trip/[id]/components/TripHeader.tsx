@@ -44,7 +44,7 @@ export default function TripHeader({ trip }: { trip: TripData }) {
         log("window undefined: skip sessionStorage")
       }
 
-      const target = "/trip/create?prefill=1"
+      const target = `/trip/create?from=${encodeURIComponent(trip.id)}`
       log("Navigating to:", target)
       router.push(target)
     } catch (error) {
