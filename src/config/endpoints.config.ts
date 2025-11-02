@@ -40,6 +40,7 @@ export const endpoints = {
 
   serviceManage: {
     car: {
+      getAllCar: (serviceId: string) =>  `${BASE_URL}/car-rental-center/${serviceId}/`,
       addCar: `${BASE_URL}/car-rental-center/add-car`,
       editCar: (id: string) => `${BASE_URL}/car/${id}`,
       deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
