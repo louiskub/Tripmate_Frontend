@@ -28,7 +28,6 @@ type HotelDetail = {
     lat: number,
     long: number,
 
-    id: string
 }
 
 type Facility = {

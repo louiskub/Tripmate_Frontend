@@ -17,7 +17,6 @@ import {ratingText} from '@/utils/service/rating'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { useRouter } from "next/navigation"
 
-import Link from "next/link";
 import RentalCarCardProps from '@/models/service/card/rental-car-card';
 
 const RentalCarCard = (car: RentalCarCardProps) => {

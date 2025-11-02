@@ -57,7 +57,7 @@ const GuideCard = (service: GuideCardProps) => {
                     
                     <div className="inline-flex items-center gap-1">
                         {
-                            service.type.map((tag, idx) =>
+                            service.type?.map((tag, idx) =>
                                 <Tag text={tag} key={idx}/>
                             )
                         }

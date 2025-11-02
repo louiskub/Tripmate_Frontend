@@ -13,6 +13,8 @@ export const endpoints = {
   upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
   favorite: `${BASE_URL}/bookmark`,
   unfavorite: (id: string) => `${BASE_URL}/bookmark/${id}`,
+  favorite_page: (id: string, type: string) => `${BASE_URL}/users/bookmark/${id}/${type}`,
+
   hotel: {
     all: (key?: string) => `${BASE_URL}/search/hotels?${key}`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
