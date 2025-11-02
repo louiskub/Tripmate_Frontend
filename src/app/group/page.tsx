@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Search, Users } from "lucide-react"
+import axios from "axios"
 import CreateGroupModal from "@/components/group/group-create-popup"
 import Toast from "@/components/ui/toast"
 import DefaultPage from "@/components/layout/default-layout"
 import GroupCard from "@/components/group/group-card"
+import { endpoints } from "@/config/endpoints.config"
 
-// --- Interfaces (อัปเดต Member interface) ---
+// --- Interfaces ---
 interface Member {
   id: string
-  name: string
-  role: "head" | "member"
   avatar?: string
 }
 interface Group {
@@ -25,110 +25,157 @@ interface Group {
   isFavorite: boolean
 }
 
+// ✅ helper อ่าน token จาก cookie
+const getToken = () => {
+  if (typeof document === "undefined") return ""
+  const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/)
+  return match ? match[1] : ""
+}
+
 export default function BookingHistory() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [groups, setGroups] = useState<Group[]>([])
 
-  // --- State สำหรับ Search ---
   const [searchTerm, setSearchTerm] = useState("")
   const [searchedGroupId, setSearchedGroupId] = useState<string | null>(null)
 
-  // --- State สำหรับ Toast ---
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState<"success" | "error">("success")
 
-  // --- Data Persistence ---
+  // --- 🧠 Fetch groups from backend ---
   useEffect(() => {
-    const savedGroups = localStorage.getItem("tripmate-groups")
-    if (savedGroups) {
+    const fetchGroups = async () => {
+      console.log("[FetchGroups] Start fetching groups...")
+
       try {
-        const parsed = JSON.parse(savedGroups).map((g: Group) => ({
-          ...g,
-          isFavorite: g.isFavorite || false,
-        }))
-        setGroups(parsed)
-      } catch (error) {
-        console.error("Error parsing saved groups:", error)
+        const token = getToken()
+        console.log("[FetchGroups] Token found:", token)
+
+        const res = await axios.get(endpoints.group.all, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        const data = Array.isArray(res.data) ? res.data : [res.data]
+
+        const mappedGroups = data.map((g: any, index: number) => {
+          return {
+            id: g.id,
+            code: g.id,
+            name: g.groupName,
+            description: g.description || "No description",
+            imageUrl: g.groupImg,
+            hostName: g.ownerId || "Unknown",
+            members: (g.members || []).map((m: any, i: number) => ({
+              id: m.userId,
+              name: m.user?.username || `User ${i + 1}`,
+              avatar: m.user?.profileImg || `https://placehold.co/128x128/${Math.floor(Math.random() * 16777215).toString(16)}/FFFFFF?text=${(m.user?.username?.slice(0,2) || "U").toUpperCase()}`,
+            })),
+            isFavorite: false,
+          }
+        })
+
+        console.log("[FetchGroups] Mapped groups:", mappedGroups)
+        setGroups(mappedGroups)
+        console.log("[FetchGroups] Groups set successfully.")
+      } catch (err) {
+        console.error("[FetchGroups] Error fetching groups:", err)
       }
     }
+
+    fetchGroups()
   }, [])
 
-  useEffect(() => {
-    // บันทึกเฉพาะเมื่อมีข้อมูลจริงๆ
-    if (groups.length > 0) {
-        localStorage.setItem("tripmate-groups", JSON.stringify(groups))
-    }
-  }, [groups])
-
-  // --- Group Functions ---
-  const createUniqueGroupId = () => {
-    let newId: string
-    let isUnique = false
-    while (!isUnique) {
-      // สร้าง ID แบบสุ่ม 6 หลัก
-      const candidateId = Math.floor(100000 + Math.random() * 900000).toString()
-      if (!groups.some((group) => group.id === candidateId)) {
-        newId = candidateId
-        isUnique = true
+  // --- ✅ Create group function ---
+  const handleCreateGroup = async (data: { name: string; description: string; image?: File }) => {
+    try {
+      const token = getToken()
+      if (!token) {
+        setToastMessage("No token found. Please log in again.")
+        setToastType("error")
+        setShowToast(true)
+        return
       }
+
+      // 1️⃣ ดึงข้อมูล user ปัจจุบัน
+      const userRes = await axios.get("http://161.246.5.236:8800/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const currentUser = userRes.data.data?.[0]
+      const ownerId = currentUser?.id
+      if (!ownerId) throw new Error("Cannot get user ID")
+
+      // 2️⃣ เตรียม FormData
+      const formData = new FormData()
+      formData.append("ownerId", ownerId)
+      formData.append("groupName", data.name)
+      formData.append("description", data.description)
+      formData.append("status", "active")
+      if (data.image) formData.append("groupImg", data.image)
+
+      console.log("[CreateGroup] Sending payload:", Object.fromEntries(formData.entries()))
+
+      // 3️⃣ ยิง POST /group
+      const res = await axios.post(endpoints.group.all, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      console.log("[CreateGroup] Response:", res.data)
+
+      // 4️⃣ เพิ่ม group ใหม่ใน state
+      const newGroup = {
+        id: res.data.id,
+        code: res.data.id,
+        name: res.data.groupName,
+        description: res.data.description || "No description",
+        imageUrl: res.data.groupImg,
+        hostName: res.data.ownerId || "Unknown",
+        members: [],
+        isFavorite: false,
+      }
+
+      setGroups((prev) => [...prev, newGroup])
+      setToastMessage("Group created successfully!")
+      setToastType("success")
+      setShowToast(true)
+    } catch (err: any) {
+      console.error("[CreateGroup] Error:", err.response?.data || err)
+      setToastMessage("Failed to create group.")
+      setToastType("error")
+      setShowToast(true)
     }
-    return newId!
   }
 
-  // --- ✅ [แก้ไข] ฟังก์ชันสร้างกลุ่ม ---
-  const handleCreateGroup = (data: { name: string; description: string; image?: File }) => {
-    const newGroupId = createUniqueGroupId()
-    
-    // สร้างรายชื่อสมาชิกพร้อมกำหนด Role
-    const newMembers: Member[] = [
-      // 1. ผู้สร้างกลุ่ม (คนปัจจุบัน) จะเป็น Head
-      { id: "user_1", name: "You", role: "head", avatar: "/images/team.jpg" },
-      // 2. เพิ่มสมาชิกเริ่มต้นคนอื่นๆ เป็น Member (ตัวอย่าง)
-      { id: "user_2", name: "Bob", role: "member", avatar: "/images/team.jpg" },
-      { id: "user_3", name: "Charlie", role: "member", avatar: "/images/team.jpg" },
-    ]
-
-    const newGroup: Group = {
-      id: newGroupId,
-      code: newGroupId, // ใช้ ID เดียวกับ Code เพื่อให้ค้นหาง่าย
-      name: data.name,
-      description: data.description,
-      imageUrl: data.image ? URL.createObjectURL(data.image) : undefined,
-      hostName: "You", // ชื่อผู้สร้างกลุ่ม
-      members: newMembers, // ใช้รายชื่อสมาชิกที่สร้างขึ้นใหม่
-      isFavorite: false,
-    }
-
-    setGroups((prev) => [newGroup, ...prev])
-    setToastMessage("Group created successfully!")
-    setToastType("success")
-    setShowToast(true)
-  }
-
+  // --- Favorite toggle ---
   const handleToggleFavorite = (groupId: string) => {
-    setGroups(
-      groups.map((group) =>
+    console.log("[ToggleFavorite] Group ID:", groupId)
+    setGroups((prev) =>
+      prev.map((group) =>
         group.id === groupId ? { ...group, isFavorite: !group.isFavorite } : group
       )
     )
   }
 
+  // --- Join group handler ---
   const handleJoinGroup = (groupName: string) => {
+    console.log("[JoinGroup] Joining group:", groupName)
     setToastMessage(`Joined "${groupName}" successfully!`)
     setToastType("success")
     setShowToast(true)
   }
 
-  // --- Search Functions ---
+  // --- Search handler ---
   const handleSearch = () => {
     if (!searchTerm.trim()) {
       setSearchedGroupId(null)
       return
     }
 
-    const foundGroup = groups.find(group => group.code === searchTerm.trim())
-
+    const foundGroup = groups.find((group) => group.code === searchTerm.trim())
     if (foundGroup) {
       setSearchedGroupId(foundGroup.id)
     } else {
@@ -140,34 +187,31 @@ export default function BookingHistory() {
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    if (value === "") {
-      setSearchedGroupId(null)
-    }
+    setSearchTerm(e.target.value)
+    if (e.target.value === "") setSearchedGroupId(null)
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      handleSearch()
-    }
+    if (event.key === "Enter") handleSearch()
   }
 
-  // --- Sorting Logic ---
+  // --- Sorting ---
   const sortedGroups = useMemo(() => {
-    return [...groups].sort((a, b) => {
+    const sorted = [...groups].sort((a, b) => {
       if (searchedGroupId) {
         if (a.id === searchedGroupId) return -1
         if (b.id === searchedGroupId) return 1
       }
       return (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)
     })
+    console.log("[Sorting] Sorted groups:", sorted)
+    return sorted
   }, [groups, searchedGroupId])
 
   return (
     <DefaultPage>
       <main className="flex-1">
-        {/* --- Header & Search Bar --- */}
+        {/* --- Header --- */}
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
@@ -193,7 +237,7 @@ export default function BookingHistory() {
         <div className="flex items-center justify-between px-6 py-4">
           <p className="text-gray-600 font-medium">Found {sortedGroups.length} groups</p>
           <div className="flex items-center space-x-6">
-            <span className="text-gray-600 font-medium">Sort by option1</span>
+            <span className="text-gray-600 font-medium">Sort by favorite</span>
             <span className="text-gray-600 font-medium">View</span>
           </div>
         </div>
@@ -212,14 +256,16 @@ export default function BookingHistory() {
             <h3 className="mt-8 text-2xl font-bold text-gray-700 text-center">
               No groups were found
             </h3>
-            <p className="text-gray-500 mt-2">Create a new group or search by code to get started!</p>
+            <p className="text-gray-500 mt-2">
+              Create a new group or search by code to get started!
+            </p>
           </div>
         ) : (
-          <div className="px-6 py-4">
+          <div className="px-6">
             <div className="flex flex-col gap-4">
-              {sortedGroups.map((group) => (
+              {sortedGroups.map((group, index) => (
                 <GroupCard
-                  key={group.id}
+                  key={`${group.id}-${index}`}
                   id={group.id}
                   name={group.name}
                   description={group.description}
@@ -234,7 +280,12 @@ export default function BookingHistory() {
           </div>
         )}
 
-        <CreateGroupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleCreateGroup} />
+        {/* --- Modals --- */}
+        <CreateGroupModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleCreateGroup}
+        />
         <Toast
           message={toastMessage}
           isVisible={showToast}

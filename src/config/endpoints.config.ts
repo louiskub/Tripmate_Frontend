@@ -20,6 +20,9 @@ export const endpoints = {
   },
 
   group:{
-    all: "/group",
+    all: `http://161.246.5.236:8800/group`,
+    expense: (id: string) => `http://161.246.5.236:8800/group/${id}/expense-groups`,
+    summary: (id: string) => `http://161.246.5.236:8800/group/${id}/expense-summary`,
+    payment: (id: string) => `http://161.246.5.236:8800/group/${id}/payments`,
   },
 }

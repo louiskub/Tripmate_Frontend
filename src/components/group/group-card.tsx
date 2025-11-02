@@ -2,14 +2,13 @@
 
 import { Heart, Users, X } from "lucide-react"
 import { useEffect, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 
-// --- Interfaces (เหมือนเดิม) ---
 interface Member {
   id: string
   avatar?: string
+  name?: string
 }
 interface GroupCardProps {
   id: string
@@ -21,7 +20,6 @@ interface GroupCardProps {
   onToggleFavorite: (id: string) => void
   onJoinGroup: (groupName: string) => void
 }
-
 
 export default function GroupCard({
   id,
@@ -36,16 +34,48 @@ export default function GroupCard({
   const [showPopup, setShowPopup] = useState(false)
 
   useEffect(() => {
-    if (showPopup) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "auto"
-    }
+    document.body.style.overflow = showPopup ? "hidden" : "auto"
   }, [showPopup])
 
   const hasDescription = description && description.trim() !== ""
   const MAX_LENGTH = 200
   const isLongText = description.length > MAX_LENGTH
+
+  // 🧩 สร้างชื่อย่อจากชื่อเต็ม
+  const getInitials = (fullName: string | undefined): string => {
+    if (!fullName) return "U"
+    const parts = fullName.trim().split(" ")
+    if (parts.length === 1) return parts[0][0].toUpperCase()
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+
+  // 🧩 แปลง string → index สำหรับสุ่มสีคงที่
+  const stringToColorIndex = (str: string): number => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    }
+    return Math.abs(hash) % colorPalette.length
+  }
+
+  // 🧩 พาเลตสีสด ๆ
+  const colorPalette = [
+    "3B82F6", // ฟ้า
+    "F59E0B", // เหลือง
+    "10B981", // เขียว
+    "EF4444", // แดง
+    "8B5CF6", // ม่วง
+    "EC4899", // ชมพู
+    "14B8A6", // teal
+  ]
+
+  // 🧩 สร้าง URL avatar แบบมีสีสุ่ม
+  const getPlaceholderUrl = (name: string | undefined, id: string): string => {
+    const initials = getInitials(name)
+    const colorIndex = stringToColorIndex(id || name || "user")
+    const bgColor = colorPalette[colorIndex]
+    return `https://placehold.co/128x128/${bgColor}/FFFFFF?text=${initials}`
+  }
 
   return (
     <>
@@ -55,12 +85,25 @@ export default function GroupCard({
             isFavorite ? "border-2 border-pink-300" : ""
           }`}
         >
+          {/* --- รูปภาพหลักของกลุ่ม --- */}
           <div className="relative w-full sm:w-48 h-48 rounded-xl overflow-hidden flex-shrink-0">
             {imageUrl ? (
-              <Image src={imageUrl} alt={name} fill className="object-cover" />
+              <img
+                src={imageUrl}
+                alt={name}
+                className="object-cover w-full h-full"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = getPlaceholderUrl(name, id)
+                }}
+              />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-200 to-purple-300" />
+              <img
+                src={getPlaceholderUrl(name, id)}
+                alt={name}
+                className="object-cover w-full h-full"
+              />
             )}
+
             <button
               onClick={(e) => {
                 e.preventDefault()
@@ -72,12 +115,12 @@ export default function GroupCard({
               <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
             </button>
           </div>
+
+          {/* --- ข้อมูลกลุ่ม --- */}
           <div className="flex-1 flex flex-col">
             <div>
-              {/* --- CHANGE 1: สร้าง container ใหม่สำหรับชื่อและจำนวนสมาชิก --- */}
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="text-2xl font-bold text-gray-800">{name}</h3>
-                {/* --- CHANGE 2: ย้ายป้าย Members มาไว้ที่นี่ --- */}
                 <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-full text-sm font-medium text-blue-600">
                   <Users className="w-4 h-4" />
                   <span>{members.length} Members</span>
@@ -109,23 +152,28 @@ export default function GroupCard({
               </div>
             </div>
 
-            {/* --- CHANGE 3: ส่วนท้ายการ์ดจะเหลือแค่ Avatar --- */}
+            {/* --- ส่วนแสดงสมาชิก --- */}
             <div className="mt-auto flex items-center justify-between">
               <div className="flex items-center">
                 <div className="flex -space-x-2">
                   {members.slice(0, 5).map((member) => (
-                    <div key={member.id} className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white">
-                      <Image
-                        src={member.avatar || "/placeholder.svg"}
-                        alt="member"
-                        fill
-                        className="object-cover"
+                    <div
+                      key={member.id}
+                      className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white"
+                    >
+                      <img
+                        src={member.avatar || getPlaceholderUrl(member.name, member.id)}
+                        alt={member.name || "member"}
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = getPlaceholderUrl(member.name, member.id)
+                        }}
                       />
                     </div>
                   ))}
                 </div>
                 {members.length > 3 && (
-                  <div className="ml-2 text-sm text-gray-500">+{members.length - 3} others</div>
+                  <div className="ml-2 text-sm text-gray-500">+{members.length - 5} others</div>
                 )}
               </div>
 
@@ -144,10 +192,10 @@ export default function GroupCard({
         </div>
       </Link>
 
-      {/* Popup Modal (เหมือนเดิม) */}
+      {/* Popup Modal */}
       <AnimatePresence>
         {showPopup && (
-           <motion.div
+          <motion.div
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

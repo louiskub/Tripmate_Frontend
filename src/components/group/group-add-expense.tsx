@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { X, DollarSign } from "lucide-react"
-import Image from "next/image"
 
 // --- Interfaces ---
 interface Member {
@@ -163,10 +162,9 @@ export default function AddExpenseModal({ isOpen, onClose, onSubmit, members }: 
                   />
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full relative overflow-hidden flex-shrink-0">
-                        <Image 
+                        <img
                             src={member.avatar || "/placeholder.svg"} 
                             alt={member.name} 
-                            layout="fill" 
                             className="object-cover"
                         />
                     </div>
