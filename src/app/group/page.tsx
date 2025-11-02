@@ -14,7 +14,6 @@ interface Member {
   role: "head" | "member"
   avatar?: string
 }
-type GroupStatus = "Planning" | "In Progress" | "Finished"
 interface Group {
   id: string
   code: string
@@ -23,7 +22,6 @@ interface Group {
   imageUrl?: string
   hostName: string
   members: Member[]
-  status: GroupStatus
   isFavorite: boolean
 }
 
@@ -99,7 +97,6 @@ export default function BookingHistory() {
       imageUrl: data.image ? URL.createObjectURL(data.image) : undefined,
       hostName: "You", // ชื่อผู้สร้างกลุ่ม
       members: newMembers, // ใช้รายชื่อสมาชิกที่สร้างขึ้นใหม่
-      status: "Planning",
       isFavorite: false,
     }
 
@@ -228,7 +225,6 @@ export default function BookingHistory() {
                   description={group.description}
                   imageUrl={group.imageUrl}
                   members={group.members}
-                  status={group.status}
                   isFavorite={group.isFavorite}
                   onToggleFavorite={handleToggleFavorite}
                   onJoinGroup={handleJoinGroup}

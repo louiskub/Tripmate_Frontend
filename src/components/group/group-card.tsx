@@ -11,32 +11,17 @@ interface Member {
   id: string
   avatar?: string
 }
-type GroupStatus = "Planning" | "In Progress" | "Finished"
 interface GroupCardProps {
   id: string
   name: string
   description: string
   imageUrl?: string
   members: Member[]
-  status: GroupStatus
   isFavorite: boolean 
   onToggleFavorite: (id: string) => void
   onJoinGroup: (groupName: string) => void
 }
 
-// --- ป้ายสถานะ (เหมือนเดิม) ---
-const StatusBadge = ({ status }: { status: GroupStatus }) => {
-  const statusStyles = {
-    Planning: "bg-blue-100 text-blue-800",
-    "In Progress": "bg-yellow-100 text-yellow-800",
-    Finished: "bg-green-100 text-green-800",
-  }
-  return (
-    <div className={`absolute top-4 right-4 px-3 py-2 text-sm font-semibold rounded-full z-20 ${statusStyles[status]}`}>
-      {status}
-    </div>
-  )
-}
 
 export default function GroupCard({
   id,
@@ -44,7 +29,6 @@ export default function GroupCard({
   description,
   imageUrl,
   members,
-  status,
   isFavorite,
   onToggleFavorite,
   onJoinGroup,
@@ -71,7 +55,6 @@ export default function GroupCard({
             isFavorite ? "border-2 border-pink-300" : ""
           }`}
         >
-          <StatusBadge status={status} />
           <div className="relative w-full sm:w-48 h-48 rounded-xl overflow-hidden flex-shrink-0">
             {imageUrl ? (
               <Image src={imageUrl} alt={name} fill className="object-cover" />

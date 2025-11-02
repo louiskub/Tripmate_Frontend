@@ -18,4 +18,8 @@ export const endpoints = {
   trip: {
     detail: (id: string) => `/trip/${id}`,
   },
+
+  group:{
+    all: "/group",
+  },
 }
