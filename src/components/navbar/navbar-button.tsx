@@ -5,7 +5,7 @@ type PageOptionProps = {
     href: string;
     text: string;
     className?: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     active?: boolean
     onclick?: () => void;
 };

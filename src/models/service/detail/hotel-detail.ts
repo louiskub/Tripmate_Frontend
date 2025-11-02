@@ -26,6 +26,8 @@ type HotelDetail = {
     policy: HotelPolicy,
     lat: number,
     long: number,
+
+    id: string
 }
 
 type Facility = {
