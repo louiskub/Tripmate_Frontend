@@ -14,7 +14,7 @@ export const GenderInput: FC<GenderInputProps> = ({onChange, selected = 'other'}
         <div className='flex gap-2'>
             <FemaleGender active={selected == 'female'} onClick={() => {onChange('female')}}/>
             <MaleGender active={selected == 'male'} onClick={() => {onChange('male')}}/>
-            <OtherGender active={selected == 'other'} onClick={() => {onChange('other')}}/>
+            <OtherGender active={selected == 'Other'} onClick={() => {onChange('Other')}}/>
         </div>
     );
 };
@@ -27,8 +27,8 @@ type GenderProps = {
 export const FemaleGender: FC<GenderProps> = ({onClick, active}) => {
     return (
         <span 
-            className={` inline-flex justify-center min-w-24 w-auto items-center gap-1 hover:cursor-pointer rounded-[10px] h-9 select-none
-            ${active ? 'bg-pink-100 text-pink-400': 'text-dark-gray shadow-[var(--boxshadow-lifted)]'} `}
+            className={` inline-flex justify-center min-w-24 w-auto items-center gap-1 rounded-[10px] h-9 select-none
+            ${active ? 'bg-pink-100 text-pink-400': 'hover:cursor-pointer text-dark-gray shadow-[var(--boxshadow-lifted)]'} `}
             onClick={onClick}>
             <Body>Female</Body>
             <FemaleIcon width='16'/>
@@ -39,8 +39,8 @@ export const FemaleGender: FC<GenderProps> = ({onClick, active}) => {
 export const MaleGender: FC<GenderProps> = ({onClick, active}) => {
     return (
         <span 
-            className={` inline-flex justify-center min-w-24 w-auto items-center gap-1 hover:cursor-pointer rounded-[10px] h-9 select-none
-            ${active ? 'bg-pale-blue text-dark-blue': 'text-dark-gray shadow-[var(--boxshadow-lifted)]'} `}
+            className={` inline-flex justify-center min-w-24 w-auto items-center gap-1 rounded-[10px] h-9 select-none
+            ${active ? 'bg-pale-blue text-dark-blue': 'hover:cursor-pointer text-dark-gray shadow-[var(--boxshadow-lifted)]'} `}
             onClick={onClick}>
             <Body>Male</Body>
             <MaleIcon width='16'/>
@@ -51,8 +51,8 @@ export const MaleGender: FC<GenderProps> = ({onClick, active}) => {
 export const OtherGender: FC<GenderProps> = ({onClick, active}) => {
     return (
         <span 
-            className={` inline-flex justify-center min-w-24 w-auto items-center gap-1 hover:cursor-pointer rounded-[10px] h-9 select-none
-            ${active ? 'bg-light-gray text-custom-black': 'text-dark-gray shadow-[var(--boxshadow-lifted)]'} `}
+            className={` inline-flex justify-center min-w-24 w-auto items-center gap-1 rounded-[10px] h-9 select-none
+            ${active ? 'bg-light-gray text-custom-black': 'hover:cursor-pointer text-dark-gray shadow-[var(--boxshadow-lifted)]'} `}
             onClick={onClick}>
             <Body>Other</Body>
             <OtherIcon width='16'/>

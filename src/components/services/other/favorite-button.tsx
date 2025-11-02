@@ -1,3 +1,5 @@
+'use client'
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState } from 'react';
@@ -9,9 +11,10 @@ type FavoriteButtonProps = {
     favorite: boolean
     id: string
     type: "hotel" | "restaurant" | "rental_car" | "guide" | "attraction"
+    large?: boolean
 }
 
-const FavoriteButton = ({ favorite, id,  type}: FavoriteButtonProps) => {
+const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps) => {
     const isFavorite = useBoolean(favorite)
     const [loading, setLoading] = useState(false);
     const [animate, setAnimate] = useState(false);
@@ -44,14 +47,16 @@ const FavoriteButton = ({ favorite, id,  type}: FavoriteButtonProps) => {
     return (
         <Button 
             onClick={handleFavorite}
-            className='absolute z-10 right-1.5 top-1.5 w-6 bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full'>
+            className={`absolute top-0 left-0 z-10 ${large ? 'w-[35px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
+        >
             { isFavorite.value ? 
                 <HeartFilledIcon 
-                    className={`${ animate ? 'filled-heart' : ''}`} 
-                    width='12'
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`}
+                    width = {large ? '18' : '14'} 
                     onAnimationEnd={handleAnimationEnd} />:
-                <HeartIcon className={`${ animate ? 'filled-heart' : ''}`} 
-                    width='12'
+                <HeartIcon 
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`} 
+                    width = {large ? '18' : '14'}
                     onAnimationEnd={handleAnimationEnd} />
             }
         </Button>

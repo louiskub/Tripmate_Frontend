@@ -1,3 +1,5 @@
+'use client'
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
 import { FemaleGender, GenderInput, MaleGender, OtherGender } from '@/components/inputs/gender-input'
@@ -22,16 +24,16 @@ const HotelCard = (hotel: HotelCardProps) => {
     const router = useRouter();
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5 hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(endpoints.hotel.detail(hotel.hotel_id))}>
+            onClick={() => router.push(paths.hotel.detail(hotel.id))}>
             <ImageSlide pictures={hotel.pictures}>
-                <FavoriteButton favorite={hotel.favorite} id={hotel.hotel_id} type='hotel'/>
+                <FavoriteButton favorite={hotel.favorite} id={hotel.id} type='hotel'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">
                 <div className="flex flex-col flex-1 gap-2">
                     <Subtitle className='max-w-full line-clamp-2 leading-6'>{hotel.name}</Subtitle>
                     <div className='text-dark-blue flex gap-1'>
-                        <Tag text={hotel.type} />
+                        {hotel.type && <Tag text={hotel.type} />}
                         <span className='flex'>
                             {Array.from({ length: hotel.star }).map((_, i) => (
                                 <StarIcon key={i} width="12" />
@@ -39,10 +41,16 @@ const HotelCard = (hotel: HotelCardProps) => {
                         </span>
                     </div>
                     
-                    <div className="inline-flex items-center gap-[3px] mt-2">
-                        <Tag text={(hotel.rating).toString()} />
-                        <Caption className='text-dark-blue'>{ratingText(hotel.rating)}</Caption>
-                    </div>
+                    {hotel.rating_count ? 
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text={(hotel.rating).toString()} /> 
+                            <Caption className='text-dark-blue'>{ratingText(hotel.rating)}</Caption>
+                        </div>
+                        :
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text='0' /> 
+                            <Caption className='text-dark-blue font-semibold!'>no rating</Caption>
+                        </div>}
                     <div className="inline-flex items-center gap-[3px] pl-1">
                         <LocationIcon width='12'/>
                         <Caption>{hotel.location}</Caption>
@@ -56,7 +64,6 @@ const HotelCard = (hotel: HotelCardProps) => {
                         <SubBody className='text-dark-blue'>฿</SubBody>
                         <ButtonText className='text-dark-blue'>{hotel.price}</ButtonText>
                     </span>
-                    <Button as='a' href={paths.hotel.detail} text='view hotel' className='bg-dark-blue rounded-lg text-custom-white !h-8 !px-3' />
                 </div>
             </div>
         </div>

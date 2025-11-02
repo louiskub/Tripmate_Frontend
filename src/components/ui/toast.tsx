@@ -25,7 +25,11 @@ export default function Toast({ message, isVisible, onClose, type = "success" }:
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-5">
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 flex items-center gap-3 min-w-[320px]">
+        {/* [TIP] เพิ่มไอคอนสำหรับ type อื่นๆ ได้ที่นี่ */}
         {type === "success" && <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />}
+        {type === "info" && <CheckCircle className="h-6 w-6 text-blue-500 flex-shrink-0" />} 
+        {type === "error" && <X className="h-6 w-6 text-red-500 flex-shrink-0" />}
+
         <p className="text-gray-800 font-medium flex-1">{message}</p>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
           <X className="h-5 w-5" />

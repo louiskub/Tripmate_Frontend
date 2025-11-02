@@ -1,6 +1,8 @@
 import React, { FC, ReactNode, ChangeEvent, useState, Children } from "react";
 import { ButtonText, Body } from '@/components/text-styles/textStyles'
 import DropdownIcon from '@/assets/icons/pagination-arrow.svg'
+import EyeOpenIcon from '@/assets/icons/eye-open.svg'
+import EyeClosedIcon from '@/assets/icons/eye-closed.svg'
 
 type FieldInputProps = {
     children?: ReactNode;
@@ -100,9 +102,20 @@ export const PasswordInput: FC<FieldInputProps> = ({
     value,
     placeholder,
     onChange,
-    }) => (
-    <div className={`flex items-center gap-2 px-2 text-custom-black bg-custom-white rounded-[10px] h-9 shadow-[var(--boxshadow-lifted)] ${className}`}>
+    }) => 
+{
+    const [show, setShow] = useState(false)
+    return (
+    <div className={`flex items-center gap-2 px-2 text-custom-black bg-custom-white rounded-[10px] h-9 shadow-(--boxshadow-lifted) ${className}`}>
         {children}
-        <input className="h-full w-full focus:outline-0 appearance-none bg-transparent" type='password' value={value} placeholder={placeholder} onChange={onChange} />
+        <input className="h-full w-full focus:outline-0 appearance-none bg-transparent" type={show ? 'text': 'password'} value={value} placeholder={placeholder} onChange={onChange} />
+        
+        <div
+            className="w-5 h-5 text-dark-gray"
+            onClick={() => setShow(!show)}>
+            {
+                show ? <EyeClosedIcon /> : <EyeOpenIcon />
+            }
+        </div>
     </div>
-);
+)}

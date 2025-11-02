@@ -16,6 +16,7 @@ import GroupIcon from '@/assets/icons/group.svg'
 import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
+import { useUser } from '@/context/userContext';
 
 type BookNavbarProps = {
     book_state: number;
@@ -23,11 +24,11 @@ type BookNavbarProps = {
 }
 
 export default function BookNavbar({restaurant = false, book_state}: BookNavbarProps) {
+    const {user} = useUser();
     const showDropdown = useBoolean(false);
     return (
         <nav className="w-full h-14 px-7 sticky top-0 z-10 bg-white border-b border-light-gray inline-flex justify-between items-center">
             <a href={paths.home} className="flex items-center gap-[3px]">
-                <div className="text-center justify-start text-black text-2xl font-extrabold">Logo</div>
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
             </a>
             <div className="flex justify-end items-center gap-2.5">
@@ -35,8 +36,14 @@ export default function BookNavbar({restaurant = false, book_state}: BookNavbarP
                     <BellIcon className="w-7.5" />
                 </Button>
                 <Button
+                    className="w-10 h-10 rounded-full overflow-hidden border border-light-gray"
                     onClick={showDropdown.toggle}>
-                    <ProfileIcon className="w-7.5" />
+                    
+                    {user?.profileImg 
+                        ? <img 
+                            src={user?.profileImg || '/images/placeholder.png'}
+                            className="w-full h-full object-over" />
+                        : <ProfileIcon className="w-7.5" />}
                 </Button>
             </div>
             {
@@ -46,7 +53,7 @@ export default function BookNavbar({restaurant = false, book_state}: BookNavbarP
                     
             }
             
-            {showDropdown.value && <ProfileDropdown />}
+            {showDropdown.value && <ProfileDropdown first_name={user?.fname || ''} last_name={user?.lname || ''} username={user?.username || ''} profile_pic={user?.profileImg || ''}  />}
         </nav>
     )
 }

@@ -1,3 +1,6 @@
+'use client'
+
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { useState, ReactNode } from 'react';
@@ -7,9 +10,10 @@ type ImageSlideProps = {
     pictures: Array<string>
     children?: ReactNode
     className?: string
+    onClick?: () => void
 }
 
-const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
+const ImageSlide = ({ pictures, children, className, onClick }: ImageSlideProps) => {
     const [index, setIndex] = useState(1);
     const [transition, setTransition] = useState(true);
     
@@ -39,29 +43,37 @@ const ImageSlide = ({ pictures, children, className }: ImageSlideProps) => {
     };
 
     return (
-        <div className={`relative rounded-[10px] overflow-hidden group ${className ? className: 'w-44 aspect-square'}`}>            
+        <div 
+            onClick={onClick}
+            className={`relative rounded-[10px] overflow-hidden group ${className ? className: 'w-44 aspect-square'} ${onClick? 'hover:cursor-pointer': ''}`}>            
             <div
                 className={`w-full h-full flex z-100 ${transition ? 'transition-transform duration-300' : ''}`}
                 style={{ transform: `translateX(-${index * 100}%)` }}
                 onTransitionEnd={handleTransitionEnd}
             >
                 {slides.map((pic, i) => (
-                <img key={i} 
+                <img
+                    key={i}
                     className="flex-shrink-0 w-full h-full object-cover"
-                    src={pic} />
+                    src={pic || "/images/placeholder.png"}
+                    onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/images/placeholder.png";
+                    }}
+                />
                 ))}
             </div>
 
             <div className={`absolute z-10 inset-0 flex justify-between px-0.5 items-center pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 transition-all`}>
                 <Button
                     onClick= {prev}
-                    className='w-1/10 max-w-8 bg-translucent-white'>
+                    className='w-1/9 max-w-8 bg-translucent-white'>
                     <ArrowIcon className='w-2/3 -scale-100'/>
                 </Button>
 
                 <Button
                     onClick={next}
-                    className='w-1/10 max-w-8 bg-translucent-white'>
+                    className='w-1/9 max-w-8 bg-translucent-white'>
                     <ArrowIcon className='w-2/3'/>
                 </Button>
             </div>

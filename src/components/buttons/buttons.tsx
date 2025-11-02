@@ -10,9 +10,10 @@ type ButtonProps = {
     className?: string;
     children?: React.ReactNode;
     icon_after?: boolean
+    type?: "button" | "submit" | "reset" | undefined
 };
 
-export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href, icon_after=false} : ButtonProps) => {
+export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick, disabled = false, className, href, icon_after=false, type = "button"} : ButtonProps) => {
     const Comp = as;
 
     const handleClick = (e: React.MouseEvent<HTMLElement>) => {
@@ -26,6 +27,7 @@ export const Button: FC<ButtonProps> = ({as = "button", children, text, onClick,
                 ${(text) ? 'px-5 h-9' : 'aspect-square rounded-full'} 
                 ${className || 'hover:text-dark-blue !scale-100'}
                 ${disabled && 'pointer-events-none opacity-50'}`}
+            type={type}
             href={as === "a" ? href : undefined}
             onClick={as === "button" ? handleClick : undefined}
         >
