@@ -15,4 +15,7 @@ export const endpoints = {
     detail: (id: string) => `/rental-car/${id}`,
     book: (id: string) => `/rental-car/book/${id}`,
   },
+  trip: {
+    detail: (id: string) => `/trip/${id}`,
+  },
 }
