@@ -1,3 +1,5 @@
+"use client"
+
 import {PageTitle, SubBody, Subtitle, Body, ButtonText, Caption} from '@/components/text-styles/textStyles'
 import { Button, TextButton } from '@/components/buttons/buttons'
 import { Tag } from '@/components/services/other/Tag'
@@ -7,7 +9,7 @@ import { endpoints } from '@/config/endpoints.config'
 import ImageSlide from '@/components/services/other/image-slide';
 
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 import { useBoolean } from '@/hooks/use-boolean'
 
 import {ratingText} from '@/utils/service/rating'
@@ -23,9 +25,9 @@ const RentalCarCard = (car: RentalCarCardProps) => {
     return (
         <div className="w-full min-h-48 p-2.5 border-t border-light-gray grid grid-cols-[180_1fr] gap-2.5
                     hover:bg-dark-white hover:cursor-pointer"
-            onClick={() => router.push(paths.rental_car.detail(car.rental_car_id))}>
+            onClick={() => router.push(paths.rental_car.detail(car.id))}>
             <ImageSlide pictures={car.pictures}>
-                <FavoriteButton favorite={car.favorite} id={car.rental_car_id} type='rental_car'/>
+                <FavoriteButton favorite={car.favorite} id={car.id} type='rental_car'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">
@@ -36,31 +38,49 @@ const RentalCarCard = (car: RentalCarCardProps) => {
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault()
-                                    window.location.href = paths.other_profile(car.owner.user_id)
+                                    window.location.href = paths.other_profile(car.owner.id)
                                 }}
                             
-                            className='w-4 aspect-square'>
+                                className='w-4 aspect-square'>
                                 {car.owner.profile_pic ?
-                                    <img src={car.owner.profile_pic} className='object-cover w-full h-full rounded-full'/> :
+                                    <img
+                                        src={car.owner.profile_pic || "/images/profile-filled.svg"}
+                                        className="object-cover w-full h-full rounded-full"
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null; // prevent infinite loop
+                                            e.currentTarget.src = "/images/profile-filled.svg"; // fallback immediately
+                                        }}
+                                        /> :
                                     <ProfileIcon className='text-custom-gray'/>
                                 }
                             </div>
-                            <Caption>{car.owner.first_name} {car.owner.last_name}</Caption>
+                            <Caption>{car.owner.name}</Caption>
                         </div>
                         <Subtitle className='max-w-full line-clamp-2 leading-6'>{car.name}</Subtitle>
                     </div>
                     
-                    <Tag text={car.type}/>
 
-                    <div className="inline-flex items-center gap-[3px] mt-2">
-                        <Tag text={(car.rating).toString()} />
-                        <Caption className='text-dark-blue'>{ratingText(car.rating)}</Caption>
-                    </div>
+                    {car.brand && car.model &&
+                        <div className='flex'>
+                        {car.brand && <Tag text={car.brand}/>}
+                        {car.model && <Tag text={car.model}/>}
+                    </div>}
                     
-                    <div className="inline-flex items-center gap-[3px] pl-1">
+                    {car.rating_count ? 
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text={(car.rating).toString()} /> 
+                            <Caption className='text-dark-blue'>{ratingText(car.rating)}</Caption>
+                        </div>
+                        :
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text='0' /> 
+                            <Caption className='text-dark-blue font-semibold!'>no rating</Caption>
+                        </div>}
+                    
+                    {car.location && <div className="inline-flex items-center gap-[3px] pl-1">
                         <LocationIcon width='12'/>
                         <Caption>{car.location}</Caption>
-                    </div>
+                    </div>}
                 </div>
                 <div className="self-stretch h-full inline-flex flex-col justify-end items-end gap-2">
                 <span className='flex items-baseline gap-1'>

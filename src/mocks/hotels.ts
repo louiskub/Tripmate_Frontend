@@ -16,7 +16,7 @@ export const hotels: HotelCardProps[] = [
             'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
         ],
         favorite: true,
-        hotel_id: 'svc-001'
+        hotel_id: 'svc-002'
     },
     {
         name: 'Centre Point Prime Hotel Pattaya',
@@ -32,7 +32,7 @@ export const hotels: HotelCardProps[] = [
             'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
         ],
         favorite: false,
-        hotel_id: 'svc-002'
+        hotel_id: 'svc-005'
     }
 ]
 
@@ -98,7 +98,7 @@ export const mockHotel1: HotelDetail =
             'Kids club',
             'Laundry'
         ],
-        services: [
+        service: [
             'Room service',
             'Spa',
             'Massage',

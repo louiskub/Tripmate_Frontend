@@ -7,7 +7,7 @@ import Reviews from '@/models/service/reviews';
 import {ratingText, ratingMeta} from '@/utils/service/rating'
 
 import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 import { RestaurantSubtopicRating } from '@/models/service/detail/restaurant-detail';
 import { GuideSubtopicRating } from '@/models/service/detail/guide-detail';
 
@@ -65,7 +65,7 @@ export const RatingOverview = ({rating, rating_count, subtopic_ratings, comment,
                     </Caption>
                     : 
                     <Caption className='h-full max-h-full p-2 text-gray rounded-lg'>
-                        there is no comment for this guide
+                        there is no comment
                     </Caption>}
             </div>
         </div>

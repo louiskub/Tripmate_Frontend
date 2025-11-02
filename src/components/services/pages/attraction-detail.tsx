@@ -11,7 +11,7 @@ import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { TextButton } from '@/components/buttons/buttons';
 import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
 import LargeMap from '@/components/other/large-map';
 
 import CheckIcon from '@/assets/icons/bullet.svg'
@@ -19,8 +19,10 @@ import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 
 import PriceCard from '@/components/services/other/price_card';
 
-import AttractionDetailModel, { priceItem } from '@/models/service/detail/attraction-detail';
+import AttractionDetailModel from '@/models/service/detail/attraction-detail';
 import { PicturePopup } from '@/components/services/other/service-pictures';
+
+import MiniMap from '@/components/map/minimap';
 
 type AttractionDetailProps = {
   service: AttractionDetailModel
@@ -37,8 +39,6 @@ type tab = {
 
   const tabs: tab[] = [
         {label: 'Overview', id: 'overview'},
-        {label: 'Admission Fee', id: 'fee'},
-        {label: 'Reviews', id: 'review'},
         {label: 'Location', id: 'location'},
   ]
 
@@ -65,20 +65,6 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
-  const first_comment = service.review?.find(a => a.comment)?.comment;
-
-  const lowest_fee = service.fee?.length
-  ? Math.min(...service.fee.map(item => item.price))
-  : 0;
-
-  const fee_groups: Record<string, priceItem[]> = (service.fee ?? []).reduce(
-    (acc, item) => {
-      const key = item.group ?? "Ungrouped";
-      (acc[key] ||= []).push(item);
-      return acc;
-    },
-    {} as Record<string, priceItem[]>
-  );
 
   return (
     <DefaultPage current_tab='attraction'>
@@ -99,18 +85,14 @@ type tab = {
           <PicturePopup pictures={service.pictures}
             name={service.name}
             Close={() => setPicturePopUp(false)}>
-            <RatingPopup 
-            rating={service.rating}
-            rating_count={service.rating_count}
-            reviews={service.review} />
-        </PicturePopup>}
+          </PicturePopup>}
         <div className='rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
-          <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
+          <header className='grid px-4 py-2 grid-rows-2 border-b border-light-gray'>
             <Title className=''>{service.name}</Title>
-            <div>
+            {service.type && <div>
               <Tag text={service.type} />
-            </div>
-              <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
+            </div>}
+              {/* <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
                 <span className='flex items-baseline gap-1'>
                     {lowest_fee > 0 ?
                     <>   
@@ -121,19 +103,19 @@ type tab = {
                     :
                     <ButtonText className='text-dark-blue'>Free</ButtonText>}
                 </span>
-              </div>
+              </div> */}
           </header>
 
-          <div className='grid grid-cols-[1fr_auto] grid-rows-[1fr_auto] p-2.5 gap-2.5'>
-            <RatingOverview 
+          <div className='grid grid-cols-[1fr_auto] p-2.5 gap-2.5'>
+            {/* <RatingOverview 
               className=' row-start-1 col-start-1' 
               rating={service.rating} 
               rating_count={service.rating_count} 
               comment={first_comment} 
-            />
+            /> */}
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (
@@ -147,7 +129,7 @@ type tab = {
                 
             </div>
 
-            <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-2 col-span-2'>
+            <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] col-start-1'>
               <ButtonText className='text-dark-blue'>Description</ButtonText>
               <Caption>{service.description || 'no description for this rentaurant'}</Caption>
             </div>
@@ -156,7 +138,7 @@ type tab = {
         </div>
       </section>
 
-      <section id='fee' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
+      {/* <section id='fee' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Admission Fee</Title>
         {lowest_fee ?
         <div className='flex justify-center px-4 py-5'>
@@ -176,16 +158,16 @@ type tab = {
         </SubBody>
         }
         
-      </section>
+      </section> */}
 
-      <section id='review' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
+      {/* <section id='review' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className=' py-1.5 px-4'>Reviews</Title>
         <Rating 
           rating={service.rating}
           rating_count={service.rating_count}
           reviews={service.review} 
           />
-      </section>
+      </section> */}
 
       <section id='location' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Location</Title>

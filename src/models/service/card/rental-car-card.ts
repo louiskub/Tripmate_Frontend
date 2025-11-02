@@ -1,16 +1,16 @@
 type RentalCarCardProps = {
     name: string
     owner: {
-        user_id: string
+        id: string
         profile_pic?: string
-        first_name: string
-        last_name: string
+        name: string
     }
     rating: number
     rating_count: number
     location: string
     price: number
-    type: string
+    brand: string
+    model: string
     pictures: Array<string>
     favorite: boolean
     id: string

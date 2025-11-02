@@ -1,6 +1,6 @@
 "use client"
 
-import React, { FC, ReactNode, ChangeEvent, useState,useEffect, Children, useRef } from "react";
+import React, { FC, ReactNode, ChangeEvent, useState,useEffect, Children, useRef, FormEvent } from "react";
 import { ButtonText, Body, SubBody } from '@/components/text-styles/textStyles'
 import DropdownIcon from '@/assets/icons/pagination-arrow.svg'
 import { FieldInput } from "./inputs";
@@ -16,14 +16,24 @@ import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { Tag } from "../services/other/Tag";
+import useClickOutside from "@/utils/service/close-click-outside";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type SearchServiceInputProps = {
-    
+    value: string | ''; // optional initial value
+    onSubmit: (location: string | null) => void; // callback to parent
 };
 
-export const SearchServiceInput: FC<SearchServiceInputProps> = () => {
-    const [location, setLocation] = useState('')
+export const SearchServiceInput: FC = () => {
+    const router = useRouter();
+    const params = useSearchParams();
+    const [location, setLocation] = useState(params.get("q") || "");
     const today = new Date();
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        router.push(`?q=${encodeURIComponent(location)}`);
+    };
 
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
@@ -50,19 +60,15 @@ export const SearchServiceInput: FC<SearchServiceInputProps> = () => {
     const [focused, setFocused] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const dateRef = useRef<HTMLDivElement>(null);
+    const roomRef = useRef<HTMLDivElement>(null);
+
+    useClickOutside(dateRef, () => setOpenDate(false))
+    useClickOutside(roomRef, () => setOpenDate(false))
+
     const nights = checkIn && checkOut 
     ? Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
     : 0;
-
-    useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-            setFocused(false);
-        }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     const toggleDate = () => {
     setOpenDate(prev => !prev);       // toggle date panel
@@ -75,7 +81,7 @@ export const SearchServiceInput: FC<SearchServiceInputProps> = () => {
     };
     
     return (
-    <div className={`flex rounded-xl p-2.5 shadow-[var(--light-shadow)] bg-custom-white items-center gap-2.5`}>
+    <form onSubmit={handleSubmit} className={`flex rounded-xl p-2.5 shadow-[var(--light-shadow)] bg-custom-white items-center gap-2.5`}>
         <div ref={containerRef} className={`relative hover:bg-dark-white flex items-center gap-2 px-2 text-custom-black bg-custom-white rounded-[10px] h-12 basis-1/3 border border-light-gray`}>
             <LocationIcon width='20' height='20' className='text-dark-blue' />
             <input 
@@ -91,10 +97,11 @@ export const SearchServiceInput: FC<SearchServiceInputProps> = () => {
         </div>
         <div className="hover:bg-dark-white flex items-center relative hover:cursor-pointer gap-2 px-2 text-custom-black bg-custom-white rounded-[10px] h-12 basis-1/3 border border-light-gray">
             <div
+                ref={dateRef}
                 onClick={toggleDate} 
                 className={`flex items-center w-full`}>
                 <CalendarIcon width='20' height='20' className='text-dark-blue'/>
-                <div className="flex items-center justify-evenly flex-1">
+                <div className="flex items-center justify-evenly flex-1 select-none">
                     <Body>
                         {checkIn ? 
                         checkIn.toLocaleDateString("en-US", options)
@@ -125,11 +132,12 @@ export const SearchServiceInput: FC<SearchServiceInputProps> = () => {
         </div>
         <div
             className={`relative hover:bg-dark-white flex items-center gap-2 px-2 text-custom-black bg-custom-white rounded-[10px] h-12 basis-1/4 border border-light-gray hover:cursor-pointer`}>
-            <div 
+            <div
+                ref={roomRef}
                 onClick={toggleRoomInfo}
                 className="flex items-center w-full gap-3">
                 <PersonIcon width='20' height='20' className='text-dark-blue'/>
-                <Body>
+                <Body className="select-none">
                     {rooms} {rooms === 1 ? 'room' : 'rooms'}, {guests} {guests === 1 ? 'guest' : 'guests'}
                 </Body>
             </div>
@@ -144,10 +152,10 @@ export const SearchServiceInput: FC<SearchServiceInputProps> = () => {
                 )
             }
         </div>
-        <Button text='search' className="bg-dark-blue text-white px-2! h-12">
+        <Button as="button" type='submit' text='search' className="bg-dark-blue text-white px-2! h-12">
             <SearchIcon width='20' height='20'/>
         </Button>
-    </div>
+    </form>
 )};
 
 type LocationPopupProps = {
@@ -185,7 +193,7 @@ type RoomInfoPopupProps = {
 
 const RoomInfoPopup = ({guest, onChangeGuest, room, onChangeRoom, onClose}: RoomInfoPopupProps) => {
     return (
-        <div className="absolute flex flex-col gap-4 rounded-2xl bg-custom-white w-full z-20 top-14.5 shadow-[var(--boxshadow-lifted)] p-4">
+        <div className="absolute flex flex-col gap-4 rounded-2xl bg-custom-white w-full z-20 top-14.5 shadow-[var(--boxshadow-lifted)] p-4 select-none">
             <div className="flex justify-between items-center">
                 <Body>Guest</Body>
                 <div className="flex items-center gap-2">
