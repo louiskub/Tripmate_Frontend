@@ -13,14 +13,14 @@ async function getHotel(): Promise<HotelCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
-      
+      console.log(endpoints.hotel.all)
       const response = await axios.get(endpoints.hotel.all, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       const data = response.data;
-      console.log(data)
+      if(!data) return null
             
       const hotels: HotelCardProps[] = data.map((d: any) => {
         const prices = d.rooms?.flatMap((r: any) => r.room_options?.map((opt: any) => opt.price) ?? []) ?? [];
@@ -58,11 +58,11 @@ export default async function AllHotel() {
             <HotelCard key={idx} {...hotel}/>
           ))}
         </div>
-        <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
+        {/* <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
           <ServiceFilter/>
           <ServiceFilter/>
           <ServiceFilter/>
-        </div>
+        </div> */}
       </div>
       
     </DefaultPage>

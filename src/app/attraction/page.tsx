@@ -21,6 +21,7 @@ async function getService(): Promise<AttractionCardProps[] | null> {
       });
       const data = response.data;
       console.log(data)
+      if(!data) return null
 
   //   id: string;
     // name: string;
@@ -63,11 +64,11 @@ export default async function AllAttraction() {
             <AttractionCard key={idx} {...attraction} />
           ))}
         </div>
-        <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
+        {/* <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
           <ServiceFilter/>
           <ServiceFilter/>
           <ServiceFilter/>
-        </div>
+        </div> */}
       </div>
       
     </DefaultPage>

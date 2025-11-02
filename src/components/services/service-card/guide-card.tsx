@@ -9,7 +9,7 @@ import { endpoints } from '@/config/endpoints.config'
 import ImageSlide from '@/components/services/other/image-slide';
 
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 import StarIcon from "@/assets/icons/star-filled.svg"
 import ClockIcon from "@/assets/icons/Clock.svg"
 
@@ -67,15 +67,21 @@ const GuideCard = (service: GuideCardProps) => {
                         </div> */}
                     </div>
 
-                    <div className="inline-flex items-center gap-[3px] mt-2">
-                        <Tag text={(service.rating).toString()} />
-                        <Caption className='text-dark-blue'>{ratingText(service.rating)}</Caption>
-                    </div>
+                    {service.rating_count ? 
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text={(service.rating).toString()} /> 
+                            <Caption className='text-dark-blue'>{ratingText(service.rating)}</Caption>
+                        </div>
+                        :
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text='0' /> 
+                            <Caption className='text-dark-blue font-semibold!'>no rating</Caption>
+                        </div>}
                     
-                    <div className="inline-flex items-center gap-[3px] pl-1">
+                    {service.location && <div className="inline-flex items-center gap-[3px] pl-1">
                         <LocationIcon width='12'/>
                         <Caption>{service.location}</Caption>
-                    </div>
+                    </div>}
                 </div>
                 <div className="self-stretch h-full inline-flex flex-col justify-end items-end gap-2">
                 <span className='flex items-baseline gap-1'>

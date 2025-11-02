@@ -33,7 +33,7 @@ const HotelCard = (hotel: HotelCardProps) => {
                 <div className="flex flex-col flex-1 gap-2">
                     <Subtitle className='max-w-full line-clamp-2 leading-6'>{hotel.name}</Subtitle>
                     <div className='text-dark-blue flex gap-1'>
-                        <Tag text={hotel.type} />
+                        {hotel.type && <Tag text={hotel.type} />}
                         <span className='flex'>
                             {Array.from({ length: hotel.star }).map((_, i) => (
                                 <StarIcon key={i} width="12" />
@@ -41,10 +41,16 @@ const HotelCard = (hotel: HotelCardProps) => {
                         </span>
                     </div>
                     
-                    <div className="inline-flex items-center gap-[3px] mt-2">
-                        <Tag text={(hotel.rating).toString()} />
-                        <Caption className='text-dark-blue'>{ratingText(hotel.rating)}</Caption>
-                    </div>
+                    {hotel.rating_count ? 
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text={(hotel.rating).toString()} /> 
+                            <Caption className='text-dark-blue'>{ratingText(hotel.rating)}</Caption>
+                        </div>
+                        :
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text='0' /> 
+                            <Caption className='text-dark-blue font-semibold!'>no rating</Caption>
+                        </div>}
                     <div className="inline-flex items-center gap-[3px] pl-1">
                         <LocationIcon width='12'/>
                         <Caption>{hotel.location}</Caption>

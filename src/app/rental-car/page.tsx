@@ -10,6 +10,7 @@ import RentalCarCardProps from '@/models/service/card/rental-car-card';
 import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
+import { getCarRentalCenter, getProfile } from '@/utils/service/profile(server)';
 
 async function getService(): Promise<RentalCarCardProps[] | null> {
     const cookieStore = await cookies();
@@ -22,23 +23,31 @@ async function getService(): Promise<RentalCarCardProps[] | null> {
         }
       });
   const data = response.data;
-  const services: RentalCarCardProps[] = data.map((d: any) => ({
-    name: d.name ?? '',
-    owner: {
-      id: d.crcId ?? '',   
-      profile_pic: '',     // no profile_pic
-      name: '',            // no owner name
-    },
-    rating: d.rating ?? 0, //ไม่มี
-    rating_count: d.service?.reviews?.length ?? 0, //none
-    location: d.service?.location?.zone ?? '',     // if location exists
-    price: d.pricePerDay ? Number(d.pricePerDay) : 0, // convert string to number
-    brand: d.brand ?? '',
-    model: d.model ?? '',
-    pictures: d.pictures?.slice(0, 3) ?? [],
-    favorite: d.favorite ?? false,
-    id: d.id ?? '',
-  }));
+  if(!data) return null
+  
+  const services: RentalCarCardProps[] = await Promise.all(
+    data.map(async (d: any) => {
+      const car_center = await getCarRentalCenter(d.crcId);
+      console.log(car_center)
+      return {
+        name: d.name ?? '',
+        owner: {
+          id: data.crcId ?? '',   
+          profile_pic: car_center?.data.image,     // no profile_pic
+          name: car_center?.data.name,            // no owner name
+        },
+        rating: d.rating ?? 0, //ไม่มี
+        rating_count: d.service?.reviews?.length ?? 0, //none
+        location: d.service?.location?.zone ?? '',     // if location exists
+        price: d.pricePerDay ? Number(d.pricePerDay) : 0, // convert string to number
+        brand: d.brand ?? '',
+        model: d.model ?? '',
+        pictures: d.pictures?.slice(0, 3) ?? [],
+        favorite: d.favorite ?? false,
+        id: d.id ?? '',
+      };
+    })
+  );
 
 
   return services
@@ -64,11 +73,11 @@ export default async function AllRentalCar() {
             <RentalCarCard key={idx} {...car}/>
           ))}
         </div>
-        <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
+        {/* <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
           <ServiceFilter/>
           <ServiceFilter/>
           <ServiceFilter/>
-        </div>
+        </div> */}
       </div>
       
     </DefaultPage>

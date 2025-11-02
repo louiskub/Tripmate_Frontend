@@ -72,9 +72,15 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
     return (
         <div className='w-[280px] rounded-xl shadow-[var(--boxshadow-lifted)] top-12 right-7.5 self-stretch bg-custom-white border border-pale-blue flex flex-col gap-2 absolute overflow-hidden'>
             <div className="self-stretch h-16 px-2.5 border-b border-light-gray inline-flex justify-start items-center gap-1.5">
-                <img className="w-11 h-11 rounded-[100px] shadow object-cover border border-light-gray" src={profile_pic} />
-                <div className="flex-1 inline-flex flex-col gap-1">
-                    <ButtonText className='translate-y-0.5'>{first_name} {last_name}</ButtonText>
+                <img
+                    onClick={() => router.push(paths.account.profile)}
+                    className="w-11 h-11 rounded-[100px] shadow object-cover border border-light-gray hover:cursor-pointer" 
+                    src={profile_pic} />
+                <div
+                    className="flex-1 inline-flex flex-col gap-1">
+                    <ButtonText
+                        onClick={() => router.push(paths.account.profile)}
+                        className='translate-y-0.5 hover:cursor-pointer'>{first_name} {last_name}</ButtonText>
                     <div className="self-stretch flex items-center -translate-y-0.5">
                             <SubBody className='text-custom-gray'>@</SubBody>
                             <SubBody className='text-custom-black'>{user?.username}</SubBody>

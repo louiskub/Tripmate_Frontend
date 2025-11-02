@@ -7,7 +7,7 @@ import Reviews from '@/models/service/reviews';
 import {ratingText, ratingMeta} from '@/utils/service/rating'
 
 import ArrowIcon from '@/assets/icons/pagination-arrow.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 import { RestaurantSubtopicRating } from '@/models/service/detail/restaurant-detail';
 import { GuideSubtopicRating } from '@/models/service/detail/guide-detail';
 

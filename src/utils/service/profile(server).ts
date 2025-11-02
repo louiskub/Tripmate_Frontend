@@ -8,7 +8,7 @@ export async function getProfile(user_id: string): Promise<ProfileData | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
-    if (!token || !user_id) return null;
+    if (!user_id) return null;
 
     const res = await fetch(endpoints.profile(user_id), {
         headers: { Authorization: `Bearer ${token}` },
@@ -19,11 +19,7 @@ export async function getProfile(user_id: string): Promise<ProfileData | null> {
     return res.json();
 }
 
-export async function getCarRentalCenter(id: string) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) return null;
+export async function getCarRentalCenter(id: string) {    
     try{
         const res = await axios.get(endpoints.car_center(id));
         return res

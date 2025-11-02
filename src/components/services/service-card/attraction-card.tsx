@@ -8,7 +8,7 @@ import { endpoints } from '@/config/endpoints.config'
 import ImageSlide from '@/components/services/other/image-slide';
 
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 import { useBoolean } from '@/hooks/use-boolean'
 
 import {ratingText} from '@/utils/service/rating'

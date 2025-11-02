@@ -23,7 +23,7 @@ import ContactIcon from '@/assets/icons/telephone.svg'
 import GuestIcon from '@/assets/icons/max-guest.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import ClockIcon from '@/assets/icons/Clock.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 
 import { PicturePopup } from '@/components/services/other/service-pictures';
 

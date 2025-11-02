@@ -36,14 +36,21 @@ const RestaurantCard = (service: RestaurantCardProps) => {
                     <div className='flex flex-col flex-1 gap-2'>
                         <Subtitle className='max-w-full line-clamp-2 leading-6'>{service.name}</Subtitle>
                         
-                        <div className="inline-flex items-center gap-[3px]">
-                            <Tag text={(service.rating).toString()} />
+                        {service.rating_count ? 
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text={(service.rating).toString()} /> 
                             <Caption className='text-dark-blue'>{ratingText(service.rating)}</Caption>
                         </div>
-                        <div className="inline-flex items-center gap-[3px] pl-1">
+                        :
+                        <div className="inline-flex items-center gap-[3px] mt-2">
+                            <Tag text='0' /> 
+                            <Caption className='text-dark-blue font-semibold!'>no rating</Caption>
+                        </div>}
+
+                        {service.location && <div className="inline-flex items-center gap-[3px] pl-1">
                             <LocationIcon width='12'/>
                             <Caption>{service.location}</Caption>
-                        </div>
+                        </div>}
                         <div className="flex gap-[3px] pl-1">
                             <ClockIcon width='12' className='self-start mt-0.5'/>
                             <div className='flex flex-col'>
@@ -51,8 +58,8 @@ const RestaurantCard = (service: RestaurantCardProps) => {
                             </div>
                         </div>
                     </div>
-                        
-                    <Tag text={service.tag} />
+                    
+                    {service.tag && <Tag text={service.tag} />}
                 </div>
             </div>
         </div>

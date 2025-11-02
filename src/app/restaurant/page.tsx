@@ -22,6 +22,7 @@ async function getService(): Promise<RestaurantCardProps[] | null> {
       });
       const data = response.data;
       console.log(data)
+      if(!data) return null
       
       const services: RestaurantCardProps[] = data.map((d: any) => {
         return {
@@ -61,11 +62,11 @@ export default async function AllRestaurant() {
             <RestaurantCard key={idx} {...restaurant} />
           ))}
         </div>
-        <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
+        {/* <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
           <ServiceFilter/>
           <ServiceFilter/>
           <ServiceFilter/>
-        </div>
+        </div> */}
       </div>
       
     </DefaultPage>

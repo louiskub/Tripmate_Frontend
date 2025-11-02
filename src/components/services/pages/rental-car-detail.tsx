@@ -17,7 +17,7 @@ import LargeMap from '@/components/other/large-map';
 import QuestionIcon from '@/assets/icons/question.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import ClockIcon from '@/assets/icons/Clock.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
+import ProfileIcon from '@/assets/icons/profile-filled.svg'
 
 
 import { restaurantRatingMeta } from '@/utils/service/rating';

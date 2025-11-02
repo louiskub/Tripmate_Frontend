@@ -52,9 +52,15 @@ const ImageSlide = ({ pictures, children, className, onClick }: ImageSlideProps)
                 onTransitionEnd={handleTransitionEnd}
             >
                 {slides.map((pic, i) => (
-                <img key={i} 
+                <img
+                    key={i}
                     className="flex-shrink-0 w-full h-full object-cover"
-                    src={pic || '/images/placeholder.png'} />
+                    src={pic || "/images/placeholder.png"}
+                    onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/images/placeholder.png";
+                    }}
+                />
                 ))}
             </div>
 

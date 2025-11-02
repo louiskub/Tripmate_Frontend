@@ -23,8 +23,7 @@ async function getService(): Promise<GuideCardProps[] | null> {
       });
       const data = response.data;
       console.log(data)
-
-      
+      if(!data) return null
 
       const services: GuideCardProps[] = await Promise.all(
         data.map(async (d: any) => {
@@ -71,11 +70,11 @@ export default async function AllGuides() {
             <GuideCard key={idx} {...guide} />
           ))}
         </div>
-        <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
+        {/* <div className='flex flex-shrink-0 flex-col w-60 gap-2.5'>
           <ServiceFilter/>
           <ServiceFilter/>
           <ServiceFilter/>
-        </div>
+        </div> */}
       </div>
       
     </DefaultPage>
