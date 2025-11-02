@@ -5,18 +5,21 @@ import maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { MapPin, Navigation, X, Search, Route } from "lucide-react"
 import { renderToString } from "react-dom/server"
+import { useSearchParams } from "next/navigation"
 
 import MyHotelIcon from "@/assets/icons/hotel.svg"
 import MyRestaurantIcon from "@/assets/icons/restaurant-fill.svg"
 import MyAttractionIcon from "@/assets/icons/attractions.svg"
+import MyQueryIcon from "@/assets/icons/map-pin-fill.svg"
 
-type MarkerCategory = "hotel" | "restaurant" | "attraction"
+type MarkerCategory = "hotel" | "restaurant" | "attraction" | "query"
 
 type SystemMarker = {
   name: string
   category: MarkerCategory
   lat: number
   lng: number
+  size?: number
 }
 
 type Suggestion = {
@@ -79,15 +82,33 @@ export default function FinalMap() {
   const [locationInfo, setLocationInfo] = useState<PopupInfo | null>(null)
   const [isClosing, setIsClosing] = useState(false)
 
+  // Search Params
+  const searchParams = useSearchParams()
+
+  const hasQuery = searchParams.get("name") ? true : false
+  const queryString = hasQuery ? {
+    name:  searchParams.get("name"),
+    category: "",
+    lat: searchParams.get("lat"),
+    long: searchParams.get("long")
+  } : {
+    // default
+    lat: 13.7367,
+    long: 100.5231
+  }
+
+  console.log(queryString)
+
   // Constants
   const ROUTE_SOURCE_ID = "route-source"
   const ROUTE_LAYER_ID = "route-line"
   const SYSTEM_PROXIMITY_PX = 24
 
-  const categoryStyles: Record<MarkerCategory, { icon: string; color: string }> = {
+  const categoryStyles: Record<MarkerCategory, { icon: string; color: string; size?: number}> = {
     hotel: { icon: MyHotelIcon, color: "#3B82F6" },
     restaurant: { icon: MyRestaurantIcon, color: "#EF4444" },
     attraction: { icon: MyAttractionIcon, color: "#10B981" },
+    query: { icon: MyQueryIcon, color: "#f0137a", size: 50},
   }
 
   // 🧭 ดึงตำแหน่งผู้ใช้
@@ -114,7 +135,8 @@ export default function FinalMap() {
 
         myLocationRef.current = new maplibregl.Marker({ element: el }).setLngLat([lng, lat]).addTo(map)
 
-        map.flyTo({ center: [lng, lat], zoom: 15 })
+        if (!hasQuery)
+          map.flyTo({ center: [lng, lat], zoom: 15 })
 
         if (directionsOnRef.current) {
           setOrigin({ lat, lng })
@@ -179,7 +201,7 @@ export default function FinalMap() {
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: "https://tiles.stadiamaps.com/styles/osm_bright.json",
-      center: [100.5231, 13.7367],
+      center: [queryString.long, queryString.lat],
       zoom: 13,
     })
     mapRef.current = map
@@ -193,13 +215,18 @@ export default function FinalMap() {
       { name: "สวนลุมพินี", category: "attraction", lat: 13.7302, lng: 100.5417 },
     ]
 
+    if (hasQuery){
+      systemPoints.push({ name: queryString.name, category: "query", lat: queryString.lat, lng: queryString.long, size: 80})
+    }
+
     const renderIconToString = (IconComp: any, color: string, size = 22) =>
       renderToString(<IconComp color={color} width={size} height={size} />)
 
     systemPoints.forEach((m) => {
-      const { icon, color } = categoryStyles[m.category]
+      const { icon, color, size} = categoryStyles[m.category]
       const markerEl = document.createElement("div")
-      markerEl.innerHTML = renderIconToString(icon, color, 40)
+      console.log("size", size)
+      markerEl.innerHTML = renderIconToString(icon, color, size ? size : 40)
 
       markerEl.addEventListener("mouseenter", () => {
         const pin = markerEl.querySelector("div") as HTMLElement
@@ -235,15 +262,31 @@ export default function FinalMap() {
       map.getContainer().appendChild(label)
       systemMarkersRef.current.push({ markerEl, label, lat: m.lat, lng: m.lng, name: m.name, category: m.category })
 
-      markerEl.addEventListener("click", (e) => {
+      markerEl.addEventListener("click", async (e) => {
         e.stopPropagation()
-        setLocationInfo({ name: m.name, address: `${m.name}, กรุงเทพมหานคร`, lat: m.lat, lng: m.lng })
+      //   return {
+      //   name: data.display_name?.split(",")[0] || "ไม่ทราบชื่อสถานที่",
+      //   address: data.display_name,
+      //   lat,
+      //   lng: lon,
+      // }
+        const position = await reverseGeocode(m.lat, m.lng)
+        setLocationInfo({ name: m.name, address: position.address, lat: m.lat, lng: m.lng })
         setIsClosing(false)
 
         if (directionsOnRef.current) {
           const pos = { lat: m.lat, lng: m.lng }
-          setDestination(pos)
-          placeABMarker(pos, "destination")
+          if (activeTargetRef.current === "origin") {
+            setOrigin(pos)
+            placeABMarker(pos, "origin")
+          } else if (activeTargetRef.current === "destination") {
+            setDestination(pos)
+            placeABMarker(pos, "destination")
+          } else {
+            setWaypoints((prev) => [...prev, pos])
+          }
+          // setDestination(pos)
+          // placeABMarker(pos, "destination")
           if (origin) {
             const allPoints = [origin, ...waypoints, pos]
             routeBetween(allPoints)
@@ -371,6 +414,7 @@ export default function FinalMap() {
   }
 
   const placeABMarker = (pos: LngLat | maplibregl.LngLat, type: "origin" | "destination") => {
+    console.log("placeABMarker", pos, type)
     const map = mapRef.current
     if (!map) return
     const lat = (pos as any).lat ?? (pos as any).lat
