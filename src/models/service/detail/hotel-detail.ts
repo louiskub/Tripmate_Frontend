@@ -24,6 +24,8 @@ type HotelDetail = {
     room: Room[],
 
     policy: HotelPolicy,
+    lat: number,
+    long: number,
 }
 
 type Facility = {

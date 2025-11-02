@@ -21,6 +21,8 @@ type RestaurantDetail = {
 
     cuisine: string
     id: string
+    lat: number,
+    long: number,
 }
 
 export type RestaurantSubtopicRating = {

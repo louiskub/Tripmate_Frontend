@@ -16,7 +16,8 @@ import { formatPrice } from '@/utils/service/string-formatter';
 
 import { guideRatingMeta } from '@/utils/service/rating';
 
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
+import MiniMap from '@/components/map/minimap';
 import LargeMap from '@/components/other/large-map';
 
 import ContactIcon from '@/assets/icons/telephone.svg'
@@ -160,7 +161,7 @@ type tab = {
             />
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (

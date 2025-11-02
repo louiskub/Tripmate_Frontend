@@ -24,6 +24,8 @@ export default async function HotelDetailPage({ params }: { params: { id: string
       },
       nearby_locations: data.nearbyLocations,
       room: mockHotel1.room,
+      lat: data.service.location.lat,
+      long: data.service.location.long,
 
     }
     return <HotelDetail service={hotel} />;

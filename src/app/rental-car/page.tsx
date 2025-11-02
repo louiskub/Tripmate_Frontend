@@ -12,18 +12,17 @@ import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
 import { getCarRentalCenter, getProfile } from '@/utils/service/profile(server)';
 
-async function getService(): Promise<RentalCarCardProps[] | null> {
+async function getService(key: string): Promise<RentalCarCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
       
-      const response = await axios.get(endpoints.rental_car.all, {
+      const response = await axios.get(endpoints.rental_car.all(key), {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
   const data = response.data;
-  if(!data) return null
   
   const services: RentalCarCardProps[] = await Promise.all(
     data.map(async (d: any) => {
@@ -54,12 +53,18 @@ async function getService(): Promise<RentalCarCardProps[] | null> {
   } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);
-      throw error
+      return null
     } 
 }
 
-export default async function AllRentalCar() {
-  const services = await getService()
+  interface PageProps {
+    searchParams: {
+      q?: string;
+    };
+  }
+export default async function AllRentalCar({ searchParams }: PageProps) {
+  const key = await searchParams.q ?? ''
+  const services = await getService(key)
 
   return (
     <DefaultPage current_tab='rental_car'>

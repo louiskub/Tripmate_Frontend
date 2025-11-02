@@ -36,6 +36,8 @@ type GuideDetail = {
     
     id:string
     favorite: boolean
+    lat: number,
+    long: number,
 }
 
 export type GuideSubtopicRating = {

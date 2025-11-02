@@ -10,18 +10,17 @@ import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
 
-async function getService(): Promise<AttractionCardProps[] | null> {
+async function getService(key: string): Promise<AttractionCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
-      const response = await axios.get(endpoints.attraction.all, {
+      const response = await axios.get(endpoints.attraction.all(key), {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       const data = response.data;
       console.log(data)
-      if(!data) return null
 
   //   id: string;
     // name: string;
@@ -45,12 +44,19 @@ async function getService(): Promise<AttractionCardProps[] | null> {
     } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);
-      throw error
+      return null
     } 
 }
 
-export default async function AllAttraction() {
-  const services = await getService()
+interface PageProps {
+  searchParams: {
+    q?: string;
+  };
+}
+
+export default async function AllAttraction({ searchParams }: PageProps) {
+  const key = await searchParams.q ?? ''
+  const services = await getService(key)
 
   return (
     <DefaultPage current_tab='attraction'>

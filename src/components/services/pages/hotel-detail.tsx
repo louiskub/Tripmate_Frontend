@@ -11,7 +11,8 @@ import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
 import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
+import MiniMap from '@/components/map/minimap';
 import LargeMap from '@/components/other/large-map';
 import RoomDetail from '@/components/services/other/room-detail'
 
@@ -200,7 +201,7 @@ type tab = {
             />
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px]'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (

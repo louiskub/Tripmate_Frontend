@@ -11,7 +11,7 @@ import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { TextButton } from '@/components/buttons/buttons';
 import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
 import LargeMap from '@/components/other/large-map';
 
 import CheckIcon from '@/assets/icons/bullet.svg'
@@ -21,6 +21,8 @@ import PriceCard from '@/components/services/other/price_card';
 
 import AttractionDetailModel from '@/models/service/detail/attraction-detail';
 import { PicturePopup } from '@/components/services/other/service-pictures';
+
+import MiniMap from '@/components/map/minimap';
 
 type AttractionDetailProps = {
   service: AttractionDetailModel
@@ -113,7 +115,7 @@ type tab = {
             /> */}
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (

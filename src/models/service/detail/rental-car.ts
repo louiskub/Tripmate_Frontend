@@ -45,6 +45,8 @@ type RentalcarDetail = {
     id: string
     
     favorite: boolean
+    lat: number,
+    long: number,
 }
 
 export default RentalcarDetail

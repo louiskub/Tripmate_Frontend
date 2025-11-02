@@ -15,14 +15,14 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
     const car: RentalcarDetailModel = {
       name: data.name ?? '',
       owner: {
-        id: data.crcId ?? '',   
-        profile_pic: profile?.data.image,     // no profile_pic
-        name: profile?.data.name,            // no owner name
+        id: data.crcId ?? '',
+        profile_pic: profile?.data.image, // no profile_pic
+        name: profile?.data.name, // no owner name
       },
       rating: data.rating ?? 0, //ไม่มี
       rating_count: data.service?.reviews?.length ?? 0, //none
       review: data.service?.reviews,
-      location: data.service?.location?.zone ?? '',     // if location exists
+      location: data.service?.location?.zone ?? '', // if location exists
       nearby_locations: data.nearbyLocations || [],
       price: data.pricePerDay ? Number(data.pricePerDay) : 0, // convert string to number
       brand: data.brand ?? '',
@@ -34,8 +34,8 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
       services: {
         deposit: data.deposit,
         delivery: {
-            in_local: 500,
-            out_local: 1000,
+          in_local: 500,
+          out_local: 1000,
         },
         insurance: 500,
       },
@@ -43,7 +43,9 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
         fuel: data.fuelPolicy || false,
         seats: data.seats,
         contact: profile?.data.contacts.phone
-      },      
+      },
+      lat: 0,
+      long: 0
     }
     return <RentalCarDetail service={car} />;
   } 

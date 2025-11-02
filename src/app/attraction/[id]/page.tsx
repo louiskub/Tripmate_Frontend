@@ -17,7 +17,9 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
       favorite: data.favorite ?? false,
       id: data.id,
       description: data.description ?? '',
-      nearby_locations: []
+      nearby_locations: [],
+      lat: 0,
+      long: 0
     }
     return <AttractionDetail service={service} />;
   } 

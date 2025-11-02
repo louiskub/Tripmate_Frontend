@@ -11,19 +11,18 @@ import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
 
-async function getService(): Promise<GuideCardProps[] | null> {
+async function getService(key: string): Promise<GuideCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
       
-      const response = await axios.get(endpoints.guide.all, {
+      const response = await axios.get(endpoints.guide.all(key), {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       const data = response.data;
       console.log(data)
-      if(!data) return null
 
       const services: GuideCardProps[] = await Promise.all(
         data.map(async (d: any) => {
@@ -51,13 +50,19 @@ async function getService(): Promise<GuideCardProps[] | null> {
     } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);
-      throw error
+      return null
     } 
 }
 
+interface PageProps {
+  searchParams: {
+    q?: string;
+  };
+}
 
-export default async function AllGuides() {
-  const services = await getService()
+export default async function AllGuides({ searchParams }: PageProps) {
+  const key = await searchParams.q ?? ''
+  const services = await getService(key)
   return (
     <DefaultPage current_tab='guide'>
       <SearchServiceInput/>

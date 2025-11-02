@@ -11,18 +11,17 @@ import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
 
-async function getService(): Promise<RestaurantCardProps[] | null> {
+async function getService(key:string): Promise<RestaurantCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
-      const response = await axios.get(endpoints.restaurant.all, {
+      const response = await axios.get(endpoints.restaurant.all(key), {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       const data = response.data;
       console.log(data)
-      if(!data) return null
       
       const services: RestaurantCardProps[] = data.map((d: any) => {
         return {
@@ -42,13 +41,20 @@ async function getService(): Promise<RestaurantCardProps[] | null> {
     } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);
-      throw error
+      return null
     } 
 }
 
 
-export default async function AllRestaurant() {
-  const services = await getService()
+  interface PageProps {
+    searchParams: {
+      q?: string;
+    };
+  }
+
+export default async function AllRestaurant({ searchParams }: PageProps) {
+  const key = await searchParams.q ?? ''
+  const services = await getService(key)
 
   return (
     <DefaultPage current_tab='restaurant'>

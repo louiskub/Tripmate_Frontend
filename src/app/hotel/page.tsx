@@ -9,18 +9,18 @@ import { endpoints } from '@/config/endpoints.config';
 import HotelCardProps from '@/models/service/card/hotel-card';
 import axios from 'axios';
 
-async function getHotel(): Promise<HotelCardProps[] | null> {
+async function getHotel(key: string): Promise<HotelCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
-      console.log(endpoints.hotel.all)
-      const response = await axios.get(endpoints.hotel.all, {
+      console.log(endpoints.hotel.all(key))
+      const response = await axios.get(endpoints.hotel.all(key), {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      const data = response.data;
-      if(!data) return null
+      const data = response.data.data;
+      console.log(response)
             
       const hotels: HotelCardProps[] = data.map((d: any) => {
         const prices = d.rooms?.flatMap((r: any) => r.room_options?.map((opt: any) => opt.price) ?? []) ?? [];
@@ -43,9 +43,15 @@ async function getHotel(): Promise<HotelCardProps[] | null> {
     } 
 }
 
-export default async function AllHotel() {
-  const hotels = await getHotel()
-  console.log(hotels)
+interface PageProps {
+  searchParams: {
+    q?: string;
+  };
+}
+
+export default async function AllHotel({ searchParams }: PageProps) {
+  const key = await searchParams.q ?? ''
+  const hotels = await getHotel(key)
   return (
     <DefaultPage current_tab='hotel'>
       <SearchServiceInput/>
