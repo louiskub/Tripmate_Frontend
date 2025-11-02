@@ -5,7 +5,7 @@ import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { guides } from '@/mocks/guide';
 import GuideCardProps from '@/models/service/card/guide-card';
-import { getProfile } from '@/utils/service/profile(server)';
+import { getProfile } from '@/utils/service/get-functions';
 
 import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';

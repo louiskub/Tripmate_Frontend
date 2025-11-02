@@ -52,16 +52,16 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
     return (
         <Button 
             onClick={handleFavorite}
-            className={`absolute top-0 left-0 z-10 ${large ? 'w-[35px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
+            className={`absolute z-10 ${large ? 'w-[37px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
         >
             { isFavorite.value ? 
                 <HeartFilledIcon 
-                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`}
-                    width = {large ? '18' : '14'} 
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[2px]`}
+                    width = {large ? '20' : '14'} 
                     onAnimationEnd={handleAnimationEnd} />:
                 <HeartIcon 
-                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`} 
-                    width = {large ? '18' : '14'}
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[2px]`} 
+                    width = {large ? '20' : '14'}
                     onAnimationEnd={handleAnimationEnd} />
             }
         </Button>

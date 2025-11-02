@@ -61,7 +61,6 @@ export default function EditProfile() {
         }
         try {
             const { profileImg, ...textData } = profile;
-            console.log(textData)
             await axios.patch(endpoints.profile(user_id), textData, {
                 headers: { Authorization: `Bearer ${token}` }
             });

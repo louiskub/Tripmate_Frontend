@@ -37,6 +37,7 @@ export const endpoints = {
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
+  nearby_location: (lat:number, long:number) => `${BASE_URL}/locations/nearby?lat=${lat}&lng=${long}&radiusKm=50&limit=10`,
   car_center: (id: string) => `${BASE_URL}/car-rental-center/${id}`,
 
   serviceManage: {

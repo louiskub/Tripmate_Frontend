@@ -20,14 +20,6 @@ async function getService(key: string): Promise<AttractionCardProps[] | null> {
         }
       });
       const data = response.data;
-      console.log(data)
-
-  //   id: string;
-    // name: string;
-    // type: string;
-    // pictures: string[];
-    // location: string;
-    // favorite: boolean;
       
       const services: AttractionCardProps[] = data.map((d: any) => {
         return {

@@ -10,7 +10,7 @@ import RentalCarCardProps from '@/models/service/card/rental-car-card';
 import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
-import { getCarRentalCenter, getProfile } from '@/utils/service/profile(server)';
+import { getCarRentalCenter, getProfile } from '@/utils/service/get-functions';
 
 async function getService(key: string): Promise<RentalCarCardProps[] | null> {
     const cookieStore = await cookies();

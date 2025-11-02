@@ -150,7 +150,6 @@ const DeleteAccountPopup = ({Close} : PopupProps) => {
     const [isEnabled, setIsEnabled] = useState(false);
 
     const handleDeleteAccount = () => {
-        console.log('delete account');
     }
 
     return (
