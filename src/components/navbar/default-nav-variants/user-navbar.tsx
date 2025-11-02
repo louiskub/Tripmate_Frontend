@@ -46,7 +46,7 @@ export default function UserNavbar() {
                 <MenuButton text='Trip' href={paths.trip.all}></MenuButton>
                 <MenuButton text='Group' href={paths.group.all} />
             </div>
-            {showDropdown.value && <ProfileDropdown first_name={user?.fname || ''} last_name={user?.lname || ''} username={user?.username || ''} profile_pic={user?.profileImg || ''}  />}
+            {showDropdown.value && <ProfileDropdown first_name={user?.fname || ''} last_name={user?.lname || ''} username={user?.username || ''} profile_pic={user?.profileImg}  />}
         </nav>
     )
 }
@@ -55,12 +55,11 @@ type ProfileDropdownProps = {
     first_name: string;
     last_name: string;
     username: string;
-    profile_pic: string;
+    profile_pic?: string;
 }
 
-export const ProfileDropdown = ({first_name = "first", last_name = "last", username = "username", profile_pic = "https://placehold.co/36x36"}: ProfileDropdownProps) => {
+export const ProfileDropdown = ({first_name = "first", last_name = "last", username = "username", profile_pic = "/images/placeholder.png"}: ProfileDropdownProps) => {
     const router = useRouter();
-    const {user} = useUser();
     
     const clickLogout = (e?: React.MouseEvent) => {
         e?.preventDefault(); // 🧠 stop <a> navigation
@@ -75,7 +74,7 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
                 <img
                     onClick={() => router.push(paths.account.profile)}
                     className="w-11 h-11 rounded-[100px] shadow object-cover border border-light-gray hover:cursor-pointer" 
-                    src={profile_pic} />
+                    src={profile_pic || '/images/placeholder.png'} />
                 <div
                     className="flex-1 inline-flex flex-col gap-1">
                     <ButtonText
@@ -83,7 +82,7 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
                         className='translate-y-0.5 hover:cursor-pointer'>{first_name} {last_name}</ButtonText>
                     <div className="self-stretch flex items-center -translate-y-0.5">
                             <SubBody className='text-custom-gray'>@</SubBody>
-                            <SubBody className='text-custom-black'>{user?.username}</SubBody>
+                            <SubBody className='text-custom-black'>{username}</SubBody>
                     </div>
                 </div>
             </div>
