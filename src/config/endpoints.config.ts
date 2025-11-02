@@ -51,5 +51,6 @@ export const endpoints = {
     }
   },
 
+  user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
 
 }

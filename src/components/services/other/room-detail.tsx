@@ -20,14 +20,18 @@ import GalleryIcon from '@/assets/icons/gallery.svg'
 import SizeIcon from '@/assets/icons/heart.svg'
 
 import { PictureListItem } from './service-pictures'
+import GuidePopup from './guide-popup'
 
 
 type RoomDetailProps = {
     room: Room
+    service_id: string
 }
 
-export const RoomDetail = ({room}: RoomDetailProps) => {
+export const RoomDetail = ({room, service_id}: RoomDetailProps) => {
     const showPopup = useBoolean(false)
+    const [guidePopup, setGuidePopup] = useState(false)
+
     return (
         <div className='border border-light-gray px-4 py-2 rounded-[10px] grid grid-cols-[240px_1fr] gap-1.5'>
             <Subtitle className='col-span-2'>{room.name}</Subtitle>
@@ -89,6 +93,7 @@ export const RoomDetail = ({room}: RoomDetailProps) => {
                 <Button
                     text="Book"
                     className="bg-dark-blue text-custom-white h-8! w-20"
+                    onClick={() => setGuidePopup(true)}
                 />
                 </div>
             </div>
@@ -96,6 +101,7 @@ export const RoomDetail = ({room}: RoomDetailProps) => {
     </div>
 )}
             {showPopup.value && <RoomDetailPopup close={showPopup.setFalse} room={room}/>}
+            {guidePopup && <GuidePopup Close={() => setGuidePopup(false)} type='hotel' service_id={service_id}/>}
         </div>
     )
 }

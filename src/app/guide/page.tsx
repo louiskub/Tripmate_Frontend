@@ -69,7 +69,7 @@ export default async function AllGuides({ searchParams }: PageProps) {
       <div className='flex w-full gap-2.5 mt-2'>
         <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
           <span className='flex justify-between  p-2.5'>
-            <Body>Found {services ? services.length : 0} attractions</Body>
+            <Body>Found {services ? services.length : 0} guides</Body>
           </span>
           {services?.map((guide, idx) => (
             <GuideCard key={idx} {...guide} />

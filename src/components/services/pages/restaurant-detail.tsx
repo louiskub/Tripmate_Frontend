@@ -35,6 +35,7 @@ type RestaurantDetailProps = {
 export default function RestaurantDetail({service}: RestaurantDetailProps) {
   const [currentTab, setCurrentTab] = useState("overview");
   const [PicturePopUp, setPicturePopUp] = useState(false);
+  const [guidePopup, setGuidePopup] = useState(false)
 
 type tab = {
     label: string
@@ -72,10 +73,6 @@ type tab = {
   }, []);
 
   const first_comment: string | undefined = service.review[0]?.comment;
-
-  const handleBookRestaurant = () => {
-  
-  }
 
   return (
     <DefaultPage current_tab='restaurant'>

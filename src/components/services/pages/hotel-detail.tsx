@@ -28,6 +28,7 @@ import { PicturePopup } from '@/components/services/other/service-pictures';
 import HotelDetailModel from '@/models/service/detail/hotel-detail';
 import { start } from 'repl';
 
+
 type HotelDetailProps = {
   service: HotelDetailModel;
 };
@@ -244,6 +245,7 @@ const starting_price = prices.length ? Math.min(...prices) : 0;
             <RoomDetail 
               key={room.name}
               room={room}
+              service_id={service.id}
             />
           ))
         }
