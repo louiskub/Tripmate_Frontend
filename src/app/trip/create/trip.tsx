@@ -99,14 +99,6 @@ interface HotelDetail {
   address: string
 }
 
-interface TourPackage {
-  id: string
-  title: string
-  description: string
-  pricePerTrip: string
-  maxGuests: number
-}
-
 // --- MOCK DATA ---
 
 const mockServices: ServiceCategory = {
@@ -437,36 +429,6 @@ const mockHotelDetails: Record<string, HotelDetail> = {
     images: ["https://placehold.co/600x400"],
     address: "202 ซ.ทองหล่อ, กรุงเทพฯ",
   },
-}
-
-const mockGuideTours: Record<string, TourPackage[]> = {
-  g1: [
-    {
-      id: "g1t1",
-      title: "ทัวร์วัดพระแก้วและพระบรมมหาราชวัง (ครึ่งวัน)",
-      description: "เจาะลึกประวัติศาสตร์และสถาปัตยกรรมที่สวยงาม",
-      pricePerTrip: "฿2,500/ทริป",
-      maxGuests: 6,
-    },
-    {
-      id: "g1t2",
-      title: "ทัวร์ตลาดน้ำดำเนินสะดวก (เต็มวัน)",
-      description: "สัมผัสวิถีชีวิตริมคลองและของกินอร่อยๆ",
-      pricePerTrip: "฿4,000/ทริป",
-      maxGuests: 4,
-    },
-  ],
-  g2: [], // No specific tours for Sarah
-  g3: [], // No specific tours for Mike
-  g4: [
-    {
-      id: "g4t1",
-      title: "ทัวร์ Street Food ย่านเยาวราช (ช่วงค่ำ)",
-      description: "ตะลุยกินร้านเด็ด มิชลินไกด์",
-      pricePerTrip: "฿2,000/ทริป",
-      maxGuests: 8,
-    },
-  ],
 }
 
 // --- HELPER FUNCTION --- (เพิ่ม 3)
@@ -1379,13 +1341,13 @@ export default function TripEditor() {
                 {showServiceDetail && (
                   <button
                     onClick={handleBackToServiceList}
-                    className="absolute top-3 left-3 p-1 rounded-full hover:bg-gray-100"
+                    className="absolute top-5 left-3 p-1 rounded-full hover:bg-gray-100"
                   >
                     <ArrowLeft className="w-5 h-5 text-gray-500" />
                   </button>
                 )}
 
-                <h3 className="text-lg font-bold text-custom-black mb-3">
+                <h3 className="text-lg font-bold text-custom-black px-10 py-1">
                   {showServiceDetail ? selectedService?.name : "Add Service"}
                 </h3>
 
@@ -1609,7 +1571,7 @@ export default function TripEditor() {
                       </div>
                     )}
 
-                    {/* --- Change 3: Guide Details & Tour Packages --- */}
+                    {/* --- Change 3: Guide Details --- */}
                     {activeServiceTab === "guides" && selectedService && mockGuideDetails[selectedService.id] && (
                       <div className="space-y-4">
                         <div className="flex items-start gap-4">
@@ -1688,55 +1650,8 @@ export default function TripEditor() {
                           </div>
                         </div>
 
-                        {/* --- Tour Packages (Added) --- */}
-                        {mockGuideTours[selectedService.id] && mockGuideTours[selectedService.id].length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-neutral-200">
-                            <h5 className="font-semibold text-custom-black text-lg mb-2">แพ็คเกจทัวร์</h5>
-                            <div className="space-y-3">
-                              {mockGuideTours[selectedService.id].map((tour) => (
-                                <div key={tour.id} className="p-3 border border-neutral-200 rounded-lg">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <h6 className="font-semibold text-custom-black">{tour.title}</h6>
-                                      <p className="text-sm text-gray-600 mt-1">{tour.description}</p>
-                                    </div>
-                                    {/* --- อัปเดตการเรียก `handleAddServiceToTrip` (สำหรับ Guide Tour) --- */}
-                                    <button
-                                      onClick={() =>
-                                        handleAddServiceToTrip(
-                                          selectedService,
-                                          `Tour: ${tour.title} - ${tour.pricePerTrip} (สูงสุด ${tour.maxGuests} คน)`,
-                                          undefined, // quantity
-                                          undefined, // roomId
-                                          tour.id, // <-- เพิ่ม tour.id เป็น packageId
-                                        )
-                                      }
-                                      className="px-3 py-1.5 bg-dark-blue text-white rounded-lg font-semibold hover:opacity-90 text-sm shrink-0 ml-2"
-                                    >
-                                      เลือกทัวร์นี้
-                                    </button>
-                                  </div>
-                                  <div className="flex items-center gap-4 mt-2">
-                                    <span className="text-sm font-medium text-dark-blue">{tour.pricePerTrip}</span>
-                                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                                      <Users className="w-4 h-4" />
-                                      <span>สูงสุด {tour.maxGuests} คน</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {/* --- End of Tour Packages --- */}
-
                         {/* --- Daily Hire Button (Modified) --- */}
                         <div className="mt-4 pt-4 border-t border-neutral-200">
-                          <p className="text-sm text-gray-600 mb-2">
-                            {mockGuideTours[selectedService.id] && mockGuideTours[selectedService.id].length > 0
-                              ? "หรือเลือกจ้างไกด์แบบรายวัน:"
-                              : "เลือกจ้างไกด์แบบรายวัน:"}
-                          </p>
                           {/* --- อัปเดตการเรียก `handleAddServiceToTrip` (สำหรับ Guide Daily) --- */}
                           <button
                             onClick={() =>
