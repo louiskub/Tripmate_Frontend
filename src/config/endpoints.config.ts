@@ -3,7 +3,8 @@ export const BASE_URL = "http://161.246.5.236:8800"
 export const endpoints = {
   auth: {
     login: `${BASE_URL}/auth/login`,
-    register: `${BASE_URL}/auth/register`
+    register: `${BASE_URL}/auth/register`,
+    owner: `${BASE_URL}/user-services/owner`,
   },
   manage_account: {
     change_password: (id: string) => `${BASE_URL}/users/${id}/password`,
@@ -36,5 +37,15 @@ export const endpoints = {
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
   car_center: (id: string) => `${BASE_URL}/car-rental-center/${id}`
+
+  serviceManage: {
+    car: {
+      getAllCar: (serviceId: string) =>  `${BASE_URL}/car-rental-center/${serviceId}/`,
+      addCar: `${BASE_URL}/car-rental-center/add-car`,
+      editCar: (id: string) => `${BASE_URL}/car/${id}`,
+      deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
+      uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
+    }
+  }
 
 }
