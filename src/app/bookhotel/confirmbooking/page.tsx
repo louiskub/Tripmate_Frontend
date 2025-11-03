@@ -64,23 +64,6 @@ export type UserInfo = {
   role?: string;
 };
 
-
-export function generateBookingId(length: number = 8): string {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const charactersLength = characters.length;
-
-  for (let i = 0; i < length; i++) {
-    // สุ่ม index จาก 0 ถึง (charactersLength - 1)
-    const randomIndex = Math.floor(Math.random() * charactersLength);
-    
-    // ดึงตัวอักษรจาก index ที่สุ่มได้
-    result += characters.charAt(randomIndex);
-  }
-
-  return result;
-}
-
 // ----------------------------------------------------
 // (ลงทะเบียนภาษาไทยให้ DatePicker)
 registerLocale("th", th);
@@ -142,12 +125,12 @@ export default function ConfirmBookingHotelPage() {
   // -------------------------------------------------------------------
   useEffect(() => {
     const fetchHotelData = async () => {
-      // const hotelId = searchParams.get('hotelId');
-      // const roomId = searchParams.get('roomId');
+      const hotelId = searchParams.get('service_id');
+      const roomId = searchParams.get('roomId');
 
       //mock data
-      const hotelId = "svc_001";
-      const roomId = "rm103";
+      // const hotelId = "svc_001";
+      // const roomId = "rm103";
 
       if (!hotelId || !roomId) {
         setErrorMsg("ไม่พบข้อมูลโรงแรมหรือห้องพัก (hotelId หรือ roomId)");
@@ -587,7 +570,7 @@ export default function ConfirmBookingHotelPage() {
       <main className="w-full h-full mx-auto bg-gray-50 px-4 sm:px-6 md:px-12 lg:px-24 pt-4 md:pt-7 pb-2.5">
         <div className="flex flex-col gap-0.5 mb-4 md:mb-5">
           <div className="text-gray-900 text-xl md:text-2xl font-extrabold">Hotel Booking</div>
-          <div className="text-gray-500 text-base md:text-lg font-semibold">Booking ID : {generateBookingId()}</div>
+          <div className="text-gray-500 text-base md:text-lg font-semibold"></div>
         </div>
 
         {/* Error banner */}

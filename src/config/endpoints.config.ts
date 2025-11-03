@@ -79,4 +79,6 @@ export const endpoints = {
     
   user_profile: (id: string) => `${BASE_URL}/users/${id}`,
   book: `${BASE_URL}/booking`,  
+
+  
 }
