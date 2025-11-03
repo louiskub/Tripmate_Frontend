@@ -256,7 +256,7 @@ export default function GuidePaymentPage() {
                 type="button"
                 onClick={() => {
                   // เผื่อยังอยากกดไปหน้า complete ตรง ๆ (ไม่แนะนำถ้าใช้ flow ชำระจริง)
-                  router.push(`/bookguide/completebooking?bookingId=${encodeURIComponent(bookingId)}&total=${total}`);
+                  router.push(`/guide/book/completebooking`);
                 }}
                 className="inline-flex w-full h-7 md:h-10 items-center justify-center rounded-[10px] bg-sky-600 text-white text-sm md:text-base font-bold shadow transition-all duration-600 ease-in-out hover:scale-[1.02] hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
               >

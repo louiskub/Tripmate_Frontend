@@ -407,6 +407,9 @@ export default function RentalCarConfirmBookingPage() {
   };
 
   const handleConfirmBooking = useCallback(async () => {
+    router.push(
+        `/rental-car/book/payment`
+      );
     try {
       setErrorMsg(null);
       const v = validateForm();
@@ -447,9 +450,7 @@ export default function RentalCarConfirmBookingPage() {
       const bookingId = json.bookingId;
       const total = json.total ?? grandTotal;
 
-      router.push(
-        `/bookrentalcar/payment?bookingId=${(bookingid.value)})}`
-      );
+      
     } catch (e) {
       const msg =
         (axios.isAxiosError(e) &&

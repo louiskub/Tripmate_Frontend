@@ -91,6 +91,9 @@ export const endpoints = {
     
   user_profile: (id: string) => `${BASE_URL}/users/${id}`,
   book: `${BASE_URL}/booking`,  
-
+  searchbook: (id: string) =>`${BASE_URL}/booking/${id}`,
+  searchroom: (roomId: string, hotelId: string) => `${BASE_URL}/room/${roomId}/${hotelId}`,
+  payment: (id: string) => `${BASE_URL}/booking/confirm/${id}`,  
+  
   
 }

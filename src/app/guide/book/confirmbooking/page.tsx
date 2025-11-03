@@ -405,6 +405,7 @@ export default function ConfirmGuideBookingPage() {
 
   // ----- Submit (✅ อัปเดต: แก้ URL + แก้ Price) -----
   const handleConfirm = async () => {
+    router.push(`/guide/book/payment`);
     // (ตรวจสอบ validation เป็นครั้งสุดท้ายก่อน submit)
     const v = validate();
     if (v) {
@@ -462,7 +463,7 @@ export default function ConfirmGuideBookingPage() {
       }
 
       const bookingid = document.getElementById("bookingid") as HTMLInputElement;
-      router.push(`/bookguide/payment?bookingId=${(bookingid.value)})}`);
+      
 
     } catch (e: unknown) {
       let msg = "Something went wrong.";

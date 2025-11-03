@@ -206,11 +206,11 @@ export default function MyHotelPage() {
 
               {/* ⭐️ [FIX] เอาปุ่มกลับมา */}
               <div className="flex justify-end gap-3 mt-6">
-                <Link href={`/hotelmanagement/edit-hotel/${hotel.id}`} legacyBehavior>
+                {/* <Link href={`/hotelmanagement/edit-hotel/${hotel.id}`} legacyBehavior>
                   <a className="px-6 py-2 bg-sky-700 text-white text-base font-bold rounded-2xl shadow-lg hover:bg-sky-800">
                     Edit Hotel
                   </a>
-                </Link>
+                </Link> */}
                 <button
                   type="button"
                   className="px-6 py-2 bg-red-700 text-white rounded-2xl shadow-lg hover:bg-red-800"

@@ -3,38 +3,103 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
+import BookNavbar from "@/components/navbar/default-nav-variants/book-navbar";
+import { endpoints, BASE_URL } from '@/config/endpoints.config'; 
+import Cookies from "js-cookie"; 
+import axios from "axios"; 
+import { AiFillStar } from "react-icons/ai";
 
-/* -------------------- types -------------------- */
-type PriceRow = { label: string; amount: number; discount?: boolean; strong?: boolean };
-type SpecialItem = { label: string; value: string };
+// (สมมติว่า import 'endpoints' มาจากที่นี่)
+// import { endpoints } from "@/utils/endpoints";
 
-type BookingSummary = {
-  bookingId: string;
-  guest: { firstName: string; lastName: string };
-  hotel: { name: string; rating: number; location?: string; type?: string };
-  room: { name: string; sizeSqm?: number; bed?: string; qty?: number };
-  checkIn: { dateISO: string; from?: string };
-  checkOut: { dateISO: string; before?: string };
-  nights: number;
-  price: {
-    main: PriceRow; // e.g. { label: "1 room (1 night)", amount: 4412 }
-    before: PriceRow[]; // price before discount, discount
-    taxes: PriceRow[]; // vat, service charge
-    total: number;
+/* -------------------- types (เพิ่มจากหน้า Payment) -------------------- */
+type RoomOption = {
+  id: string;
+  roomId: string;
+  hotelId: string;
+  name: string;
+  bed: string;
+  maxGuest: number;
+  price: string;
+};
+
+type HotelRoom = {
+  id: string;
+  options: RoomOption[];
+  hotelId: string;
+  description: string;
+  image: string;
+  facilities: string[];
+  name: string;
+  pictures: string[];
+  sizeSqm: number;
+};
+
+type HotelData = {
+  id: string;
+  rooms: HotelRoom[];
+  name: string;
+  description: string;
+  rating: string;
+  image: string;
+  breakfast: string;
+  checkIn: string;
+  checkOut: string;
+  locationSummary: string;
+  petAllow: boolean;
+  pictures: string[];
+  star: number;
+  subtopicRatings: {
+    value: number;
+    [key: string]: number;
   };
-  special?: { roomType?: string; bedSize?: string };
+  type: string;
+  service: {
+    serviceImg: string;
+    [key: string]: any;
+  };
+  status: "pending" | "successed" | "cancelled";
 };
 
-type BookingApiResponse = {
-  success: boolean;
-  data: BookingSummary;
-  message?: string;
+type ServiceData = {
+  id: string;
+  name: string;
+  serviceImg: string;
+  type: string;
+  // (เพิ่ม field อื่นๆ ถ้ามี)
 };
+
+type BookingData = {
+  id: string;
+  serviceId: string;
+  subServiceId: string;
+  optionId: string;
+  groupId: string;
+  startBookingDate: string;
+  endBookingDate: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+  status: string; // <-- ข้อมูล status ที่เราต้องการ
+  price: string;
+  service: ServiceData;
+};
+
+/* -------------------- types (ของเดิม) -------------------- */
+type PriceRow = {
+  label: string;
+  amount: number;
+  discount?: boolean;
+  strong?: boolean;
+};
+type SpecialItem = { label: string; value: string };
 
 /* -------------------- helpers -------------------- */
 const formatTHB = (n: number) =>
-  new Intl.NumberFormat("en-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  new Intl.NumberFormat("en-TH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -53,49 +118,74 @@ export default function CompleteBookingHotelPage() {
   // ---- query values passed from previous pages ----
   const bookingIdQ = params.get("bookingId") ?? "";
   const paymentIdQ = params.get("paymentId") ?? "";
-  const roomTypeQ = params.get("roomType") ?? "";
-  const bedSizeQ = params.get("bedSize") ?? "";
-  const totalQ = params.get("total");
+  // (query 'roomTypeQ' และ 'bedSizeQ' จะถูกแทนที่ด้วยข้อมูล fetch)
+  const totalQ = params.get("total"); // (fallback)
 
   // ---- ui state ----
   const [loading, setLoading] = useState<boolean>(!!bookingIdQ);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [summary, setSummary] = useState<BookingSummary | null>(null);
 
-  // ---- fallback display data when API is not provided ----
+  // --- (เปลี่ยน) States สำหรับเก็บข้อมูลที่ Fetch มา ---
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [hotelData, setHotelData] = useState<HotelData | null>(null);
+  const [roomData, setRoomData] = useState<HotelRoom | null>(null);
+  const [selectedOption, setSelectedOption] = useState<RoomOption | null>(null);
+
+  // ---- fallback display data ----
   const fallbackTotal = useMemo<number>(() => {
     const n = totalQ ? Number(totalQ) : NaN;
     return Number.isFinite(n) ? n : 5192.92;
   }, [totalQ]);
 
-  // ---- fetch booking detail if bookingId is present ----
+  // ---- (เปลี่ยน) fetch booking detail (3-step logic) ----
   useEffect(() => {
-    if (!bookingIdQ) return; // no fetch if we didn't get id
+    if (!bookingIdQ) {
+      setLoading(false);
+      setErrorMsg("Booking ID not found.");
+      return;
+    }
 
     const ac = new AbortController();
+    const signal = ac.signal;
+
     const run = async () => {
       try {
         setLoading(true);
         setErrorMsg(null);
 
-        // Example endpoint: GET /booking/:id (proxied via next rewrites to Nest)
-        const res = await fetch(`/api/booking/${encodeURIComponent(bookingIdQ)}`, {
-          method: "GET",
-          cache: "no-store",
-          signal: ac.signal,
-          // credentials: "include", // uncomment if backend uses cookies
-        });
+        // --- 1. Get Booking Details ---
+        const bookingRes = await axios.get(
+          endpoints.searchbook(bookingIdQ),
+          { signal }
+        );
+        const booking = bookingRes.data as BookingData;
+        setBookingData(booking);
 
-        if (!res.ok) {
-          const txt = await res.text().catch(() => "");
-          throw new Error(txt || `Request failed: ${res.status}`);
+        if (!booking.subServiceId || !booking.serviceId) {
+          throw new Error("Booking data is missing required IDs.");
         }
 
-        const json = (await res.json()) as BookingApiResponse;
-        if (!json.success) throw new Error(json.message || "Failed to get booking.");
+        // --- 2. Get Room (subServiceId) ---
+        const roomRes = await axios.get(
+          endpoints.searchroom(booking.subServiceId, booking.serviceId),
+          { signal }
+        );
+        const room = roomRes.data as HotelRoom;
+        setRoomData(room);
 
-        setSummary(json.data);
+        // --- 3. Get Hotel (from booking.serviceId) ---
+        const hotelRes = await axios.get(
+          endpoints.hotel.detail(booking.serviceId),
+          { signal }
+        );
+        const hotel = hotelRes.data as HotelData;
+        setHotelData(hotel);
+
+        // --- 4. Find Selected Option ---
+        const option = room.options.find((o) => o.id === booking.optionId);
+        setSelectedOption(option || null);
       } catch (e: unknown) {
+        if (axios.isCancel(e)) return;
         const msg = e instanceof Error ? e.message : String(e);
         setErrorMsg(msg || "Something went wrong.");
       } finally {
@@ -107,69 +197,78 @@ export default function CompleteBookingHotelPage() {
     return () => ac.abort();
   }, [bookingIdQ]);
 
-  // ---- derive values for UI (from API or fallback constants) ----
-  const STARS = Array.from({ length: 5 });
+  // ---- (เปลี่ยน) derive values for UI (from fetched states or fallbacks) ----
+  const STARS = Array.from({ length: hotelData?.star || 5 });
 
-  const priceMain: PriceRow =
-    summary?.price.main ?? { label: "1 room (1 night)", amount: 4412 };
+  // (Price breakdown ไม่มีใน 3-step fetch, เราจะใช้ fallback)
+  const priceMain: PriceRow = {
+    label: `${roomData?.name || "1 room"} (${
+      bookingData?.startBookingDate ? "1 night" : ""
+    })`,
+    amount: 4412, // (Fallback)
+  };
+  const priceBefore: PriceRow[] = [
+    { label: "price before discount", amount: 5786.74, discount: false },
+    { label: "discount", amount: 1374.74, discount: true },
+  ];
+  const taxesAndFees: PriceRow[] = [
+    { label: "VAT", amount: 4412.0 },
+    { label: "Service charge", amount: 4412.0, strong: true },
+  ];
 
-  const priceBefore: PriceRow[] =
-    summary?.price.before ?? [
-      { label: "price before discount", amount: 5786.74, discount: false },
-      { label: "discount", amount: 1374.74, discount: true },
-    ];
-
-  const taxesAndFees: PriceRow[] =
-    summary?.price.taxes ?? [
-      { label: "VAT", amount: 4412.0 },
-      { label: "Service charge", amount: 4412.0, strong: true },
-    ];
-
-  const total: number = summary?.price.total ?? fallbackTotal;
+  // (Total เรามีข้อมูลจริงจาก bookingData)
+  const total: number = bookingData ? Number(bookingData.price) : fallbackTotal;
 
   const special: SpecialItem[] = [
     {
       label: "Room type",
-      value: summary?.special?.roomType || roomTypeQ || "—",
+      value: roomData?.name || "—",
     },
     {
       label: "Bed size",
-      value: summary?.special?.bedSize || bedSizeQ || "—",
+      value: selectedOption?.bed || "—",
     },
   ];
 
-  const guestName =
-    summary ? `${summary.guest.firstName} ${summary.guest.lastName}` : "Emily Chow";
+  // (Guest name ไม่มีใน 3-step fetch, ใช้ fallback)
+  const guestName = "Emily Chow";
 
   const hotelName =
-    summary?.hotel.name ?? "Centara Grand Mirage Beach Resort Pattaya";
+    hotelData?.name ?? "Centara Grand Mirage Beach Resort Pattaya";
 
-  const nights = summary?.nights ?? 1;
+  const nights = bookingData ? 1 : 1; // (ควรคำนวณจาก start/end date)
 
-  const checkInStr = summary
-    ? formatDate(summary.checkIn.dateISO)
+  const checkInStr = bookingData
+    ? formatDate(bookingData.startBookingDate)
     : "Sat, 25 Aug 2025";
-  const checkInFrom = summary?.checkIn.from ?? "from 15.00";
+  const checkInFrom = hotelData?.checkIn
+    ? `from ${hotelData.checkIn}`
+    : "from 15.00";
 
-  const checkOutStr = summary
-    ? formatDate(summary.checkOut.dateISO)
+  const checkOutStr = bookingData
+    ? formatDate(bookingData.endBookingDate)
     : "Sun, 26 Aug 2025";
-  const checkOutBefore = summary?.checkOut.before ?? "before 12.00";
+  const checkOutBefore = hotelData?.checkOut
+    ? `before ${hotelData.checkOut}`
+    : "before 12.00";
 
   const viewBookingsHref =
     process.env.NEXT_PUBLIC_VIEW_BOOKINGS_PATH || "/bookhotel/bookinghistory";
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <BookNavbar book_state={3}/>
+      <BookNavbar book_state={3} />
 
       <main className="max-w-[1240px] mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 space-y-4 md:space-y-5">
-        <h1 className="text-gray-900 text-xl md:text-2xl font-extrabold">Hotel Booking</h1>
+        <h1 className="text-gray-900 text-xl md:text-2xl font-extrabold">
+          Hotel Booking
+        </h1>
 
         {/* status banners */}
         {!!paymentIdQ && (
           <div className="rounded-md bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-800">
-            Payment confirmed. ID: <span className="font-semibold">{paymentIdQ}</span>
+            Payment confirmed. ID:{" "}
+            <span className="font-semibold">{paymentIdQ}</span>
           </div>
         )}
         {errorMsg && (
@@ -182,19 +281,33 @@ export default function CompleteBookingHotelPage() {
         <section className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4">
           {/* Title */}
           <div className="border-b border-gray-200 pb-2 space-y-1">
-            <div className="text-gray-900 text-lg md:text-xl font-bold">Your booking is complete.</div>
-            <div className="text-gray-500 text-sm md:text-base">Enjoy your stay!</div>
+            <div className="text-gray-900 text-lg md:text-xl font-bold">
+              Your booking is complete.
+            </div>
+            <div className="text-gray-500 text-sm md:text-base">
+              Enjoy your stay!
+            </div>
             {bookingIdQ && (
-              <div className="text-xs text-gray-400">Booking ID: {bookingIdQ}</div>
+              <div className="text-xs text-gray-400">
+                Booking ID: {bookingIdQ}
+              </div>
             )}
           </div>
 
-          {/* Top row: Hotel + Guest name */}
+          {/* Top row: Hotel + Guest name + Status */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
             {/* Hotel card */}
             <div className="bg-white rounded-xl">
               <div className="flex flex-col sm:flex-row gap-3">
-                <div className="w-full sm:w-36 md:w-44 h-36 sm:h-36 md:h-44 rounded-xl bg-gradient-to-b from-gray-200 to-gray-400 flex-shrink-0" />
+                <img
+                  src={
+                    hotelData?.image ||
+                    hotelData?.pictures[0] ||
+                    "/placeholder.jpg"
+                  }
+                  alt={hotelName}
+                  className="w-full sm:w-36 md:w-44 h-36 sm:h-36 md:h-44 rounded-xl object-cover bg-gray-200 flex-shrink-0"
+                />
 
                 <div className="flex-1 flex flex-col gap-1">
                   <div className="text-gray-900 font-semibold text-sm md:text-base">
@@ -203,24 +316,30 @@ export default function CompleteBookingHotelPage() {
 
                   <div className="w-14 h-3 flex">
                     {STARS.map((_, i) => (
-                      <div key={i} className="flex-1 flex items-center px-[1px]">
-                        <div className="h-2.5 w-full bg-sky-600" />
+                      <div
+                        key={i}
+                        className="flex-1 flex items-center px-[1px]"
+                      >
+                      <AiFillStar className="text-yellow-400"/>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium">10.0</span>
-                    <span className="text-sky-700 text-xs">Excellent</span>
-                  </div>
+                  {hotelData?.rating && (
+                    <div className="flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium">
+                        {hotelData.rating}
+                      </span>
+                      <span className="text-sky-700 text-xs">Excellent</span>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-1 text-xs text-gray-700">
-                    <div className="w-2.5 h-3 bg-gray-900" />
-                    <span>{summary?.hotel.location ?? "location"}</span>
+                    <span>{hotelData?.locationSummary ?? "location"}</span>
                   </div>
 
                   <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium w-fit">
-                    {summary?.hotel.type ?? "type"}
+                    {hotelData?.type ?? "type"}
                   </span>
                 </div>
               </div>
@@ -228,42 +347,74 @@ export default function CompleteBookingHotelPage() {
               {/* Small booking box */}
               <div className="mt-3 rounded-xl bg-gray-50 p-2 md:p-3 relative">
                 <div className="flex gap-2">
-                  <div className="w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-xl bg-gradient-to-b from-gray-200 to-gray-400 flex-shrink-0" />
+                  <img
+                    src={
+                      roomData?.image || roomData?.pictures[0] || "/placeholder.jpg"
+                    }
+                    alt={roomData?.name || "Room"}
+                    className="w-20 sm:w-24 md:w-28 h-20 sm:h-24 md:h-28 rounded-xl object-cover bg-gray-200 flex-shrink-0"
+                  />
                   <div className="flex flex-col justify-center">
                     <div className="text-gray-900 text-xs sm:text-sm font-medium">
-                      {summary?.room.name ?? "Mirage Premium Explorer King View,sea"}
+                      {roomData?.name ??
+                        "Mirage Premium Explorer King View,sea"}
                     </div>
                     <div className="pt-1.5 space-y-1 text-xs text-gray-700">
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-gray-900" />
-                        <span>{summary?.room.sizeSqm ? `${summary.room.sizeSqm} m²` : "42.0 m²"}</span>
+                        <span>
+                          {roomData?.sizeSqm
+                            ? `${roomData.sizeSqm} m²`
+                            : "42.0 m²"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-gray-900" />
-                        <span>{summary?.room.bed ?? "1 king bed"}</span>
+                        <span>{selectedOption?.bed ?? "1 king bed"}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-gray-900" />
-                        <span>{summary?.room.qty ?? 5}</span>
+                        <span>{selectedOption?.maxGuest ?? 5} guests</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-2 w-40 flex items-center gap-1 text-xs text-green-600">
-                  <div className="w-4 h-3 bg-green-500" />
-                  <span>Breakfast included</span>
-                </div>
+                {hotelData?.breakfast && (
+                  <div className="mt-2 w-40 flex items-center gap-1 text-xs text-green-600">
+                    <div className="w-4 h-3 bg-green-500" />
+                    <span>{hotelData.breakfast}</span>
+                  </div>
+                )}
 
-                <div className="absolute right-2 bottom-2 text-xs text-gray-700">x 1</div>
+                <div className="absolute right-2 bottom-2 text-xs text-gray-700">
+                  x 1
+                </div>
               </div>
             </div>
 
-            {/* Guest name */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="text-gray-900 font-semibold mb-2 text-sm md:text-base">Guest Name</div>
-              <div className="h-10 px-3 flex items-center rounded-md border border-gray-200 text-sm md:text-base">
-                {loading ? "Loading..." : guestName}
+            {/* Guest name + Status */}
+            <div className="space-y-3">
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="text-gray-900 font-semibold mb-2 text-sm md:text-base">
+                  Guest Name
+                </div>
+                <div className="h-10 px-3 flex items-center rounded-md border border-gray-200 text-sm md:text-base">
+                  {guestName}
+                </div>
+              </div>
+              
+              {/* --- (เพิ่ม) แสดง Status --- */}
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="text-gray-900 font-semibold mb-2 text-sm md:text-base">
+                  Booking Status
+                </div>
+                <div className="h-10 px-3 flex items-center rounded-md border border-gray-200 text-sm md:text-base">
+                  {loading ? (
+                    "Loading..."
+                  ) : (
+                    <span className="font-medium capitalize text-blue-700">
+                      {bookingData?.status || "Unknown"}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -274,16 +425,21 @@ export default function CompleteBookingHotelPage() {
               <div className="grid grid-cols-3 items-center gap-2">
                 <div>
                   <div className="text-xs text-gray-500">Check-in</div>
-                  <div className="text-xs sm:text-sm text-gray-900">{checkInStr}</div>
+                  <div className="text-xs sm:text-sm text-gray-900">
+                    {checkInStr}
+                  </div>
                   <div className="text-xs text-gray-500">{checkInFrom}</div>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="text-xs sm:text-sm text-gray-900">{nights} night{nights > 1 ? "s" : ""}</div>
-                  <div className="w-4 h-3 bg-gray-900" />
+                  <div className="text-xs sm:text-sm text-gray-900">
+                    {nights} night{nights > 1 ? "s" : ""}
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-gray-500">Check-out</div>
-                  <div className="text-xs sm:text-sm text-gray-900">{checkOutStr}</div>
+                  <div className="text-xs sm:text-sm text-gray-900">
+                    {checkOutStr}
+                  </div>
                   <div className="text-xs text-gray-500">{checkOutBefore}</div>
                 </div>
               </div>
@@ -292,75 +448,38 @@ export default function CompleteBookingHotelPage() {
 
           {/* Price details */}
           <div className="rounded-xl border border-gray-200 p-4 md:p-5 space-y-3">
-            <div className="text-gray-900 text-lg md:text-xl font-bold">Price Details</div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-start justify-between">
-                <div className="text-gray-900 text-sm font-medium">{priceMain.label}</div>
-                <div className="flex items-start gap-0.5">
-                  <span className="text-gray-500 text-sm">฿</span>
-                  <span className="text-gray-900 text-sm font-medium">{formatTHB(priceMain.amount)}</span>
-                </div>
-              </div>
-
-              {priceBefore.map((row) => (
-                <div key={row.label} className="pl-3 md:pl-5 flex items-start justify-between">
-                  <div className={`text-xs ${row.discount ? "text-red-500" : "text-gray-500"}`}>{row.label}</div>
-                  <div className="flex items-start gap-0.5">
-                    {row.discount && <span className="text-red-500 text-xs">-</span>}
-                    <span className={`text-xs ${row.discount ? "text-red-500" : "text-gray-500"}`}>฿</span>
-                    <span className={`text-xs ${row.discount ? "text-red-500" : "text-gray-500"}`}>
-                      {formatTHB(row.amount)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-start justify-between">
-                <div className="text-gray-900 text-sm font-medium">Taxes & fees</div>
-                <div className="flex items-start gap-0.5">
-                  <span className="text-gray-500 text-sm">฿</span>
-                  <span className="text-gray-900 text-sm font-medium">
-                    {formatTHB(
-                      taxesAndFees.reduce((acc, r) => acc + (r.amount || 0), 0)
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {taxesAndFees.map((row) => (
-                <div key={row.label} className="pl-3 md:pl-5 flex items-start justify-between">
-                  <div className="text-gray-500 text-xs">{row.label}</div>
-                  <div className="flex items-start gap-0.5">
-                    <span className="text-gray-500 text-xs">฿</span>
-                    <span className={`text-xs ${row.strong ? "text-gray-900" : "text-gray-500"}`}>
-                      {formatTHB(row.amount)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div className="text-gray-900 text-lg md:text-xl font-bold">
+              Price Details
             </div>
 
             <div className="h-px bg-gray-200" />
 
+            {/* (ใช้ Total จริง) */}
             <div className="flex items-center justify-between">
               <div className="text-gray-900 text-base font-bold">Total</div>
               <div className="flex items-start gap-0.5">
                 <span className="text-gray-500 text-base">฿</span>
-                <span className="text-gray-900 text-base font-bold">{formatTHB(total)}</span>
+                <span className="text-gray-900 text-base font-bold">
+                  {formatTHB(total)}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Special Request summary */}
           <div className="rounded-xl border border-gray-200 p-4 md:p-5 space-y-2">
-            <div className="text-gray-900 font-bold text-sm md:text-base">Special Request</div>
+            <div className="text-gray-900 font-bold text-sm md:text-base">
+              Special Request
+            </div>
             <div className="space-y-2">
               {special.map((s) => (
-                <div key={s.label} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                  <div className="text-sm text-gray-900 font-medium sm:w-24">{s.label}</div>
+                <div
+                  key={s.label}
+                  className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3"
+                >
+                  <div className="text-sm text-gray-900 font-medium sm:w-24">
+                    {s.label}
+                  </div>
                   <div className="text-sm text-gray-500">{s.value}</div>
                 </div>
               ))}
@@ -371,10 +490,12 @@ export default function CompleteBookingHotelPage() {
         {/* CTA */}
         <section className="bg-white border border-gray-200 rounded-xl p-4">
           <Link
-            href={viewBookingsHref}
+            href="http://localhost:3000/"
             className="inline-flex w-full h-7 md:h-10 items-center justify-center rounded-[10px] bg-sky-600 text-white no-underline text-sm md:text-base font-bold shadow transition-all duration-600 ease-in-out hover:scale-[1.02] hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
-            <span className="text-sm sm:text-base font-bold text-gray-50">View your bookings</span>
+            <span className="text-sm sm:text-base font-bold text-gray-50">
+              Back
+            </span>
           </Link>
         </section>
       </main>

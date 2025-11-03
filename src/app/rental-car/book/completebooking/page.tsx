@@ -141,7 +141,7 @@ export default function RentalCarBookingCompletePage() {
    * Handlers
    * ========================= */
   const handleGoToMyBookings = () => {
-    router.push("/mybookings"); // ปรับ path ให้ตรงโปรเจกต์จริง
+    router.push("/"); // ปรับ path ให้ตรงโปรเจกต์จริง
   };
 
   /* =========================
@@ -356,7 +356,7 @@ export default function RentalCarBookingCompletePage() {
                   onClick={handleGoToMyBookings}
                   className="inline-flex w-full h-10 items-center justify-center rounded-[10px] bg-sky-600 text-white text-sm md:text-base font-bold shadow transition-all duration-300 hover:scale-[1.02] hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 >
-                  View your bookings
+                  Back
                 </button>
 
                 {/* <Link

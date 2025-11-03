@@ -233,6 +233,9 @@ export default function RentalCarPaymentPage() {
   };
 
   const handlePayNow = async (): Promise<void> => {
+    router.push(
+        `/rental-car/book/completebooking`
+      );
     setErrorMsg(null);
     setInfoMsg(null);
     setLoading(true);

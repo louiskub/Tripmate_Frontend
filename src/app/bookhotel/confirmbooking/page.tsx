@@ -7,16 +7,30 @@ import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
 import { endpoints, BASE_URL } from '@/config/endpoints.config'; 
 import Cookies from "js-cookie"; 
 import axios from "axios"; 
+import { AiFillStar } from "react-icons/ai";
+
 
 import DatePicker, { registerLocale } from "react-datepicker";
-import th from "date-fns/locale/th"; // <== ✅ (แก้ไขแล้ว)
+import th from "date-fns/locale/th"; 
 import "react-datepicker/dist/react-datepicker.css"; 
 
 // ----------------------------------------------------
-// Type Definitions
+// Type Definitions (เหมือนเดิม)
 // ----------------------------------------------------
+
+type RoomOption = {
+  id: string; // (subserviceid / optionId)
+  roomId: string;
+  hotelId: string;
+  name: string;
+  bed: string;
+  maxGuest: number;
+  price: string; 
+};
+
 type HotelRoom = {
   id: string;
+  options: RoomOption[]; 
   hotelId: string;
   pricePerNight: string;
   bedType: string;
@@ -31,6 +45,7 @@ type HotelRoom = {
 
 type HotelData = {
   id: string;
+  rooms: HotelRoom[]; 
   name: string;
   description: string;
   rating: string;
@@ -47,12 +62,10 @@ type HotelData = {
     [key: string]: number;
   };
   type: string;
-  rooms: HotelRoom[];
   service: {
     serviceImg: string;
     [key: string]: any;
   };
-  status: "pending" | "successed" | "cancelled";
 };
 
 export type UserInfo = {
@@ -64,76 +77,66 @@ export type UserInfo = {
   role?: string;
 };
 
+type DiscountData = {
+  id: string; 
+  type: 'percent' | 'fixed'; 
+  value: number; 
+};
+
 // ----------------------------------------------------
-// (ลงทะเบียนภาษาไทยให้ DatePicker)
 registerLocale("th", th);
 
-// --- ✅ (เพิ่มตัวแปรที่หายไปกลับมา) ---
+// --- (ตัวแปร UI - เหมือนเดิม) ---
 const formRows = [
   ["First name*", "Last name*"],
   ["Email*", "Phone number (optional)"],
 ];
-
 const specialRequests = {
   roomType: ["Non-smoking", "Smoking"] as const,
   bedSize: ["Large bed", "Twin beds"] as const,
 };
-
-const priceDetailsMain = [{ label: "1 room (1 night)", amount: "4,412.00" }];
-const priceDetailsBefore = [
-  { label: "price before discount", amount: "5,786.74", discount: false },
-  { label: "discount", amount: "1,374.74", discount: true },
-];
-const taxesAndFees = [
-  { label: "VAT", amount: "4,412.00" },
-  { label: "Service charge", amount: "4,412.00", strong: true },
-];
-// --- ✅ (สิ้นสุดส่วนที่เพิ่มกลับมา) ---
+// ...
 
 
 export default function ConfirmBookingHotelPage() {
   const router = useRouter();
   const searchParams = useSearchParams(); 
 
-  // --- Main guest form (เหมือนเดิม) ---
+  // --- (States - เหมือนเดิม) ---
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-
-  // --- Special request (เหมือนเดิม) ---
   const [roomType, setRoomType] = useState<"Non-smoking" | "Smoking" | "">("");
   const [bedSize, setBedSize] = useState<"Large bed" | "Twin beds" | "">("");
-
-  // --- Misc (เหมือนเดิม) ---
   const [promo, setPromo] = useState("");
   const [useAccountInfo, setUseAccountInfo] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isFetchingProfile, setIsFetchingProfile] = useState(false);
-
-  // --- (State ใหม่สำหรับข้อมูลโรงแรม, ห้องพัก, และปฏิทิน) ---
   const [hotelData, setHotelData] = useState<HotelData | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<HotelRoom | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true); 
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [numberOfNights, setNumberOfNights] = useState(0);
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountData | null>(null);
+  const [selectedOption, setSelectedOption] = useState<RoomOption | null>(null);
+  const [note, setNote] = useState(""); // (State สำหรับ Note)
 
   // -------------------------------------------------------------------
-  // [Effect] ดึงข้อมูลโรงแรมและห้องพักเมื่อหน้าโหลด
+  // [Effect] ดึงข้อมูลโรงแรมและห้องพัก (เหมือนเดิม)
   // -------------------------------------------------------------------
   useEffect(() => {
     const fetchHotelData = async () => {
       const hotelId = searchParams.get('service_id');
-      const roomId = searchParams.get('roomId');
+      const roomId = searchParams.get('room_id');
+      const groupId = searchParams.get('group_id'); 
 
-      //mock data
-      // const hotelId = "svc_001";
-      // const roomId = "rm103";
+      console.log(`Fetching data for: serviceId=${hotelId}, roomId=${roomId}, groupId=${groupId}`);
 
-      if (!hotelId || !roomId) {
-        setErrorMsg("ไม่พบข้อมูลโรงแรมหรือห้องพัก (hotelId หรือ roomId)");
+      if (!hotelId || !roomId || !groupId) {
+        setErrorMsg("ไม่พบข้อมูลจำเป็น (hotelId, roomId, หรือ groupId) ใน URL");
         setIsDataLoading(false);
         return;
       }
@@ -141,21 +144,26 @@ export default function ConfirmBookingHotelPage() {
       try {
         setIsDataLoading(true);
         const response = await axios.get(
-          `${BASE_URL}${endpoints.hotel.detail(hotelId)}`
+          `${endpoints.hotel.detail(hotelId)}`
         );
-        console.log("Fetched hotel data:", response.data);
         
         const hotel: HotelData = response.data;
         const room = hotel.rooms.find(r => r.id === roomId);
         
-        console.log("hotel pic:", response.data.pictures[5]);
-
         if (!room) {
           throw new Error("ไม่พบข้อมูลห้องพักที่ระบุ");
         }
 
         setHotelData(hotel);
         setSelectedRoom(room);
+
+        if (room.options && room.options.length > 0) {
+          setSelectedOption(room.options[0]); 
+          console.log("Defaulting to first room option:", room.options[0]);
+        } else {
+          console.warn("Selected room has no options available.");
+          setErrorMsg("ห้องพักนี้ไม่มีตัวเลือกราคา (Options)");
+        }
 
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -168,9 +176,7 @@ export default function ConfirmBookingHotelPage() {
     fetchHotelData();
   }, [searchParams]);
 
-  // -------------------------------------------------------------------
-  // [Effect] คำนวณจำนวนคืน เมื่อวันที่เปลี่ยน
-  // -------------------------------------------------------------------
+  // [Effect] คำนวณจำนวนคืน (เหมือนเดิม)
   useEffect(() => {
     if (checkInDate && checkOutDate) {
       if (checkOutDate > checkInDate) {
@@ -185,37 +191,78 @@ export default function ConfirmBookingHotelPage() {
     }
   }, [checkInDate, checkOutDate]);
 
-  const dis = promo;
-  // console.log("promo code:", dis);
+  
+  // [ฟังก์ชัน fetchDiscount] (แก้ Bug `value` เป็น String)
   async function fetchDiscount() {
-    const discount = await axios.get(
-            `${BASE_URL}${endpoints.discount.all}`
-          ); 
-        // console.log("discount data:", discount.data);
-      // if (discount.data.id = dis) {
-      //   const discount = await axios.get(
-      //       `${BASE_URL}${endpoints.discount.detail(dis)}`
-      //     );
-      // }
+    const code = promo.trim(); 
+    if (!code) {
+      setErrorMsg("Please enter a promo code.");
+      return;
+    }
+    setSubmitting(true); 
+    setErrorMsg(null);
+    setAppliedDiscount(null); 
+    try {
+      const response = await axios.get(
+        endpoints.discount.detail(code), 
+        { headers: { Authorization: `Bearer ${Cookies.get("token") || ""}` } }
+      );
+
+      console.log("Discount data:", response.data);
+
+      const rawDiscount = response.data; 
+      const parsedValue = parseFloat(rawDiscount.value); // ⭐️ [FIX] แปลง String เป็น Number
+
+      if (rawDiscount.type !== 'percent' && rawDiscount.type !== 'fixed') {
+        throw new Error("Invalid discount type received from API.");
+      }
+      if (isNaN(parsedValue)) { 
+         throw new Error("Invalid discount value received from API (value is not a number).");
+      }
+      
+      const discount: DiscountData = {
+          id: rawDiscount.id,
+          type: rawDiscount.type,
+          value: parsedValue // ⭐️ (ใช้ค่าที่แปลงแล้ว)
+      };
+
+      setAppliedDiscount(discount);
+      setPromo(""); 
+      alert(`Applied discount: ${discount.id}`);
+
+    } catch (err) {
+      console.error("Fetch discount error:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(msg || "Invalid promo code or failed to apply.");
+      setAppliedDiscount(null);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  
-
-  // -------------------------------------------------------------------
-  // [Logic] คำนวณราคาสรุป
-  // -------------------------------------------------------------------
-  // const roomPricePerNight = Number(selectedRoom?.pricePerNight || 0);
-  const roomPricePerNight = 2500; //mock data
+  // [Logic คำนวณราคาสรุป] (เหมือนเดิม)
+  const roomPricePerNight = Number(selectedOption?.price || 0);
   const basePrice = roomPricePerNight * numberOfNights;
-  const vatAmount = basePrice * 0.07; // สมมติ VAT 7%
-  const serviceChargeAmount = basePrice * 0.10; // สมมติ Service Charge 10%
-  const totalPrice = basePrice + vatAmount + serviceChargeAmount;
+  let discountAmount = 0;
+  if (appliedDiscount && numberOfNights > 0) { 
+    if (appliedDiscount.type === 'percent') {
+      discountAmount = basePrice * (appliedDiscount.value / 100);
+    } else { 
+      discountAmount = appliedDiscount.value;
+    }
+    if (discountAmount > basePrice) {
+      discountAmount = basePrice;
+    }
+  }
+  const discountedBasePrice = basePrice - discountAmount;
+  const vatAmount = discountedBasePrice * 0.07; 
+  const serviceChargeAmount = discountedBasePrice * 0.10; 
+  const totalPrice = discountedBasePrice + vatAmount + serviceChargeAmount;
 
-  // (ฟังก์ชัน validate)
+  // (ฟังก์ชัน validate - เหมือนเดิม)
   const validate = () => {
     if (!firstName.trim() || !lastName.trim()) return "Please enter first and last name.";
     if (!email.trim()) return "Please enter your email.";
-    
     if (!checkInDate || !checkOutDate) return "กรุณาเลือกวันเช็คอินและเช็คเอาท์";
     if (numberOfNights <= 0) return "วันเช็คเอาท์ต้องอยู่หลังวันเช็คอิน";
     return null;
@@ -223,81 +270,61 @@ export default function ConfirmBookingHotelPage() {
 
   type ConfirmResponse = { bookingId?: string };
 
-  // (ฟังก์ชัน handleConfirm)
-  // (ฟังก์ชัน handleConfirm ที่แก้ไขแล้ว)
+  // ⭐️ [2. อัปเดต handleConfirm] (Payload ใหม่ทั้งหมด)
   const handleConfirm = async () => {
     const err = validate();
     if (err) {
       setErrorMsg(err);
       return;
     }
+    if (!selectedOption) {
+      setErrorMsg("กรุณาเลือกตัวเลือกห้องพัก (Room Option)");
+      return;
+    }
     setErrorMsg(null);
     setSubmitting(true);
 
     try {
-      // 1. ⭐️ สร้าง Object (Payload) ที่จะส่งไป API
-      //    (นี่คือข้อมูลที่ก่อนหน้านี้อยู่ใน URLSearchParams)
-      const bookingPayload = {
-        // ข้อมูลโรงแรมและห้อง
-        hotelId: hotelData?.id || "",
-        roomId: selectedRoom?.id || "",
-        
-        // ข้อมูลการจอง
-        checkIn: checkInDate?.toISOString() || "",
-        checkOut: checkOutDate?.toISOString() || "",
-        nights: numberOfNights,
-        totalPrice: totalPrice,
-        status: "pending", // Backend อาจจะกำหนดเองก็ได้
-
-        // ข้อมูลคำขอพิเศษ
-        roomType: roomType || "",
-        bedSize: bedSize || "",
-
-        // 🚨 (สำคัญมาก) เพิ่มข้อมูล Guest ที่กรอกในฟอร์มไปด้วย
-        // API ของคุณจะต้องใช้ข้อมูลนี้
-        guestDetails: {
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          phone: phone || "", // ส่งเป็นค่าว่างถ้าไม่มี
-        }
+      // ⭐️ [FIX] สร้าง Payload ใหม่ตามที่ API ร้องขอ
+      const bookingPayload: any = {
+        serviceId: hotelData?.id || "",
+        subServiceId: selectedRoom?.id || "", // ⭐️ [FIX] เพิ่ม 'subServiceId' (Room ID)
+        optionId: selectedOption?.id || "", 
+        groupId: searchParams.get('group_id') || "",
+        startBookingDate: checkInDate?.toISOString() || "",
+        endBookingDate: checkOutDate?.toISOString() || "",
+        note: note.trim(), // (ใช้ State 'note')
+        paymentMethod: "CASH", 
+        discountId: appliedDiscount?.id || null, 
       };
 
-      // 2. ⭐️ เรียกใช้ axios.post
-      // ‼️ (หมายเหตุ) คุณต้องสร้าง Endpoint นี้ขึ้นมาเองใน Backend
-      // และเพิ่มลงใน 'endpoints.config.js'
-      // เช่น: const apiEndpoint = `${BASE_URL}${endpoints.booking.create}`;
-      
-      const apiEndpoint = `${BASE_URL}/booking`; // <-- ❗️ (ตัวอย่าง) แก้เป็น Endpoint จริงของคุณ
+      // (ทำความสะอาด Payload - ลบ discountId ถ้ามันเป็น null)
+      if (!bookingPayload.discountId) {
+        delete bookingPayload.discountId;
+      }
+
+      const apiEndpoint = `${BASE_URL}/booking`; 
       
       console.log("Sending booking data to API:", apiEndpoint, bookingPayload);
 
-      // ส่งข้อมูลไปที่ Backend
       const response = await axios.post(apiEndpoint, bookingPayload, {
         headers: {
-          // (ถ้า API นี้ต้องใช้ Token ก็ใส่)
-          // Authorization: `Bearer ${Cookies.get("token") || ""}`,
+           Authorization: `Bearer ${Cookies.get("token") || ""}`, 
         },
       });
 
-      // 3. ⭐️ (ทางเลือก) จัดการข้อมูลที่ API ตอบกลับมา
-      // API ที่ดีควรตอบ ID ของการจองที่เพิ่งสร้างกลับมา
-      const responseData = response.data as ConfirmResponse; // (สมมติว่ามี type ConfirmResponse)
-      const newBookingId = responseData?.bookingId;
+      const responseData = response.data as ConfirmResponse;
+      const newBookingId = responseData?.booking.id;
 
       console.log("API created booking successfully:", newBookingId);
 
-      // 4. ⭐️ นำทางไปยังหน้า Payment
-      // (ถ้าหน้า Payment ต้องใช้ ID ให้ส่งไปด้วย)
-      // router.push(`/hotel/book/payment?bookingId=${newBookingId}`);
-      
-      // (หรือไปหน้า Payment ตามโค้ดเดิมของคุณ ถ้าไม่ต้องการส่ง ID)
-      const bookingid = document.getElementById("bookingid") as HTMLInputElement;
-      router.push(`/hotel/book/payment?bookingId=${(bookingid.value)})}`);
+      // if (!newBookingId) {
+      //   throw new Error("API did not return a bookingId.");
+      // }
+      router.push(`/bookhotel/payment?bookingId=${newBookingId}`);
 
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      // (ถ้า error มาจาก axios)
       if (axios.isAxiosError(e) && e.response) {
         setErrorMsg(`Error from server: ${e.response.data?.message || msg}`);
       } else {
@@ -308,7 +335,7 @@ export default function ConfirmBookingHotelPage() {
     }
   };
 
-  // (ฟังก์ชัน handleUseAccountInfoChange)
+  // (ฟังก์ชัน handleUseAccountInfoChange - เหมือนเดิม)
   const handleUseAccountInfoChange = async (isChecked: boolean) => {
     setUseAccountInfo(isChecked);
     setErrorMsg(null); 
@@ -330,9 +357,7 @@ export default function ConfirmBookingHotelPage() {
       if (!userId) throw new Error("Token ไม่ถูกต้อง");
 
       const response = await axios.get(endpoints.user.profile(userId), {
-        headers: {
-          Authorization: `Bearer ${token}`, 
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const profileData = response.data as UserInfo;
@@ -352,11 +377,12 @@ export default function ConfirmBookingHotelPage() {
     }
   };
 
-  // --- (ฟังก์ชัน Render แถบขวา) ---
+  // --- (ฟังก์ชัน Render แถบขวา - เหมือนเดิม) ---
   const renderRightSidebar = () => {
     if (isDataLoading) {
       return (
         <div className="flex flex-col gap-2.5 w-full lg:w-[384px]">
+          {/* (Loading Skeleton) */}
           <div className="bg-white rounded-[10px] p-4 animate-pulse">
             <div className="h-48 w-full bg-gray-200 rounded-md"></div>
             <div className="h-6 w-3/4 bg-gray-200 rounded-md mt-4"></div>
@@ -395,18 +421,20 @@ export default function ConfirmBookingHotelPage() {
                 <div className="w-14 h-3 flex">
                   {Array.from({ length: hotelData.star || 5 }).map((_, i) => (
                     <div key={i} className="flex-1 flex items-center px-[1px]">
-                      <div className="h-2.5 w-full bg-sky-600" />
+                      <AiFillStar className="text-yellow-400"/>
                     </div>
                   ))}
                 </div>
                 <div className="flex items-center gap-1">
+                  {/* [FIX toFixed Bug] */}
                   <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium">
-                    {hotelData.subtopicRatings?.value.toFixed(1) || hotelData.rating}
+                    {typeof hotelData.subtopicRatings?.value === 'number'
+                      ? hotelData.subtopicRatings.value.toFixed(1)
+                      : hotelData.rating}
                   </span>
                   <span className="text-sky-700 text-xs">{/* (Excellent) */}</span>
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-700">
-                  <div className="w-2.5 h-3 bg-gray-900" /> 
                   <span className="line-clamp-2">{hotelData.locationSummary}</span>
                 </div>
                 <div className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 text-xs font-medium w-fit">
@@ -416,7 +444,7 @@ export default function ConfirmBookingHotelPage() {
             </div>
           </div>
 
-          {/* --- 2. การ์ดข้อมูลห้อง --- */}
+          {/* --- 2. การ์ดข้อมูลห้อง (แสดงรายละเอียด Option) --- */}
           <div className="px-2.5 pb-2.5">
             <div className="min-h-36 px-2 pt-2 pb-1 bg-gray-50 rounded-[10px] relative">
               <div className="h-full flex flex-col sm:flex-row gap-1.5">
@@ -429,18 +457,16 @@ export default function ConfirmBookingHotelPage() {
                   <div className="text-gray-900 text-sm font-medium">
                     {selectedRoom.name}
                   </div>
+                  {/* (แสดงรายละเอียดจาก Option ที่เลือก) */}
                   <div className="pt-1.5 flex flex-col gap-1">
                     <div className="flex items-center gap-1 text-xs text-gray-700">
-                      <div className="w-3 h-3 bg-gray-900" /> 
-                      <span>{selectedRoom.sizeSqm} m²</span>
+                      <span>{selectedOption?.name || selectedRoom.bedType}</span>
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-700">
-                      <div className="w-3 h-3 bg-gray-900" /> 
-                      <span>{selectedRoom.bedType}</span>
+                      <span>{selectedOption?.bed || selectedRoom.bedType}</span>
                     </div>
                     <div className="flex items-center gap-1 text-xs text-gray-700">
-                      <div className="w-3 h-3 bg-gray-900" /> 
-                      <span>{selectedRoom.personPerRoom} คน</span>
+                      <span>{selectedOption?.maxGuest || selectedRoom.personPerRoom} คน</span>
                     </div>
                   </div>
                 </div>
@@ -456,7 +482,7 @@ export default function ConfirmBookingHotelPage() {
           </div>
         </div>
 
-        {/* --- 3. การ์ดปฏิทิน (ใหม่) --- */}
+        {/* --- 3. การ์ดปฏิทิน (เหมือนเดิม) --- */}
         <div className="bg-white rounded-[10px] px-4 md:px-5 py-3.5 flex flex-col gap-3">
           <div className="text-gray-900 text-lg md:text-xl font-bold">Select Dates</div>
           <div className="flex flex-col sm:flex-row gap-2 w-full">
@@ -494,12 +520,13 @@ export default function ConfirmBookingHotelPage() {
           </div>
         </div>
 
-        {/* --- 4. การ์ดสรุปราคา (อัปเดต) --- */}
+        {/* --- 4. การ์ดสรุปราคา (ฉบับอัปเดต - เหมือนเดิม) --- */}
         <div className="bg-white rounded-[10px] px-4 md:px-5 py-2.5 flex flex-col gap-3.5">
           <div className="text-gray-900 text-lg md:text-xl font-bold">Price Details</div>
 
           {numberOfNights > 0 ? (
             <>
+              {/* (ราคาห้อง) */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-start justify-between">
                   <div className="text-gray-900 text-sm font-medium">
@@ -512,6 +539,33 @@ export default function ConfirmBookingHotelPage() {
                 </div>
               </div>
 
+              {/* (ส่วนลด) */}
+              {appliedDiscount && discountAmount > 0 && (
+                <div className="flex items-start justify-between text-red-600">
+                  <div className="text-sm font-medium">
+                    Discount ({appliedDiscount.id})
+                  </div>
+                  <div className="flex items-start gap-0.5">
+                    <span className="text-sm font-normal">-฿</span>
+                    <span className="text-sm font-medium">{discountAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* (Subtotal) */}
+              {appliedDiscount && discountAmount > 0 && (
+                 <div className="flex items-start justify-between pt-1 border-t border-gray-100">
+                  <div className="text-gray-900 text-sm font-medium">
+                    Subtotal
+                  </div>
+                  <div className="flex items-start gap-0.5">
+                    <span className="text-gray-500 text-sm">฿</span>
+                    <span className="text-gray-900 text-sm font-medium">{discountedBasePrice.toFixed(2)}</span>
+                  </div>
+                 </div>
+              )}
+
+              {/* (Taxes & fees) */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-start justify-between">
                   <div className="text-gray-900 text-sm font-medium">Taxes & fees</div>
@@ -538,6 +592,7 @@ export default function ConfirmBookingHotelPage() {
                 </div>
               </div>
 
+              {/* (Total) */}
               <div className="h-px bg-gray-200" />
               <div className="flex items-center justify-between">
                 <div className="text-gray-900 text-sm md:text-base font-bold">Total</div>
@@ -633,9 +688,61 @@ export default function ConfirmBookingHotelPage() {
                     className="flex-1 min-w-24 h-11 rounded-[10px] border border-neutral-200 px-3 text-slate-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Phone number (optional)"
                     value={phone} 
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => setPhone(e.target.value)} // ⭐️ [FIX] แก้ e.g.target.value
                   />
                 </div>
+              </div>
+            </section>
+
+            {/* (Select Room Option) */}
+            <section className="bg-white rounded-[10px] px-4 md:px-6 py-4 flex flex-col gap-4 md:gap-5">
+              <div className="flex flex-col gap-2">
+                <div className="text-gray-900 text-lg md:text-xl font-bold">Select Room Option</div>
+                <p className="text-gray-500 text-sm md:text-base">
+                  Please select your preferred room plan.
+                </p>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                {isDataLoading ? (
+                  <div className="text-gray-500">Loading options...</div>
+                ) : (
+                  selectedRoom?.options?.map((option) => (
+                    <label 
+                      key={option.id} 
+                      className={`flex justify-between items-center p-4 border-2 rounded-lg cursor-pointer transition-all
+                        ${selectedOption?.id === option.id ? 'border-sky-500 bg-sky-50' : 'border-gray-200 bg-white hover:bg-gray-50'}
+                      `}
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="roomOption"
+                            value={option.id}
+                            checked={selectedOption?.id === option.id}
+                            onChange={() => {
+                              setSelectedOption(option);
+                              console.log("Selected option:", option);
+                            }}
+                            className="w-4 h-4 text-sky-600 focus:ring-sky-500"
+                          />
+                          <span className="text-gray-900 font-medium">{option.name}</span>
+                        </div>
+                        <div className="pl-6 text-sm text-gray-600">
+                          <div>Bed: {option.bed}</div>
+                          <div>Max Guests: {option.maxGuest}</div>
+                        </div>
+                      </div>
+                      <div className="text-lg font-bold text-gray-900">
+                        ฿{Number(option.price).toFixed(2)}
+                      </div>
+                    </label>
+                  ))
+                )}
+                {(!isDataLoading && (!selectedRoom?.options || selectedRoom.options.length === 0)) && (
+                  <div className="text-gray-500">No options available for this room.</div>
+                )}
               </div>
             </section>
 
@@ -656,8 +763,6 @@ export default function ConfirmBookingHotelPage() {
                 <div className="flex-1 flex flex-col gap-3 md:gap-4">
                   <div className="text-gray-900 text-sm md:text-base font-bold">Room type</div>
                   <div className="flex flex-wrap gap-3">
-                    
-                    {/* --- ✅ (โค้ดส่วนนี้จะทำงานได้แล้ว) --- */}
                     {specialRequests.roomType.map((opt) => (
                       <label key={opt} className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -671,8 +776,6 @@ export default function ConfirmBookingHotelPage() {
                         <span className="text-gray-600 text-sm font-medium">{opt}</span>
                       </label>
                     ))}
-                    {/* --- ✅ (สิ้นสุด) --- */}
-
                   </div>
                 </div>
 
@@ -680,8 +783,6 @@ export default function ConfirmBookingHotelPage() {
                 <div className="flex-1 flex flex-col gap-3 md:gap-4">
                   <div className="text-gray-900 text-sm md:text-base font-bold">Bed size</div>
                   <div className="flex flex-wrap gap-3">
-
-                    {/* --- ✅ (โค้ดส่วนนี้จะทำงานได้แล้ว) --- */}
                     {specialRequests.bedSize.map((opt) => (
                       <label key={opt} className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -695,11 +796,27 @@ export default function ConfirmBookingHotelPage() {
                         <span className="text-gray-600 text-sm font-medium">{opt}</span>
                       </label>
                     ))}
-                    {/* --- ✅ (สิ้นสุด) --- */}
-
                   </div>
                 </div>
               </div>
+            </section>
+
+            {/* (Section for Note) */}
+            <section className="bg-white rounded-[10px] px-4 md:px-6 py-4 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                  <div className="text-gray-900 text-lg md:text-xl font-bold">Additional Note</div>
+                  <div className="text-gray-500 text-sm md:text-base font-medium">(optional)</div>
+                </div>
+              </div>
+              <textarea
+                name="note"
+                rows={4}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Want a high-floor room? Any allergies? Let us know."
+                className="w-full px-3 py-2 bg-white rounded-[10px] border-2 border-neutral-200 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </section>
 
             {/* Promo */}
@@ -730,8 +847,9 @@ export default function ConfirmBookingHotelPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => fetchDiscount()}
-                  className="px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs sm:text-sm font-semibold"
+                  onClick={fetchDiscount}
+                  disabled={submitting}
+                  className="px-3 py-1.5 rounded-md bg-slate-900 text-white text-xs sm:text-sm font-semibold disabled:bg-gray-400"
                 >
                   Apply
                 </button>
@@ -744,7 +862,7 @@ export default function ConfirmBookingHotelPage() {
               <button
                 type="button"
                 onClick={handleConfirm}
-                disabled={submitting || numberOfNights <= 0} // <== ปิดปุ่มถ้ายังไม่เลือกวัน
+                disabled={submitting || numberOfNights <= 0} 
                 className="inline-flex w-full h-10 items-center justify-center rounded-[10px] bg-sky-600 text-white text-base font-bold shadow transition-all hover:scale-[1.02] hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-60"
               >
                 {submitting ? "Processing..." : "Confirm Booking"}
@@ -762,24 +880,25 @@ export default function ConfirmBookingHotelPage() {
 
         </div>
 
-        {/* Mobile CTA */}
+        {/* Mobile CTA (เติมส่วนที่ขาด) */}
         <div className="block xl:hidden bg-white rounded-[10px] mt-2 px-4 md:px-6 py-4 flex flex-col gap-2.5">
           <div className="text-sm font-medium text-sky-700">You won’t be charged yet</div>
           <button
             type="button"
             onClick={handleConfirm}
-            disabled={submitting || numberOfNights <= 0} // <== ปิดปุ่มถ้ายังไม่เลือกวัน
+            disabled={submitting || numberOfNights <= 0}
             className="inline-flex w-full h-10 items-center justify-center rounded-[10px] bg-sky-600 text-white text-base font-bold shadow transition-all hover:scale-[1.02] hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-60"
           >
             {submitting ? "Processing..." : "Confirm Booking"}
           </button>
           <div className="text-sm text-gray-500">
             By continuing to payment, I agree to TripMate’s{" "}
-            <Link className="underline" href="#">Terms of Use</Link>{" "}and{" "}
-            <Link className="underline" href="#">Privacy Policy</Link>.
+            <a className="underline" href="#">Terms of Use</a>{" "}and{" "}
+            <a className="underline" href="#">Privacy Policy</a>.
           </div>
-        </div>
-      </main>
-    </div>
+        </div> 
+
+      </main> 
+    </div> 
   );
 }
