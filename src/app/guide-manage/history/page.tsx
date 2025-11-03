@@ -1,31 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from 'react';
-import SideNav from '@/components/guide-manage/sidenav';
-import Navbar from '@/components/navbar/navbar';
-import BookingItem from '@/components/guide-manage/HistoryBookingItem';
-import BookingDetailModal from '@/components/guide-manage/HistoryBookingDetailModal';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import SideNav from "@/components/guide-manage/sidenav";
+import Navbar from "@/components/navbar/navbar";
+import BookingItem from "@/components/guide-manage/HistoryBookingItem";
+import BookingDetailModal from "@/components/guide-manage/HistoryBookingDetailModal";
 
-// --- MOCK DATA ---
-const mockBookings = [
-    { id: 1, bookingId: '#BK001', customerName: 'Ms. Name Surname', email: 'name.surname@example.com', phone: '+66 89-123-4567', avatarUrl: 'https://placehold.co/52x52/7C3AED/FFFFFF', tourName: 'Bangkok Temple Tour', date: '02-09-2025', time: '09:00 AM', guests: 4, price: 180.00, duration: '4 hours', status: 'Confirmed', paid: true },
-    { id: 2, bookingId: '#BK002', customerName: 'Mr. John Smith', email: 'john.smith@example.com', phone: '+66 81-234-5678', avatarUrl: 'https://placehold.co/52x52/DB2777/FFFFFF', tourName: 'Floating Market Adventure', date: '03-09-2025', time: '08:00 AM', guests: 2, price: 200.00, duration: '6 hours', status: 'Pending', paid: false },
-    { id: 3, bookingId: '#BK003', customerName: 'Mrs. Emily Jones', avatarUrl: 'https://placehold.co/52x52/059669/FFFFFF', tourName: 'Ancient Temples Tour', date: '01-09-2025', time: '10:00 AM', guests: 3, price: 120.00, duration: '3 hours', status: 'Completed', paid: true, email: 'emily.jones@example.com', phone: '+66 82-345-6789' },
-];
+const API_URL = "http://161.246.5.236:8800/guide/svc-004";
+
+// ✅ รูป fallback ถ้ารูปโหลดไม่ได้
+const FALLBACK_IMAGE =
+  "https://placehold.co/600x400/cccccc/000000?text=Guide+Image";
 
 export default function GuideHistoryPage() {
+  const [guide, setGuide] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null);
 
-  const handleViewDetails = (booking) => {
-    setSelectedBooking(booking);
-    setIsModalOpen(true);
-  };
+  useEffect(() => {
+    const fetchGuide = async () => {
+      try {
+        const res = await axios.get(API_URL);
+        console.log("📦 Data from /guide/svc-004:", res.data);
+        setGuide(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch guide detail:", err);
+      }
+    };
+    fetchGuide();
+  }, []);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedBooking(null);
-  };
+  const handleViewDetails = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  // ✅ แปลงข้อมูล guide → booking card format
+  const formatGuideToBooking = (g: any) => ({
+    id: g.id,
+    bookingId: g.licenseId || "—",
+    customerName: g.name,
+    email: g.contacts?.email || "—",
+    phone: g.contacts?.phone || "—",
+    avatarUrl:
+      g.image && g.image.startsWith("http") ? g.image : FALLBACK_IMAGE,
+    tourName: g.locationSummary || "—",
+    date: g.availability?.mon_fri || "N/A",
+    time: g.availability?.weekend || "N/A",
+    guests: g.experienceYears || 0,
+    price: parseFloat(g.dayRate || "0"),
+    duration: `${g.experienceYears} yrs`,
+    status: "Completed",
+    paid: true,
+    gallery:
+      Array.isArray(g.pictures) && g.pictures.length > 0
+        ? g.pictures.filter((p: string) => p.startsWith("http"))
+        : [FALLBACK_IMAGE],
+  });
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-['Manrope']">
@@ -36,24 +65,27 @@ export default function GuideHistoryPage() {
           <h1 className="text-3xl font-extrabold text-gray-800 mb-6">
             Booking History
           </h1>
-          
-          <div className="space-y-5">
-            {mockBookings.map((booking) => (
-              <BookingItem 
-                key={booking.id} 
-                booking={booking}
-                onViewDetails={handleViewDetails} 
-              />
-            ))}
-          </div>
+
+          {guide ? (
+            <BookingItem
+              booking={formatGuideToBooking(guide)}
+              onViewDetails={handleViewDetails}
+            />
+          ) : (
+            <p className="text-gray-500 text-base font-medium">
+              Loading guide booking...
+            </p>
+          )}
         </main>
       </div>
 
-      <BookingDetailModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        booking={selectedBooking}
-      />
+      {guide && (
+        <BookingDetailModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          booking={formatGuideToBooking(guide)}
+        />
+      )}
     </div>
   );
 }

@@ -1,52 +1,60 @@
-"use client"
+"use client";
 
-import SideNav from '@/components/guide-manage/sidenav';
-import Navbar from '@/components/navbar/navbar';
-import ReviewItem from '@/components/guide-manage/ReviewItem';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import SideNav from "@/components/guide-manage/sidenav";
+import Navbar from "@/components/navbar/navbar";
+import ReviewItem from "@/components/guide-manage/ReviewItem";
 
-// --- MOCK DATA FOR CUSTOMER REVIEWS ---
-const mockReviews = [
-  {
-    id: 1,
-    customerName: 'Ms. Name Surname',
-    avatarUrl: 'https://placehold.co/52x52/7C3AED/FFFFFF',
-    tourName: 'Bangkok City Tour',
-    comment: 'Amazing experience! The guide was knowledgeable and friendly. Highly recommend!',
-    rating: 10,
-    helpfulCount: 12,
-    date: '09-02-2025',
-  },
-  {
-    id: 2,
-    customerName: 'Mr. John Smith',
-    avatarUrl: 'https://placehold.co/52x52/DB2777/FFFFFF',
-    tourName: 'Floating Market Adventure',
-    comment: 'A truly authentic experience. Our guide, was fantastic and showed us all the best spots. The boat ride was a highlight!',
-    rating: 9.5,
-    helpfulCount: 8,
-    date: '05-02-2025',
-  },
-  {
-    id: 3,
-    customerName: 'Mrs. Emily Jones',
-    avatarUrl: 'https://placehold.co/52x52/059669/FFFFFF',
-    tourName: 'Ancient Temples Tour',
-    comment: 'A good tour, but it felt a bit rushed. We would have liked more time at the main temple.',
-    rating: 7,
-    helpfulCount: 3,
-    date: '01-02-2025',
-  },
-];
+const API_URL = "http://161.246.5.236:8800/review";
 
-// --- MAIN PAGE COMPONENT ---
+// ✅ รูป fallback ถ้ารูปไม่โหลดหรือไม่มี
+const FALLBACK_AVATAR = "https://placehold.co/52x52/999/FFF?text=User";
+
 export default function GuideReviewsPage() {
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(API_URL);
+        console.log("📦 Data from /review:", res.data);
+
+        const formatted = res.data.map((r: any) => ({
+          id: r.id,
+          customerName: `User ${r.userId?.slice(0, 5) || "Anonymous"}`,
+          avatarUrl: FALLBACK_AVATAR,
+          tourName: r.status ? r.status.toUpperCase() : "Service",
+          comment: r.comment || "No comment provided.",
+          rating: r.rating || 0,
+          helpfulCount: Math.floor(Math.random() * 10), // mock ค่า
+          date: new Date(r.createdAt).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }),
+          images:
+            Array.isArray(r.image) && r.image.length > 0
+              ? r.image
+              : [FALLBACK_AVATAR],
+        }));
+
+        setReviews(formatted);
+      } catch (err) {
+        console.error("❌ Failed to fetch reviews:", err);
+      }
+    };
+    fetchReviews();
+  }, []);
+
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-['Manrope']">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         <SideNav />
+
         <main className="flex-1 p-7 overflow-y-auto">
-          {/* --- Header --- */}
+          {/* Header */}
           <div>
             <h1 className="text-3xl font-extrabold text-gray-800">
               Customer Reviews
@@ -55,12 +63,18 @@ export default function GuideReviewsPage() {
               Manage and respond to customer feedback
             </p>
           </div>
-          
-          {/* --- Review List --- */}
+
+          {/* Review List */}
           <div className="mt-6 space-y-5">
-            {mockReviews.map((review) => (
-              <ReviewItem key={review.id} review={review} />
-            ))}
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <ReviewItem key={review.id} review={review} />
+              ))
+            ) : (
+              <p className="text-gray-500 text-base mt-4">
+                No reviews available.
+              </p>
+            )}
           </div>
         </main>
       </div>
