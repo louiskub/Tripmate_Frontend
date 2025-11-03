@@ -2,6 +2,12 @@ import React, { useEffect, useState } from "react";
 import { StarIcon } from "lucide-react";
 import LocationIcon from "@/assets/icons/location-point.svg";
 
+import axios from "axios";
+import { authJsonHeader } from "@/utils/service/get-header";
+import { endpoints } from "@/config/endpoints.config";
+import { uploadBlobUrls } from "@/utils/service/upload";
+import { getCookieFromName } from "@/utils/service/cookie"
+
 interface EditReviewPopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,6 +30,16 @@ interface RatingGroupProps {
   value: number;
   onChange: (value: number) => void;
 }
+
+// ✅ ฟังก์ชันกำหนดหัวข้อคะแนนตามประเภท
+const RatingGroupByType = (type: string) => {
+  if (type === "Hotel") return ["cleanliness", "comfort", "meal", "location", "service", "facilities"];
+  // if (type === "restaurant") return ["Food Quality", "Service", "Ambiance", "Value for Money"];
+  if (type === "attraction") return ["overall"];
+  if (type === "Rental car") return ["overall"];
+  if (type === "Guide") return ["knowledge", "communication", "punctuality", "safety", "route_planning", "local_insights"];
+  return [];
+};
 
 const RatingGroup: React.FC<RatingGroupProps> = ({ label, value, onChange }) => (
   <div className="w-full flex flex-col justify-start items-start gap-1">
@@ -107,7 +123,33 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
           ...images.map((i) => URL.createObjectURL(i)),
         ],
       };
-      console.log("Updated review data:", updated);
+
+      const imgForm = await uploadBlobUrls(updated.img)
+      const resImg = await axios.post(endpoints.review.uploadImg(updated.id), imgForm, {
+        headers: {
+          Authorization: `Bearer ${getCookieFromName("token")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      console.log("resImg :", resImg)
+
+
+
+      const metrics = RatingGroupByType(updated.service)
+      const formData = {
+        "comment": updated.review,
+        "image": resImg.data.image.slice(-3)
+      }
+      for(let i=0; i<metrics.length; i++){
+        formData[`score${i+1}`] = updated.score[metrics[i]]
+      }
+      const res = await axios.patch(endpoints.review.edit(updated.id), formData, authJsonHeader())
+      console.log("res1", res)
+      
+      // // "JR3887CJUVOZ"
+      // console.log("Updated review data:", updated);
+      // console.log("Form Data", formData)
       onSave?.(updated);
       onClose();
     } catch (error) {

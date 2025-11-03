@@ -59,7 +59,10 @@ export const endpoints = {
     }
   },
   review: {
+    getAll: `${BASE_URL}/review`,
     create: `${BASE_URL}/review`,
+    edit: (id: string) => `${BASE_URL}/review/${id}`,
+    delete: (id: string) => `${BASE_URL}/review/${id}`,
     uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
   },
   user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
