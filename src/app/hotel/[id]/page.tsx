@@ -17,7 +17,6 @@ export default async function HotelDetailPage({ params }: { params: { id: string
 
     
     const get_nearby_locations = await getNearbyLocations(data.service.location.lat.toFixed(2), data.service.location.long.toFixed(2))
-    console.log(get_nearby_locations)
 
     const reviews = await Promise.all(
       data.service.reviews.map(async (review: any) => {
