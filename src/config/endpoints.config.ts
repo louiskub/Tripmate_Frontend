@@ -56,6 +56,9 @@ export const endpoints = {
       editCar: (id: string) => `${BASE_URL}/car/${id}`,
       deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
       uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
+    },
+    guide: {
+      uploadImg: (id: string) => `${BASE_URL}/guide/upload/${id}`,
     }
   },
   review: {
