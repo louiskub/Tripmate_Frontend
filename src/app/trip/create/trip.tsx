@@ -9,13 +9,15 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import type React from "react"
 import { useState, useEffect, useMemo } from "react" // <-- เพิ่ม 2 (useMemo)
-import { useRouter } from "next/navigation"
+import { useSearchParams , useRouter } from "next/navigation"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import "maplibre-gl/dist/maplibre-gl.css"
 import FinalMap from "./map"
 import TripRouteDisplay from "./trip-route"
 import TextareaAutosize from "react-textarea-autosize"
+import axios from "axios"
+import {getToken} from "@/utils/service/cookie"
 
 // --- INTERFACES ---
 
@@ -481,6 +483,36 @@ export default function TripEditor() {
   // --- Bug Fix 2: Changed state for room quantity ---
   const [roomQuantities, setRoomQuantities] = useState<Record<string, number>>({})
 
+  //
+  const searchParams  = useSearchParams()
+  const groupId = searchParams.get("groupId")
+  const token = getToken()
+  const headers = { Authorization: `Bearer ${token}` }
+
+  const [member, setMember] = useState<[]>([])
+  useEffect(() => {
+    async function fetchData() {
+        const res = await axios.get(`http://161.246.5.236:8800/group/${groupId}/details`, headers)
+        console.log("res", res.data)
+        setMember(res.data.members)
+    }
+    if (groupId)
+      fetchData()
+    // console.log("groupId", groupId)
+  }, [])
+
+  
+  const savedTripsJson = localStorage.getItem('myTrips');
+    let tripsArray = [];
+    if (savedTripsJson) {
+        try {
+            tripsArray = JSON.parse(savedTripsJson);
+        } catch (e) {
+            console.error("Error parsing myTrips from localStorage", e);
+            tripsArray = [];
+        }
+    }
+
   // --- NEW: CALCULATE TOTAL BUDGET --- (เพิ่ม 4)
   const totalBudget = useMemo(() => {
     return days.reduce((total, day) => {
@@ -840,6 +872,7 @@ export default function TripEditor() {
 
     // ใช้ transformedDays แทน
     const tripData = {
+      groupId: groupId,
       title: tripTitle,
       isPublic: isPublic,
       startDate: startDate,
@@ -850,7 +883,39 @@ export default function TripEditor() {
       days: transformedDays,
     }
 
-    console.log("Saving trip data:", JSON.stringify(tripData, null, 2))
+    
+
+    const savedTripsJson = localStorage.getItem('myTrips');
+    let tripsArray = [];
+    if (savedTripsJson) {
+        try {
+            tripsArray = JSON.parse(savedTripsJson);
+        } catch (e) {
+            console.error("Error parsing myTrips from localStorage", e);
+            tripsArray = [];
+        }
+    }
+
+    // 2. ค้นหา "index" ของ trip ที่มี tripId ตรงกัน
+    const existingTripIndex = tripsArray.findIndex(trip => trip.groupId === tripData.groupId);
+    if (existingTripIndex > -1) {
+        // 3. ถ้าเจอ (index มากกว่า -1): ให้ทับที่ตำแหน่งเดิม
+        tripsArray[existingTripIndex] = tripData;
+        console.log("Updating existing trip:", tripData.groupId);
+    } else {
+        // 4. ถ้าไม่เจอ: ให้เพิ่ม (push) เข้าไปใหม่
+        tripsArray.push(tripData);
+        console.log("Adding new trip:", tripData.groupId);
+    }
+
+    // 5. บันทึก array ที่อัปเดตแล้วกลับลง localStorage
+    localStorage.setItem('myTrips', JSON.stringify(tripsArray));
+    console.log("Saving trip data complete.");
+
+
+
+    // localStorage.setItem('myTrips', JSON.stringify(tripsArray));
+    // console.log("Saving trip data:", JSON.stringify(tripData))
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -1194,9 +1259,22 @@ export default function TripEditor() {
               <h3 className="flex-1 text-custom-black text-base font-bold font-[Manrope]">People in trip (2)</h3>
               <Users className="w-5 h-5 text-custom-black" />
             </div>
-
-            <PersonRow name="full name" role="head" you />
-            <PersonRow name="full name" role="member" />
+            
+            {/* {
+              member.map((mem, i) => <PersonRow key={i} name={mem.user.username} role={mem.status} you />)
+            } */}
+            
+              {member.map((m, index) => (
+                <PersonRow 
+                  key={index}
+                  name={m.user.username}
+                  role={m.status}
+                  img={m.user.profileImg}
+                  // you={m.isYou} // ถ้ามี field you
+                />
+              ))}
+            
+            {/* <PersonRow name="full name" role="member" /> */}
           </div>
         </aside>
       </div>
@@ -1821,10 +1899,10 @@ export default function TripEditor() {
 }
 
 
-function PersonRow({ name, role, you = false }: { name: string; role: string; you?: boolean }) {
+function PersonRow({ name, role, you = false, img }: { name: string; role: string; you?: boolean; img?: string }) {
   return (
     <div className="w-full inline-flex items-center gap-2">
-      <img className="w-7 h-7 rounded-full object-cover" src="https://placehold.co/28x28" alt={name} />
+      <img className="w-7 h-7 rounded-full object-cover" src={img} alt={name} />
       <div className="flex-1 flex flex-col">
         <div className="w-full inline-flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-1 min-w-0">
