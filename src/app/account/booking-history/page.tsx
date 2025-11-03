@@ -158,7 +158,7 @@ export default function BookingHistory() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [displayBookings, setDisplayBookings] = useState<any[]>([]);
 
-  const [activeFilter, setActiveFilter] = useState("Hotel");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [sortOption, setSortOption] = useState("date"); // 'date' (ใหม่สุด) เป็นค่าเริ่มต้น
   const [viewOption, setViewOption] = useState("List");
   
@@ -185,7 +185,7 @@ export default function BookingHistory() {
   // 4. ใช้ useEffect เพื่อคำนวณ list ใหม่ เมื่อ filter หรือ sort เปลี่ยน
   useEffect(() => {
     // 4a. กรองข้อมูล (Filter)
-    const filtered = bookings.filter((b) => b.type === activeFilter);
+    const filtered = activeFilter == "All" ? bookings : bookings.filter((b) => b.type === activeFilter);
 
     // 4b. เรียงลำดับ (Sort)
     const sorted = [...filtered]; // Copy array ก่อน sort
@@ -203,22 +203,27 @@ export default function BookingHistory() {
 
   }, [bookings, activeFilter, sortOption]); // dependencies: ทำงานใหม่เมื่อค่าเหล่านี้เปลี่ยน
 
+  const filterRemainReview = (filter: string) => {
+    setActiveFilter(filter === activeFilter ? "All" : filter)
+    
+  }
+
   return (
     <DefaultPage>
       <div className="bg-custom-white -m-1 p-2 pt-5 rounded-lg">
         <div className="flex gap-5">
           <ProfileNavbar />
           <div className="flex-1 flex flex-col gap-4 ">
-                <div className="flex-1 p-7">
-      <div className="flex bg-white rounded-lg p-2 shadow-sm gap-4">
-        <section className="flex-1 p-5 flex flex-col gap-4">
+                {/* <div className="flex-1 p-7"> */}
+      {/* <div className="flex bg-white rounded-lg p-2 shadow-sm gap-4"> */}
+        <section className="flex-1 flex flex-col gap-4">
           <h1 className="text-2xl font-extrabold">Booking History</h1>
 
           <div className="bg-white rounded-md shadow px-3 py-2 inline-flex gap-3 items-center">
             {filters.map((filter) => (
               <button
                 key={filter}
-                onClick={() => setActiveFilter(filter)}
+                onClick={() => filterRemainReview(filter)}
                 className={`px-4 py-1 rounded-md font-medium hover:bg-blue-50 ${
                   activeFilter === filter
                     ? "bg-sky-100 text-sky-800"
@@ -347,7 +352,7 @@ export default function BookingHistory() {
             ))}
           </div>
         </section>
-      </div>
+      {/* </div> */}
       <CreateReviewPopup
                 isOpen={isEditing}
                 initialData={initialData}
@@ -356,7 +361,7 @@ export default function BookingHistory() {
     </div>
           </div>
         </div>
-    </div>
+    {/* </div> */}
     </DefaultPage>
   );
 }
