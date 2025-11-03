@@ -68,6 +68,9 @@ export const endpoints = {
       editCar: (id: string) => `${BASE_URL}/car/${id}`,
       deleteCar: (id: string) => `${BASE_URL}/car/${id}`,
       uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
+    },
+    guide: {
+      uploadImg: (id: string) => `${BASE_URL}/guide/upload/${id}`,
     }
   },
   review: {
@@ -76,6 +79,9 @@ export const endpoints = {
     edit: (id: string) => `${BASE_URL}/review/${id}`,
     delete: (id: string) => `${BASE_URL}/review/${id}`,
     uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
+  },
+  booking: {
+    getAllFromService: (id: string) => `${BASE_URL}/booking/getByService/${id}`
   },
   user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
 
