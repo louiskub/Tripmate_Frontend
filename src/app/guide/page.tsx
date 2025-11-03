@@ -41,7 +41,7 @@ async function getService(key: string): Promise<GuideCardProps[] | null> {
             price: d.dayRate || 0,
             type: d.specialties,
             pictures: d.pictures?.slice(0, 3) ?? [],
-            favorite: d.favorite ?? false,
+            favorite: d.service?.bookmarks.length > 0 ? true: false,
             id: d.id,
           };
         })

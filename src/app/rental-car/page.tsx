@@ -42,7 +42,7 @@ async function getService(key: string): Promise<RentalCarCardProps[] | null> {
         brand: d.brand ?? '',
         model: d.model ?? '',
         pictures: d.pictures?.slice(0, 3) ?? [],
-        favorite: d.favorite ?? false,
+        favorite: d.service?.bookmarks.length > 0 ? true: false,
         id: d.id ?? '',
       };
     })

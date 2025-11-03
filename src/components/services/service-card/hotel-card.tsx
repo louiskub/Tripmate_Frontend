@@ -51,10 +51,13 @@ const HotelCard = (hotel: HotelCardProps) => {
                             <Tag text='0' /> 
                             <Caption className='text-dark-blue font-semibold!'>no rating</Caption>
                         </div>}
-                    <div className="inline-flex items-center gap-[3px] pl-1">
-                        <LocationIcon width='12'/>
-                        <Caption>{hotel.location}</Caption>
-                    </div>
+                    {hotel.location && 
+                        <div className="inline-flex items-center gap-[3px] pl-1">
+                            <LocationIcon width='12'/>
+                            <Caption>{hotel.location}</Caption>
+                        </div>
+                    }    
+                    
                     
                 </div>
 

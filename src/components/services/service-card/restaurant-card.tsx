@@ -51,12 +51,6 @@ const RestaurantCard = (service: RestaurantCardProps) => {
                             <LocationIcon width='12'/>
                             <Caption>{service.location}</Caption>
                         </div>}
-                        <div className="flex gap-[3px] pl-1">
-                            <ClockIcon width='12' className='self-start mt-0.5'/>
-                            <div className='flex flex-col'>
-                                {service.open.map((o, i) => <Caption key={i}>{o.day} {o.open} - {o.close}</Caption>)}
-                            </div>
-                        </div>
                     </div>
                     
                     {service.tag && <Tag text={service.tag} />}
