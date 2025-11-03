@@ -56,6 +56,7 @@ export const endpoints = {
   review: {
     create: `${BASE_URL}/review`,
     uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
-  }
+  },
+  user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
 
 }
