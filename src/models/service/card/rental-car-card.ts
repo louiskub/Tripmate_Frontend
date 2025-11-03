@@ -1,19 +1,19 @@
 type RentalCarCardProps = {
     name: string
-    renter: {
-        username: string
+    owner: {
+        id: string
         profile_pic?: string
-        first_name: string
-        last_name: string
+        name: string
     }
     rating: number
     rating_count: number
     location: string
     price: number
-    type: string
+    brand: string
+    model: string
     pictures: Array<string>
     favorite: boolean
-    rental_car_id: string
+    id: string
 }
 
 export default RentalCarCardProps

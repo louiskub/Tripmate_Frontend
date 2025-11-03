@@ -6,7 +6,12 @@ type RestaurantCardProps = {
     pictures: Array<string>
     favorite: boolean
     tag: string
-    restaurant_id: string
+    open: {
+        day: string
+        open: string
+        close: string
+    }[]
+    id: string
 }
 
 export default RestaurantCardProps

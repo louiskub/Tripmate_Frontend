@@ -36,6 +36,7 @@ export default function RegisterPage() {
                 password,
                 fname,
                 lname,
+                role: "user",
             });
 
             console.log(response)

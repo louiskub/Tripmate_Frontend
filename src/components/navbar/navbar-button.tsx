@@ -5,16 +5,18 @@ type PageOptionProps = {
     href: string;
     text: string;
     className?: string;
-    children: React.ReactNode;
+    children?: React.ReactNode;
     active?: boolean
+    onclick?: () => void;
 };
 
-export const PageOptionDropdown: FC<PageOptionProps> = ({children, text, className, href, active = false} : PageOptionProps) => {
+export const PageOptionDropdown: FC<PageOptionProps> = ({children, text, className, href, active = false, onclick} : PageOptionProps) => {
     return (
         <a 
             className={`w-full px-5 flex items-center gap-2.5 hover:cursor-pointer h-8 
                 ${className} ${active ? 'text-dark-blue' : 'hover:text-dark-blue'}`}
             href={href}
+            onClick={onclick}
         >   
             <span className='flex items-center justify-center w-3.5 h-3.5'>
                 {children}

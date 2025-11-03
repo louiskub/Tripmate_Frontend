@@ -21,9 +21,13 @@ type HotelDetail = {
     
     favorite: boolean
 
-    rooms: Room[],
+    room: Room[],
 
     policy: HotelPolicy,
+    lat: number,
+    long: number,
+
+    id: string
 }
 
 type Facility = {
@@ -31,7 +35,7 @@ type Facility = {
     internet: string[]
     food: string[]
     accessibility: string[]
-    services: string[]
+    service: string[]
     transportation: string[]
 }
 

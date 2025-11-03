@@ -18,6 +18,7 @@ export const paths = {
     group: '/account/my-group',
     trip: '/account/my-trip',
   },
+  other_profile: (id: string) => `/users/${id}`,
   trip: {
     all: '/trip',
   },
@@ -27,22 +28,22 @@ export const paths = {
   hotel: {
     all: '/hotel',
     detail: (id: string) => `/hotel/${id}`,
-    book: '/hotel/book',
+    book: (service_id: string, group_id:string) => `/bookhotel/confirmbooking?service_id=${service_id}&group_id=${group_id}`,
   },
   restaurant: {
     all: '/restaurant',
     detail: (id: string) => `/restaurant/${id}`,
-    book: '/restaurant/book',
+    book: (service_id: string, group_id:string) => `/bookrestaurant/confirmbooking?service_id=${service_id}&group_id=${group_id}`,
   },
   rental_car: {
     all: '/rental-car',
     detail: (id: string) => `/rental-car/${id}`,
-    book: '/rental-car/book',
+    book: (service_id: string, group_id:string) => `/bookrentalcar/confirmbooking?service_id=${service_id}&group_id=${group_id}`,
   },
   guide: {
     all: '/guide',
     detail: (id: string) => `/guide/${id}`,
-    book: '/guide/book',
+    book: (service_id: string, group_id:string) => `/bookguide/confirmbooking?service_id=${service_id}&group_id=${group_id}`,
   },
   attraction: {
     all: '/attraction',

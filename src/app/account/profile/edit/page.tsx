@@ -1,39 +1,117 @@
 "use client"
 
-import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
-import { FieldInput, PasswordInput } from '@/components/inputs/inputs'
-import { FemaleGender, GenderInput, MaleGender, OtherGender } from '@/components/inputs/gender-input'
-import { Button, TextButton } from '@/components/buttons/buttons'
+import {PageTitle, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
+import { FieldInput } from '@/components/inputs/inputs'
+import { GenderInput } from '@/components/inputs/gender-input'
+import { Button } from '@/components/buttons/buttons'
 import { useState } from 'react';
 import { paths } from '@/config/paths.config'
 import ProfilePageLayout from '@/components/layout/profile-page-layout';
 import EditIcon from '@/assets/icons/edit.svg'
 import ProfilePic from '@/assets/icons/profile-filled.svg';
+import { getUserIdFromToken } from '@/utils/service/cookie'
+import Cookies from "js-cookie";
+import { endpoints } from '@/config/endpoints.config'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { useEffect } from 'react'
+import { useRouter } from "next/navigation"
 
-type ProfileData = {
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    email: string;
-    telephone?: string;
-    birth_date?: string;
-    gender?: "female" | "male" | "other" | null;
-    profile_pic?: string;
-}
-
-export default function EditProfile(profile: ProfileData) {
-    const [profileData, setProfileData] = useState({
-        first_name: profile.first_name || '',
-        last_name: profile.first_name || '',
-        telephone: profile.telephone || '',
-        birth_date: profile.birth_date || '',
-        gender: profile.gender || '',
-        profile_pic: profile.profile_pic || '',
+export default function EditProfile() {
+    const router = useRouter();
+    const [profile, setProfile] = useState({
+        fname: '',
+        lname: '',
+        phone:  '',
+        birthDate: '',
+        gender: '',
+        profileImg: '',
+        username: '',
+        email: '',
+        role: 'user',
+        status: 'active'
     });
 
-    const handleSaveProfile = () => {
-        console.log("Saved!", profileData);
-        window.location.href = paths.account.profile;
+    useEffect(() => {
+        const token = Cookies.get("token");
+        const user_id = getUserIdFromToken(token)
+        if (!token || !user_id) return;
+
+        const fetchProfile = async () => {
+        try {
+            const res = await axios.get(endpoints.profile(user_id), {
+            headers: { Authorization: `Bearer ${token}` },
+            });
+            setProfile(res.data);
+        } catch (err) {
+            console.error("Failed to fetch profile", err);
+        }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleSaveProfile = async () => {
+        const token = Cookies.get("token");
+        const user_id = getUserIdFromToken(token);
+
+        if (!token || !user_id) {
+            toast.error("Unauthorized");
+            return;
+        }
+        try {
+            const { profileImg, ...textData } = profile;
+            console.log(textData)
+            await axios.patch(endpoints.profile(user_id), textData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("save profile successfully!");
+
+            router.push(paths.account.profile)
+
+        } catch (error: any) {
+        console.error("save profile failed:", error.response?.data || error.message);
+
+        toast.error(
+            error.response?.data?.message || "Failed to save profile. Please check your inputs."
+        );
+    }
+    }
+
+    const handleUploadProfile = async (file: File) => {
+        const token = Cookies.get("token");
+        const user_id = getUserIdFromToken(token);
+
+        if (!user_id) return
+
+        try{
+            // Upload profile image if there is a new file
+            if (file && (file as any) instanceof File) {
+                const formData = new FormData();
+                formData.append("profileImg", file);
+                await axios.post(endpoints.upload_profile(user_id), formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+            }
+
+            // Refetch profile to get updated image
+            const res = await axios.get(endpoints.profile(user_id), {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setProfile(res.data); // update state with new profile
+
+            toast.success("upload profile successfully!");
+
+
+        } catch (error: any) {
+
+            toast.error(
+                error.response?.data?.message || "Failed to upload profile"
+            );
+        }
     }
 
     return (
@@ -61,22 +139,25 @@ export default function EditProfile(profile: ProfileData) {
         
         <div className="flex flex-col items-center gap-1">
             <div className="w-28 h-28 relative">
-            {profile.profile_pic ? 
+            {profile.profileImg ? 
                 <img className="w-28 h-28 rounded-full border border-dark-gray" 
-                    src={profile.profile_pic} 
+                    src={profile.profileImg} 
                 />
                 :
                 <ProfilePic />
             }                
                 <label className='flex items-center justify-center cursor-pointer absolute border hover:bg-custom-black hover:text-custom-white !h-7 bottom-0 right-0 bg-dark-white aspect-square rounded-full'>
                     <EditIcon width='16'/>
-                <FieldInput
+                <input
                     type='file'
                     className='hidden'
-                    value={profileData.profile_pic}
-                    onChange={(e) => setProfileData((f) => ({ ...f, profile_pic: e.target.value }))}
-                >
-                </FieldInput>
+                    onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            handleUploadProfile(file)
+                        }
+                    }}>
+                </input>
                 </label>
             </div>
             <div className="flex-col gap-1.5">
@@ -89,16 +170,16 @@ export default function EditProfile(profile: ProfileData) {
             <div className="flex flex-col w-full">
                 <ButtonText className='text-custom-black'>First name</ButtonText>
                 <FieldInput 
-                  className='border border-light-gray shadow-none'
-                  value={profileData.first_name}
-                  onChange={(e) => setProfileData((f) => ({ ...f, first_name: e.target.value }))}></FieldInput>
+                    className='border border-light-gray shadow-none'
+                    value={profile.fname || ''}
+                    onChange={(e) => setProfile((f) => ({ ...f, fname: e.target.value }))}></FieldInput>
             </div>
             <div className="flex flex-col w-full">
                 <ButtonText className='text-custom-black'>Last name</ButtonText>
                 <FieldInput 
-                  className='border border-light-gray shadow-none'
-                  value={profileData.last_name}
-                  onChange={(e) => setProfileData((f) => ({ ...f, last_name: e.target.value }))}></FieldInput>
+                    className='border border-light-gray shadow-none'
+                    value={profile.lname || ''}
+                    onChange={(e) => setProfile((f) => ({ ...f, lname: e.target.value }))}></FieldInput>
             </div>
         </div>
 
@@ -112,27 +193,28 @@ export default function EditProfile(profile: ProfileData) {
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Telephone Number</ButtonText>
             <FieldInput
-              className='border border-light-gray shadow-none'
-              value={profileData.telephone}
-              onChange={(e) => setProfileData((f) => ({ ...f, telephone: e.target.value }))}>
+                className='border border-light-gray shadow-none'
+                value={profile.phone || ''}
+                onChange={(e) => setProfile((f) => ({ ...f, phone: e.target.value }))}>
             </FieldInput>
         </div>
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Birth Date</ButtonText>
             <FieldInput 
-              className='border border-light-gray shadow-none'
-              value={profileData.birth_date}
-              onChange={(e) => setProfileData((f) => ({ ...f, birth_date: e.target.value }))}>
+                type='date'
+                className='border border-light-gray shadow-none'
+                value={profile.birthDate ? profile.birthDate.split("T")[0] : ""}
+                onChange={(e) => setProfile((f) => ({ ...f, birthDate: e.target.value }))}>
             </FieldInput>
         </div>
         <div className="inline-flex flex-col self-start">
             <ButtonText className='text-custom-black'>Gender</ButtonText>
             <GenderInput
-              selected={profileData.gender}
-              onChange={(gender) => setProfileData(prev => ({ ...prev, gender }))}
+                selected={profile.gender}
+                onChange={(gender) => setProfile(prev => ({ ...prev, gender }))}
             />
         </div>
-      </div>
+    </div>
     </div>
     </ProfilePageLayout>
 );

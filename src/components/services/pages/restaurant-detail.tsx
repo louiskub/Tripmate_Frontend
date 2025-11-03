@@ -11,7 +11,8 @@ import FavoriteButton from '@/components/services/other/favorite-button'
 import { Tag } from '@/components/services/other/Tag';
 import { Button, TextButton } from '@/components/buttons/buttons';
 import { RatingOverview, Rating, RatingPopup } from '@/components/services/other/rating';
-import MiniMap from '@/components/other/mini-map';
+// import MiniMap from '@/components/other/mini-map';
+import MiniMap from '@/components/map/minimap';
 import LargeMap from '@/components/other/large-map';
 import RoomDetail from '@/components/services/other/room-detail'
 
@@ -20,17 +21,21 @@ import BulletIcon from '@/assets/icons/bullet.svg'
 import StarIcon from '@/assets/icons/star-filled.svg'
 import LocationIcon from '@/assets/icons/tourist-attracton.svg'
 import ClockIcon from '@/assets/icons/Clock.svg'
-import ProfileIcon from '@/assets/icons/profile.svg'
 
-import { rental_car_detail } from '@/mocks/rental-cars';
+import { restaurant_detail } from '@/mocks/restaurants';
 import ImageSlide from '@/components/services/other/image-slide';
 
 import { restaurantRatingMeta } from '@/utils/service/rating';
-import PriceCard from '@/components/services/other/price_card';
+import RestaurantDetailModel from '@/models/service/detail/restaurant-detail';
 
-export default function RentalCarDetail() {
+type RestaurantDetailProps = {
+  service: RestaurantDetailModel
+}
+
+export default function RestaurantDetail({service}: RestaurantDetailProps) {
   const [currentTab, setCurrentTab] = useState("overview");
   const [PicturePopUp, setPicturePopUp] = useState(false);
+  const [guidePopup, setGuidePopup] = useState(false)
 
 type tab = {
     label: string
@@ -39,10 +44,9 @@ type tab = {
 
   const tabs: tab[] = [
         {label: 'Overview', id: 'overview'},
-        {label: 'Services', id: 'service'},
+        {label: 'Menu', id: 'menu'},
         {label: 'Reviews', id: 'review'},
         {label: 'Location', id: 'location'},
-        {label: 'Policy', id: 'policy'},
   ]
 
   useEffect(() => {
@@ -68,30 +72,22 @@ type tab = {
     return () => observer.disconnect();
   }, []);
 
-  const service = rental_car_detail
-
-  const first_comment = service.review?.find(r => r.comment)?.comment;
-
-  const handleBookRentalCar = () => {
-  
-  }
+  const first_comment: string | undefined = service.review[0]?.comment;
 
   return (
-    <DefaultPage current_tab='rental_car'>
+    <DefaultPage current_tab='restaurant'>
       <SearchServiceInput/>
       <ServiceNavTab current_tab={currentTab} onSelect={setCurrentTab} tabs={tabs}/>
-
       <div className="p-2 flex justify-between items-center">
         <Body> 
-          {`Rental Cars > ${service.location} > `} 
+          {`Restaurant > ${service.location} > `} 
           <TextButton className='text-dark-blue'>{service.name}</TextButton>
         </Body>
-        <ButtonText className='text-dark-blue font-medium'>See all rental cars in {service.location}</ButtonText>
+        <ButtonText className='text-dark-blue font-medium'>See all restaurants in {service.location}</ButtonText>
       </div>
-
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
-          <FavoriteButton favorite={false} id={'1'} type='hotel' large/>
+          <FavoriteButton favorite={false} id={'1'} type='restaurant' large/>
         </ServicePictures>
         {PicturePopUp && 
           <PicturePopup pictures={service.pictures}
@@ -103,32 +99,17 @@ type tab = {
             reviews={service.review}/>
         </PicturePopup>}
         <div className=' rounded-[10px] bg-custom-white shadow-[var(--light-shadow)]'>
-          
-          <header className='grid px-4 py-3 gap-1 grid-cols-2 grid-rows-[auto_auto_auto] border-b border-light-gray'>
-            <div className='flex gap-1 items-center text-dark-gray'>
-              <div className='w-4 aspect-square'>
-                {service.renter.profile_pic ?
-                    <img src={service.renter.profile_pic} className='object-cover w-full h-full rounded-full'/> :
-                    <ProfileIcon className='text-custom-gray'/>
-                }
-              </div>
-              <Caption>{service.renter.first_name} {service.renter.last_name}</Caption>
-            </div>
+          <header className='grid px-4 py-2 grid-cols-2 grid-rows-2 border-b border-light-gray'>
             <Title className=''>{service.name}</Title>
-            <div>
-              <Tag text={service.type} />
+            <div className='flex gap-2'>
+                <Tag text={service.cuisine} />
             </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
-                <span className='flex items-baseline'>
-                    <Title className='text-dark-blue font-medium'>฿</Title>
-                    <Title className='text-dark-blue'>{service.price}</Title>
-                    <Body className='text-dark-gray'>/day</Body>
-                </span>
-                <Button
+                {/* <Button
                   text='Book'
                   className='bg-dark-blue rounded-[10px] px-6! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
-                  onClick={handleBookRentalCar}
-                />
+                  onClick={handleBookRestaurant}
+                /> */}
               </div>
           </header>
 
@@ -137,11 +118,13 @@ type tab = {
               className=' row-start-1 col-start-1' 
               rating={service.rating} 
               rating_count={service.rating_count} 
-              comment={first_comment} 
+              subtopic_ratings={service.subtopic_ratings} 
+              comment={first_comment}
+              rating_meta={restaurantRatingMeta}
             />
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
-                <MiniMap location_link=''/>
+                <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (
@@ -157,26 +140,23 @@ type tab = {
 
             <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-2 col-span-2'>
               <ButtonText className='text-dark-blue'>Description</ButtonText>
-              <Caption>{service.description || 'no description for this rental car'}</Caption>
+              <Caption>{service.description || 'no description for this rentaurant'}</Caption>
             </div>
 
           </div>
         </div>
       </section>
 
-      <section id='service' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
-        <Title className='border-b border-light-gray py-1.5 px-4'>Additional Services</Title>
-        <div className='flex justify-center px-4 py-5'>
-          <div className='px-10'>
-            <PriceCard name={'Deposit'} price={1000} />
-          </div>
-          <div className='flex flex-col gap-4 border-x border-light-gray px-10'>
-            <PriceCard name={'Delivery'} description='in local area' price={500} />
-            <PriceCard name={'Delivery'} description='out of local area' price={1000} />
-          </div>
-          <div className='px-10'>
-            <PriceCard name={'Insurance'} price={500} />
-          </div>
+      <section id='menu' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
+        <Title className='border-b border-light-gray py-1.5 px-4'>Menu</Title>
+        <div className='flex justify-center px-4 py-2 gap-y-6'>
+          {/* <ImageSlide className='w-3/4 aspect-5/3' pictures={service.menu} /> */}
+          <iframe
+            src={service.menu}
+            width="100%"
+            height="800px"
+            style={{ border: "none" }}
+          ></iframe>
         </div>
       </section>
 
@@ -185,6 +165,7 @@ type tab = {
         <Rating 
           rating={service.rating}
           rating_count={service.rating_count}
+          subtopic_ratings={service.subtopic_ratings}
           reviews={service.review} 
           rating_meta={restaurantRatingMeta}/>
       </section>
@@ -210,50 +191,6 @@ type tab = {
             <TextButton className='text-dark-blue'>
               <SubBody>View on map</SubBody>
             </TextButton>
-          </div>
-        </div>
-      </section>
-
-      <section id='policy' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
-        <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Policy</Title>
-        <div className='flex flex-col px-4 py-2 gap-3'>
-          <div className='grid grid-cols-[auto_1fr] gap-1'>
-            <ClockIcon width='16' className='text-custom-gray self-center'/>
-            <SubBody className='font-semibold col-start-2'>Pick-up/Drop-off</SubBody>
-            <span className='col-start-2 flex  gap-1.5'>
-              <SubBody className='text-custom-gray'>Pick-up:</SubBody>
-              <SubBody className='font-semibold'>{service.policy.pick_up}</SubBody>
-              <SubBody className='text-custom-gray'>Drop-off:</SubBody>
-              <SubBody className='font-semibold'>{service.policy.drop_off}</SubBody>
-            </span>
-          </div>
-          <div className='grid grid-cols-[auto_1fr] gap-1.5'>
-            <QuestionIcon width='16' className='text-custom-gray self-center'/>
-            <span className='col-start-2 flex gap-1.5'>
-              <SubBody className='font-semibold'>Fuel</SubBody>
-              <SubBody className='text-custom-gray'>{service.policy.fuel ? 'The car owner will prepare fuel for you.' : 'Customer needs to refuel on their own. '}</SubBody>
-            </span>
-          </div>
-          <div className='grid grid-cols-[auto_1fr] gap-1'>
-            <QuestionIcon width='16' className='text-custom-gray self-center'/>
-            <span className='col-start-2 flex gap-1.5'>
-              <SubBody className='font-semibold'>Pets</SubBody>
-              <SubBody className='text-custom-gray'>{service.policy.pet_allow ? 'allowed' : 'not allowed'}</SubBody>
-            </span>
-          </div>
-          <div className='grid grid-cols-[auto_1fr] gap-1'>
-            <QuestionIcon width='16' className='text-custom-gray self-center'/>
-            <span className='col-start-2 flex gap-1.5'>
-              <SubBody className='font-semibold'>Please note</SubBody>
-              <SubBody className='text-custom-gray'>if the car is returned damaged or not in a clean condition, extra charges may apply.</SubBody>
-            </span>
-          </div>
-          <div className='grid grid-cols-[auto_1fr] gap-1'>
-            <QuestionIcon width='16' className='text-custom-gray self-center'/>
-            <span className='col-start-2 flex gap-1.5'>
-              <SubBody className='font-semibold'>Contact</SubBody>
-              <SubBody className='text-custom-gray'>{service.policy.contact}</SubBody>
-            </span>
           </div>
         </div>
       </section>

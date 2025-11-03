@@ -12,34 +12,26 @@ import { endpoints } from '@/config/endpoints.config'
 import { ProfileData } from '@/models/profile'
 
 import { ProfileEx } from '@/mocks/profile'
-import getCookie from '@/utils/service/cookie'
 import { cookies } from "next/headers";
 
+import { getUserIdFromToken } from '@/utils/service/cookie'
+import { formatDate } from '@/utils/service/string-formatter'
 
-// async function getProfile(): Promise<ProfileData | null> {
-//     const cookieStore = await cookies();
-//     const token = cookieStore.get("token")?.value;
+async function getProfile(): Promise<ProfileData | null> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    const user_id = getUserIdFromToken(token)
 
-//     if (!token) return null;
+    if (!token || !user_id) return null;
 
-//     const res = await fetch(endpoints.user_profile(token), {
-//         headers: { Authorization: `Bearer ${token}` },
-//         cache: "no-store"
-//     });
-
-//     if (!res.ok) return null;
-//     return res.json();
-// }
-
-async function getProfile(id: string): Promise<ProfileData | null> {
-    const res = await fetch(endpoints.user_profile(id), {
-        cache: "no-store",
+    const res = await fetch(endpoints.profile(user_id), {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store"
     });
 
     if (!res.ok) return null;
     return res.json();
 }
-
 
 export default async function Profile() {
     const cookieStore = await cookies();
@@ -47,16 +39,18 @@ export default async function Profile() {
 
     if (!id) return <p>Unauthorized</p>;
 
-    const profile = await getProfile(id);
+    const profile = await getProfile()  ;
     
     // const profile = ProfileEx;
     console.log(profile)
 
+    const birth_date = formatDate(profile?.birthDate)
+
     if (!profile) return <p>Unauthorized</p>;
 
     const genderMap = {
-    'Female': <FemaleGender active />,
-    'Male': <MaleGender active />,
+    'female': <FemaleGender active />,
+    'male': <MaleGender active />,
     'Other': <OtherGender active />,
     };
     return (
@@ -78,9 +72,9 @@ export default async function Profile() {
         
         <div className="flex flex-col items-center gap-1">
             <div className="w-28 h-28">
-            {profile.profile_pic ? 
+            {profile.profileImg ? 
                 <img className="w-28 h-28 rounded-full border border-dark-gray" 
-                    src={profile.profile_pic} 
+                    src={profile.profileImg} 
                 />
                 :
                 <ProfilePic />
@@ -94,11 +88,11 @@ export default async function Profile() {
 
         <div className='w-2/3 flex gap-2.5'>
             <div className="flex flex-col w-full">
-                <ButtonText className='text-custom-black'>First name</ButtonText>
+                <ButtonText className='text-dark-gray'>First name</ButtonText>
                 <Subtitle className='px-2 h-9 flex items-center'>{profile.fname}</Subtitle>
             </div>
             <div className="flex flex-col w-full">
-                <ButtonText className='text-custom-black'>Last name</ButtonText>
+                <ButtonText className='text-dark-gray'>Last name</ButtonText>
                 <Subtitle className='px-2 h-9 flex items-center'>{profile.lname}</Subtitle>
             </div>
         </div>
@@ -112,11 +106,11 @@ export default async function Profile() {
         </div>
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Telephone Number</ButtonText>
-            <Body className='px-2 h-9 flex items-center'>{profile.birthDate || '-'}</Body>
+            <Body className='px-2 h-9 flex items-center'>{profile.phone || '-'}</Body>
         </div>
         <div className="flex flex-col w-full">
             <ButtonText className='text-custom-black'>Birth Date</ButtonText>
-            <Body className='px-2 h-9 flex items-center'>{profile.phone || '-'}</Body>
+            <Body className='px-2 h-9 flex items-center'>{birth_date || '-'}</Body>
         </div>
         <div className="inline-flex flex-col self-start">
             <ButtonText className='text-custom-black'>Gender</ButtonText>
