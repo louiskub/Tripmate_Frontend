@@ -17,7 +17,6 @@ import { getUserIdFromToken } from '@/utils/service/cookie'
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
-
 export default function ManageAccount() {
     const showChangePasswordPopup = useBoolean(false);
     const showDeleteAccountPopup = useBoolean(false);
@@ -150,7 +149,6 @@ const DeleteAccountPopup = ({Close} : PopupProps) => {
     const [isEnabled, setIsEnabled] = useState(false);
 
     const handleDeleteAccount = () => {
-        console.log('delete account');
     }
 
     return (

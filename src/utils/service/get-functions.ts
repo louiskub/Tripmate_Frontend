@@ -30,5 +30,21 @@ export async function getCarRentalCenter(id: string) {
         console.error("Unexpected Error:", error);
     }
     throw error;
-} 
+    } 
+}
+
+export async function getNearbyLocations(lat: number, long: number) {    
+    try{
+        console.log(endpoints.nearby_location(lat, long))
+        const res = await axios.get(endpoints.nearby_location(lat, long));
+        const location_name = res.data.map((location: any) => location.name)
+        return location_name
+    }catch (error: any) {
+    if (axios.isAxiosError(error)) {
+        console.error("API Error:", error.response?.data || error.message);
+    } else {
+        console.error("Unexpected Error:", error);
+    }
+    throw error;
+    } 
 }

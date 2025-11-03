@@ -3,12 +3,17 @@ import { endpoints } from '@/config/endpoints.config';
 import AttractionDetailModel from '@/models/service/detail/attraction-detail';
 import AttractionDetail from '@/components/services/pages/attraction-detail';
 import { attraction_detail } from '@/mocks/attractions';
+import { getNearbyLocations } from '@/utils/service/get-functions';
 
 export default async function RentalCarDetailPage({ params }: { params: { id: string } }) {
   const { id } = await params;
   try {
     const response = await axios.get(endpoints.attraction.detail(id));
     const data = response.data;
+
+    const get_nearby_locations = await getNearbyLocations(data.service.location.lat, data.service.location.long)
+    console.log(get_nearby_locations)
+
     const service: AttractionDetailModel = {
       name: data.name ?? '',
       type: data.type ?? '',
@@ -17,7 +22,7 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
       favorite: data.favorite ?? false,
       id: data.id,
       description: data.description ?? '',
-      nearby_locations: [],
+      nearby_locations: get_nearby_locations,
       lat: 0,
       long: 0
     }

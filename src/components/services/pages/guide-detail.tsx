@@ -30,6 +30,7 @@ import { PicturePopup } from '@/components/services/other/service-pictures';
 
 import GuideDetailModel from '@/models/service/detail/guide-detail';
 import { paths } from '@/config/paths.config';
+import GuidePopup from '../other/guide-popup';
 
 type GuideDetailProps = {
   service: GuideDetailModel
@@ -38,6 +39,7 @@ type GuideDetailProps = {
 export default function GuideDetail({service}: GuideDetailProps) {
   const [currentTab, setCurrentTab] = useState("overview");
   const [PicturePopUp, setPicturePopUp] = useState(false);
+  const [guidePopup, setGuidePopup] = useState(false)
 
 type tab = {
     label: string
@@ -77,10 +79,6 @@ type tab = {
   const first_comment = service.review?.find(a => a.comment)?.comment;
   // const duration = formatDurationHHMM(service.duration);
 
-  const handleBookGuide = () => {
-
-  }
-
   return (
     <DefaultPage current_tab='guide'>
       <SearchServiceInput/>
@@ -94,7 +92,7 @@ type tab = {
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
-          <FavoriteButton favorite={false} id={'1'} type='guide' large/>
+          <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='service' large/>
         </ServicePictures>
         {PicturePopUp && 
           <PicturePopup pictures={service.pictures}
@@ -145,8 +143,9 @@ type tab = {
               <Button
                 text='Book'
                 className='bg-dark-blue rounded-[10px] px-6! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
-                onClick={handleBookGuide}
+                onClick={()=>setGuidePopup(false)}
               />
+              {guidePopup && <GuidePopup Close={() => setGuidePopup(false)} type='hotel' service_id={service.id}/>}
             </div>
           </header>
 

@@ -1,23 +1,49 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StarIcon } from "lucide-react";
 import LocationIcon from "@/assets/icons/location-point.svg";
+import axios from "axios"
+import {endpoints} from "@/config/endpoints.config"
+import {authJsonHeader} from "@/utils/service/get-header"
+import {uploadBlobUrls, uploadFile} from "@/utils/service/upload"
+import { getCookieFromName } from "@/utils/service/cookie"
 
-interface EditReviewPopupProps {
+interface CreateReviewPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave?: (data: any) => void;
+  // initialData?: {
+  //   name: string;
+  //   location: string;
+  //   type: string;          // ✅ เพิ่ม type เช่น "hotel" | "restaurant" | "attraction" | "rental car"
+  //   star?: number;
+  //   coverImg?: string;
+  // } | null;
   initialData?: {
     name: string;
+    location: string;
+    type: string;          // ✅ เพิ่ม type เช่น "hotel" | "restaurant" | "attraction" | "rental car"
+    star?: number;
     coverImg?: string;
-    service?: string;
-    score: Record<string, number>;
-    review: string;
-    date: string;
-    viewOption: string;
-    img?: string[];
-    location?: string;
+
+    serviceId: string; 
+    bookingId: string;
   } | null;
 }
+
+
+// example initialData
+// const initialData = {
+//     name: "Kimpton Paris Hotel",
+//     coverImg: "https://static51.com-hotel.com/uploads/hotel/84844/photo/vibe-hotel-gold-coast_17307266811.jpg",
+//     location: "Paris, France",
+//     star: 3,
+//     type: "attraction",
+// }
+{/* <CreateReviewPopup
+                isOpen={isEditing}
+                initialData={initialData}
+                onClose={() => setIsEditing(false)} 
+            /> */}
+
 
 interface RatingGroupProps {
   label: string;
@@ -48,32 +74,42 @@ const RatingGroup: React.FC<RatingGroupProps> = ({ label, value, onChange }) => 
   </div>
 );
 
-const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
+// ✅ ฟังก์ชันกำหนดหัวข้อคะแนนตามประเภท
+const RatingGroupByType = (type: string) => {
+  if (type === "Hotel") return ["cleanliness", "comfort", "meal", "location", "service", "facilities"];
+  // if (type === "restaurant") return ["Food Quality", "Service", "Ambiance", "Value for Money"];
+  if (type === "attraction") return ["overall"];
+  if (type === "Rental car") return ["overall"];
+  if (type === "Guide") return ["knowledge", "communication", "punctuality", "safety", "route_planning", "local_insights"];
+  return [];
+};
+
+const CreateReviewPopup: React.FC<CreateReviewPopupProps> = ({
   isOpen,
   onClose,
-  onSave,
   initialData,
 }) => {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState("");
   const [images, setImages] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const maxImages = 3;
 
+  // ✅ เมื่อเปิด popup หรือเปลี่ยน type ให้กำหนดคะแนนเริ่มต้นตามประเภท
   useEffect(() => {
-    if (!initialData) return;
-    setRatings(initialData.score ?? {});
-    setComment(initialData.review ?? "");
-    setExistingImages(initialData.img ?? []);
-    setImages([]);
+    if (initialData?.type) {
+      const categories = RatingGroupByType(initialData.type);
+      const defaultRatings: Record<string, number> = {};
+      categories.forEach((label) => {
+        defaultRatings[label] = 0;
+      });
+      setRatings(defaultRatings);
+    }
   }, [initialData]);
 
   const average =
-    Object.keys(ratings).length === 0
-      ? 0
-      : Object.values(ratings).reduce((a, b) => a + b, 0) /
-        Object.keys(ratings).length;
+    Object.values(ratings).reduce((a, b) => a + b, 0) /
+      (Object.keys(ratings).length || 1) || 0;
 
   const handleRatingChange = (label: string, value: number) => {
     setRatings((prev) => ({ ...prev, [label]: value }));
@@ -83,32 +119,67 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
     const files = e.target.files;
     if (!files) return;
     const fileArray = Array.from(files);
-    if (existingImages.length + images.length + fileArray.length > maxImages) {
+    if (images.length + fileArray.length > maxImages) {
       alert("You can upload up to " + maxImages + " images.");
       return;
     }
     setImages((prev) => [...prev, ...fileArray]);
   };
 
-  const handleRemoveExistingImage = (index: number) => {
-    setExistingImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
+  // ✅ ส่งข้อมูลทั้งหมดรวมถึง type
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      const updated = {
-        ...initialData,
-        score: ratings,
-        review: comment,
-        img: [
-          ...existingImages,
-          ...images.map((i) => URL.createObjectURL(i)),
-        ],
-      };
-      console.log("Updated review data:", updated);
-      onSave?.(updated);
+      const formData = {
+        "userId": localStorage.getItem("userId"),
+        // "placeId": initialData?.bookingId,
+        "placeId": null,
+        "comment": comment,
+        "serviceId": initialData?.serviceId,
+        "status": initialData?.type.toLowerCase()
+      }
+
+      Object.entries(ratings).forEach(([label, value], index) => {
+        formData[`score${index + 1}`] =  value.toString();
+      });
+      const res = await axios.post(endpoints.review.create, formData, authJsonHeader())
+      const reviewId = res.data.id
+
+      const formImg = await uploadFile(images)
+      const resImg = await axios.post(endpoints.review.uploadImg(reviewId), formImg, {
+        headers: {
+          Authorization: `Bearer ${getCookieFromName("token")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      // console.log("Upload Img success:", res.data)
+      // console.log("Slice", res.data.pictures.slice(-images.length))
+      // console.log("res", res)
+      // const formData = new FormData();
+      // formData.append("name", initialData?.name ?? "");
+      // formData.append("location", initialData?.location ?? "");
+      // formData.append("type", initialData?.type ?? "unknown");
+      // formData.append("comment", comment);
+
+      // Object.entries(ratings).forEach(([key, value]) => {
+      //   formData.append(`score[${key}]`, value.toString());
+      // });
+
+      // images.forEach((image) => {
+      //   formData.append("images", image);
+      // });
+
+      // const response = await fetch("/api/reviews", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+
+      // if (!response.ok) {
+      //   throw new Error("Failed to save review");
+      // }
+
       onClose();
     } catch (error) {
       console.error(error);
@@ -123,31 +194,37 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 z-[100] flex justify-center items-center">
       <div className="w-[70%] max-w-[800px] bg-custom-white rounded-[10px] flex flex-col overflow-hidden shadow-lg animate-fade-in">
-        {/* Header */}
         <div className="h-11 p-2.5 border-b border-neutral-200 flex justify-between items-center">
-          <div className="text-custom-black text-xl font-bold">Edit Review</div>
-          <button
-            onClick={onClose}
-            aria-label="Close popup"
-            className="text-gray-500 hover:text-black"
-          >
+          <div className="text-custom-black text-xl font-bold">Create Review</div>
+          <button onClick={onClose} className="text-gray-500 hover:text-black">
             ✕
           </button>
         </div>
 
-        {/* Info */}
+        {/* Info section */}
         <div className="p-3 border-b border-neutral-200 flex gap-3 items-center">
-          {/* <div className="w-16 h-16 bg-gradient-to-b from-zinc-800/0 to-black/30 rounded-[10px]" /> */}
-          <img src={initialData?.coverImg} alt="" className="w-16 h-16 rounded-[10px] object-cover" />
+          {initialData?.coverImg && (
+            <img
+              src={initialData.coverImg}
+              alt=""
+              className="w-16 h-16 rounded-[10px] object-cover"
+            />
+          )}
           <div className="flex-1">
             <div className="font-bold text-custom-black text-base">
               {initialData?.name || ""}
             </div>
             <div className="flex gap-1">
-              {[...Array(5)].map((_, i) => (
+              {[...Array(initialData?.star || 0)].map((_, i) => (
                 <StarIcon
                   key={i}
                   className="w-3 h-3 fill-dark-blue text-dark-blue"
+                />
+              ))}
+              {[...Array(5 - (initialData?.star || 0))].map((_, i) => (
+                <StarIcon
+                  key={i}
+                  className="w-3 h-3 fill-gray-300 text-gray-300"
                 />
               ))}
             </div>
@@ -158,49 +235,30 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
           </div>
         </div>
 
-        {/* Ratings + Comment */}
         <div className="flex border-b border-neutral-200">
           <div className="flex-[1.1] p-4 border-r border-neutral-200 flex flex-col items-center gap-4 justify-start">
-            {Object.keys(ratings).length > 0 ? (
-              Object.entries(ratings).map(([label, value]) => (
-                <RatingGroup
-                  key={label}
-                  label={label}
-                  value={value}
-                  onChange={(v) => handleRatingChange(label, v)}
-                />
-              ))
-            ) : (
-              <div className="text-gray text-sm italic">
-                No rating categories available
-              </div>
-            )}
+            {Object.entries(ratings).map(([label, value]) => (
+              <RatingGroup
+                key={label}
+                label={label}
+                value={value}
+                onChange={(v) => handleRatingChange(label, v)}
+              />
+            ))}
           </div>
 
           <div className="flex-[1.2] p-5 flex flex-col items-center justify-start gap-4 text-left">
-            {/* Overall */}
             <div className="flex items-center gap-2 self-start">
-              <div className="text-custom-black text-sm font-medium">
-                Overall
-              </div>
+              <div className="text-custom-black text-sm font-medium">Overall</div>
               <div className="bg-pale-blue rounded-[10px] flex items-center gap-1 px-3 py-1 shadow-sm border border-dark-blue/30">
-                <div className="text-dark-blue text-xl font-bold">
-                  {average.toFixed(1)}
-                </div>
+                <div className="text-dark-blue text-xl font-bold">{average.toFixed(1)}</div>
                 <div className="text-gray text-xs">/10</div>
               </div>
             </div>
 
-            {/* Comment */}
             <div className="flex flex-col gap-1 w-full">
-              <label
-                htmlFor="comment"
-                className="text-custom-black text-sm font-medium"
-              >
-                Comment
-              </label>
+              <label className="text-custom-black text-sm font-medium">Comment</label>
               <textarea
-                id="comment"
                 className="border border-gray-300 rounded-md p-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-dark-blue resize-none overflow-hidden"
                 value={comment}
                 onChange={(e) => {
@@ -215,24 +273,8 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
 
             {/* Images */}
             <div className="flex flex-wrap gap-3 justify-start w-full">
-              {existingImages.map((src, index) => (
-                <div key={`existing-${index}`} className="relative w-20 h-20">
-                  <img
-                    src={src}
-                    alt={`existing-${index}`}
-                    className="w-20 h-20 object-cover rounded-lg border shadow-sm"
-                  />
-                  <button
-                    onClick={() => handleRemoveExistingImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-
               {images.map((img, index) => (
-                <div key={`upload-${index}`} className="relative w-20 h-20">
+                <div key={index} className="relative w-20 h-20">
                   <img
                     src={URL.createObjectURL(img)}
                     alt={`upload-${index}`}
@@ -249,8 +291,7 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
                 </div>
               ))}
 
-              {/* Upload button */}
-              {existingImages.length + images.length < maxImages && (
+              {images.length < maxImages && (
                 <label className="w-20 h-20 border border-gray rounded-lg flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-gray-100 transition">
                   <div className="text-gray text-2xl">＋</div>
                   <div className="text-gray text-xs">Add</div>
@@ -279,7 +320,7 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
             disabled={isSubmitting}
             className="h-8 px-4 rounded-[10px] bg-dark-blue text-white text-sm font-semibold hover:bg-blue-900 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? "Saving..." : "Create"}
           </button>
         </div>
       </div>
@@ -287,4 +328,4 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
   );
 };
 
-export default EditReviewPopup;
+export default CreateReviewPopup;

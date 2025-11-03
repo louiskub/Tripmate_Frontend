@@ -16,7 +16,7 @@ export const hotels: HotelCardProps[] = [
             'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
         ],
         favorite: true,
-        hotel_id: 'svc-002'
+        id: 'svc-002'
     },
     {
         name: 'Centre Point Prime Hotel Pattaya',
@@ -32,7 +32,7 @@ export const hotels: HotelCardProps[] = [
             'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640'
         ],
         favorite: false,
-        hotel_id: 'svc-005'
+        id: 'svc-005'
     }
 ]
 
@@ -45,8 +45,7 @@ export const mockHotel1: HotelDetail =
 
     description: 'Staying at Centre Point Prime Hotel Pattaya is a good choice when you are visiting Na Kluea. 24-hours front desk is available to serve you, from check-in to check-out, or any assistance you need. Should you desire more, do not hesitate to ask the front desk, we are always ready to accommodate you. WiFi is available within public areas of the property to help you to stay connected with family and friends.',
 
-    pictures: 
-    [
+    pictures: [
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-6d207fe600a2de57f0b4e8f7bd0dc74d.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-48dbaff76038a1598d6460554dd16bf2.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-ed2a0d87cecc0f5fd602a8935c648e14.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
@@ -59,8 +58,7 @@ export const mockHotel1: HotelDetail =
         'https://ik.imagekit.io/tvlk/apr-asset/dgXfoyh24ryQLRcGq00cIdKHRmotrWLNlvG-TxlcLxGkiDwaUSggleJNPRgIHCX6/hotel/asset/20016086-1c450af3e4efd97b13aa7a7d4f0bb564.jpeg?_src=imagekit&tr=c-at_max,f-jpg,h-360,pr-true,q-80,w-640',
     ],
 
-    facilities: 
-    {
+    facilities: {
         health: [
             '24-Hour Front Desk',
             'Dinner restaurant',
@@ -166,7 +164,7 @@ export const mockHotel1: HotelDetail =
         'Bangkok Pattaya Hospital',
         'Bangkok Pattaya Hospital',
     ],
-    
+
     favorite: false,
 
     room: [
@@ -240,4 +238,7 @@ export const mockHotel1: HotelDetail =
         pet_allow: false,
         contact: "0123456789"
     },
+    id: "",
+    lat: 0,
+    long: 0
 }

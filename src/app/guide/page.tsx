@@ -5,7 +5,7 @@ import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { guides } from '@/mocks/guide';
 import GuideCardProps from '@/models/service/card/guide-card';
-import { getProfile } from '@/utils/service/profile(server)';
+import { getProfile } from '@/utils/service/get-functions';
 
 import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
@@ -41,7 +41,7 @@ async function getService(key: string): Promise<GuideCardProps[] | null> {
             price: d.dayRate || 0,
             type: d.specialties,
             pictures: d.pictures?.slice(0, 3) ?? [],
-            favorite: d.favorite ?? false,
+            favorite: d.service?.bookmarks.length > 0 ? true: false,
             id: d.id,
           };
         })
@@ -69,7 +69,7 @@ export default async function AllGuides({ searchParams }: PageProps) {
       <div className='flex w-full gap-2.5 mt-2'>
         <div className='shadow-[var(--light-shadow)] flex flex-col bg-custom-white rounded-[10px] w-full'>
           <span className='flex justify-between  p-2.5'>
-            <Body>Found {services ? services.length : 0} attractions</Body>
+            <Body>Found {services ? services.length : 0} guides</Body>
           </span>
           {services?.map((guide, idx) => (
             <GuideCard key={idx} {...guide} />

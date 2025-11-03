@@ -22,7 +22,19 @@ async function getService(key:string): Promise<RestaurantCardProps[] | null> {
       });
       const data = response.data;
       console.log(data)
-      
+    //       name: string
+    // rating: number
+    // rating_count: number
+    // location: string
+    // pictures: Array<string>
+    // favorite: boolean
+    // tag: string
+    // open: {
+    //     day: string
+    //     open: string
+    //     close: string
+    // }[]
+    // id: string
       const services: RestaurantCardProps[] = data.map((d: any) => {
         return {
           name: d.name,
@@ -30,7 +42,7 @@ async function getService(key:string): Promise<RestaurantCardProps[] | null> {
           rating_count: d.service?.reviews?.length ?? 0,
           location: d.service.location.zone ?? '',
           pictures: d.pictures?.slice(0, 3) ?? [],
-          favorite: d.favorite ?? false,
+          favorite: d.service.bookmarks.length > 0 ? true: false,
           tag: d.cuisine,
           id: d.id,
           open: d.openingHours || []

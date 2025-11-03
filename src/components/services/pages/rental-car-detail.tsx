@@ -24,6 +24,7 @@ import ProfileIcon from '@/assets/icons/profile-filled.svg'
 import { restaurantRatingMeta } from '@/utils/service/rating';
 import PriceCard from '@/components/services/other/price_card';
 import RentalcarDetail from '@/models/service/detail/rental-car';
+import GuidePopup from '../other/guide-popup';
 
 type RentalCarDetailProps = {
   service: RentalcarDetail
@@ -32,6 +33,7 @@ type RentalCarDetailProps = {
 export default function RentalCarDetail({service}: RentalCarDetailProps) {
   const [currentTab, setCurrentTab] = useState("overview");
   const [PicturePopUp, setPicturePopUp] = useState(false);
+  const [guidePopup, setGuidePopup] = useState(false)
 
 type tab = {
     label: string
@@ -90,7 +92,7 @@ type tab = {
 
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
-          <FavoriteButton favorite={false} id={'1'} type='hotel' large/>
+          <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='service' large/>
         </ServicePictures>
         {PicturePopUp && 
           <PicturePopup pictures={service.pictures}
@@ -127,8 +129,9 @@ type tab = {
                 <Button
                   text='Book'
                   className='bg-dark-blue rounded-[10px] px-6! text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
-                  onClick={handleBookRentalCar}
+                  onClick={()=>guidePopup}
                 />
+                {guidePopup && <GuidePopup Close={() => setGuidePopup(false)} type='hotel' service_id={service.id}/>}
               </div>
           </header>
 
