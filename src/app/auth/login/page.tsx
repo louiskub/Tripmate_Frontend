@@ -71,7 +71,16 @@ export default function LoginPage() {
                 })
                 localStorage.setItem("serviceId", res.data[0].id)
             }
-            router.push(paths.home)
+
+            console.log("change page")
+            if (data.userRole == "hotel-manager")
+                router.push("/hotelmanagement/dashboard")
+            else if (data.userRole == "car-manager")
+                router.push("/car-manage/dashboard")
+            else if (data.userRole == "guide")
+                router.push("/guide-manage/dashboard")
+            else
+                router.push(paths.home)
             
         } catch (error: any) {
             console.error("Login failed:", error.response?.data || error.message);
