@@ -16,7 +16,6 @@ import GroupIcon from '@/assets/icons/group.svg'
 import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
-import { useUser } from '@/context/userContext';
 
 type BookNavbarProps = {
     book_state: number;
@@ -24,8 +23,11 @@ type BookNavbarProps = {
 }
 
 export default function BookNavbar({restaurant = false, book_state}: BookNavbarProps) {
-    const {user} = useUser();
     const showDropdown = useBoolean(false);
+    const username = localStorage.getItem('username');
+    const first_name = localStorage.getItem('fname');
+    const last_name = localStorage.getItem('lname');
+    const profile_pic = localStorage.getItem('profileImg');
     return (
         <nav className="w-full h-14 px-7 sticky top-0 z-10 bg-white border-b border-light-gray inline-flex justify-between items-center">
             <a href={paths.home} className="flex items-center gap-[3px]">
@@ -39,9 +41,9 @@ export default function BookNavbar({restaurant = false, book_state}: BookNavbarP
                     className="w-10 h-10 rounded-full overflow-hidden border border-light-gray"
                     onClick={showDropdown.toggle}>
                     
-                    {user?.profileImg 
+                    {profile_pic 
                         ? <img 
-                            src={user?.profileImg || '/images/placeholder.png'}
+                            src={profile_pic || '/images/placeholder.png'}
                             className="w-full h-full object-over" />
                         : <ProfileIcon className="w-7.5" />}
                 </Button>
@@ -53,7 +55,7 @@ export default function BookNavbar({restaurant = false, book_state}: BookNavbarP
                     
             }
             
-            {showDropdown.value && <ProfileDropdown first_name={user?.fname || ''} last_name={user?.lname || ''} username={user?.username || ''} profile_pic={user?.profileImg || ''}  />}
+            {showDropdown.value && <ProfileDropdown first_name={first_name || ''} last_name={last_name || ''} username={username || ''} profile_pic={profile_pic || ''}  />}
         </nav>
     )
 }
