@@ -65,6 +65,9 @@ export const endpoints = {
     delete: (id: string) => `${BASE_URL}/review/${id}`,
     uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
   },
+  booking: {
+    getAllFromService: (id: string) => `${BASE_URL}/booking/getByService/${id}`
+  },
   user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
 
 }
