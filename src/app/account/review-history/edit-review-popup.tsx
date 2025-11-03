@@ -139,7 +139,8 @@ const EditReviewPopup: React.FC<EditReviewPopupProps> = ({
       const metrics = RatingGroupByType(updated.service)
       const formData = {
         "comment": updated.review,
-        "image": resImg.data.image.slice(-3)
+        "image": resImg.data.image.slice(-updated.img.length),
+        // "userId": localStorage.getItem("userId")
       }
       for(let i=0; i<metrics.length; i++){
         formData[`score${i+1}`] = updated.score[metrics[i]]
