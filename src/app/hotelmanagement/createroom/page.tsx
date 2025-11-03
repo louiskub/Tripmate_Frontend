@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Menu, X, Upload } from "lucide-react"
-import Navbar from '@/components/navbar/nav';
-import VendorSideNav from '@/components/navbar/vendorsidenav';
+import Navbar from '@/components/navbar/navbar';
+import VendorSideNav from '@/components/navbar/hotelvendorsidenav';
 // import Link from "next/link";
 
 export default function CreateHotelPage() {

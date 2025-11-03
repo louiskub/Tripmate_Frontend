@@ -1,162 +1,273 @@
 "use client"
 
-import { useState } from "react"
-import Navbar from '@/components/navbar/nav';
-import VendorSideNav from '@/components/navbar/vendorsidenav';
-import Link from "next/link";
+import { useState, useEffect, useMemo } from "react" // 1. Import useMemo
+import axios from "axios"
+import Navbar from "@/components/navbar/navbar"
+import VendorSideNav from "@/components/navbar/hotelvendorsidenav"
+import ManageHotelNav from "@/components/navbar/hotelstatussidenav"
+import Link from "next/link"
+import Cookies from "js-cookie"
+import { endpoints } from "@/config/endpoints.config"
+import ConfirmModal from "@/app/hotelmanagement/myhotel/ConfirmModal" 
 
-export default function HotelSearchPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
+export default function MyHotelPage() {
+  const [hotels, setHotels] = useState<any[]>([]) // 2. ⭐️ นี่คือ "ข้อมูลหลัก"
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null) 
+  const [activeFilter, setActiveFilter] = useState("total") // 3. ⭐️ นี่คือ "ตัวกรอง"
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [hotelToDelete, setHotelToDelete] = useState<string | null>(null) 
 
-  const hotels = [
-    { id: 1, name: "name", tag: "tag", rating: 10.0, ratingText: "Excellent", location: "location", price: "4,412.00" },
-    { id: 2, name: "name", tag: "tag", rating: 10.0, ratingText: "Excellent", location: "location", price: "4,412.00" },
-    { id: 3, name: "name", tag: "tag", rating: 10.0, ratingText: "Excellent", location: "location", price: "4,412.00" },
-    { id: 4, name: "name", tag: "tag", rating: 10.0, ratingText: "Excellent", location: "location", price: "4,412.00" },
-  ]
+  // ดึงข้อมูลโรงแรม (เหมือนเดิม)
+  useEffect(() => {
+    const fetchHotel = async () => {
+      setIsLoading(true)
+      setError(null)
+      const token = Cookies.get("token")
 
-  const filterSections = [
-    { items: ["text", "text", "text", "text"] },
-    { items: ["text", "text", "text", "text"] },
-    { items: ["text", "text", "text", "text"] },
-    { items: ["text", "text", "text", "text"] },
-    { items: ["text", "text", "text", "text", "text", "text", "text", "text", "text", "text"] },
-  ]
+      if (!token) {
+        setError("No authentication token found. Please login.")
+        setIsLoading(false)
+        return
+      }
 
+      try {
+        const response = await axios.get(`${endpoints.user_services.owner}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        console.log("Fetched hotels data:", response.data)
+        setHotels(response.data) // ⭐️ เก็บข้อมูลหลัก
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          if (err.response && err.response.status === 401) {
+            setError("Unauthorized. Please check your login session.")
+          } else {
+            setError(err.message)
+          }
+        } else {
+          setError("An unexpected error occurred.")
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchHotel()
+  }, [])
+
+  // 4. ⭐️ [เพิ่ม] สร้าง "ข้อมูลที่กรองแล้ว" โดยใช้ useMemo
+  const filteredHotels = useMemo(() => {
+    console.log(`Applying filter: ${activeFilter}`) 
+
+    if (activeFilter === "available") {
+      // ⭐️ กรองตามที่คุณขอ: "active"
+      return hotels.filter((hotel) => hotel.status === "active");
+    }
+
+    if (activeFilter === "unavailable") {
+      // ⭐️ (ผมเดา) Unavailable คืออันที่ *ไม่ใช่* "active"
+      return hotels.filter((hotel) => hotel.status !== "active");
+    }
+
+    if (activeFilter === "full") {
+      // ⭐️ (ผมเดา) Full Booking อาจจะมี status 'full'
+      return hotels.filter((hotel) => hotel.status === "full"); 
+    }
+
+    // ⭐️ Default: ถ้า filter เป็น "total"
+    return hotels; // คืนค่าทั้งหมด
+
+  }, [hotels, activeFilter]); // ⭐️ Dependencies
+
+  // --- ฟังก์ชันสำหรับจัดการ POPUP (เหมือนเดิม) ---
+
+  const handleOpenDeleteModal = (hotelId: string) => {
+    setHotelToDelete(hotelId)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setHotelToDelete(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!hotelToDelete) return
+
+    console.log("กำลังลบโรงแรม ID:", hotelToDelete)
+
+    try {
+      const token = Cookies.get("token");
+      if (!token) {
+        setError("Token not found. Please login again.");
+        handleCloseModal();
+        return;
+      }
+
+      // 1. เรียก API เพื่อลบ
+      await axios.delete(endpoints.user_services.delete(hotelToDelete), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // 2. ถ้าลบสำเร็จ ให้อัปเดต State (ลบออกจากหน้าจอ)
+      // ⭐️ (สำคัญ) ต้องอัปเดต 'hotels' (Master List) ไม่ใช่ filteredHotels
+      setHotels((currentHotels) =>
+        currentHotels.filter((hotel) => hotel.id !== hotelToDelete)
+      )
+    } catch (err) {
+      console.error("Failed to delete hotel:", err);
+      setError("Failed to delete hotel.");
+    } finally {
+      // 3. ปิด Modal เสมอ
+      handleCloseModal(); 
+    }
+  }
+
+  // --- 5. ⭐️ [แก้ไข] ฟังก์ชันสำหรับ Render (ให้ใช้ filteredHotels) ---
+  const renderContent = () => {
+    if (isLoading) {
+      return <div className="text-center p-10">Loading hotel data...</div>
+    }
+
+    if (error) {
+      return (
+        <div className="bg-white rounded-[10px] border border-red-300 p-4 sm:p-5">
+          <div className="text-center p-10 text-red-600">Error: {error}</div>
+        </div>
+      )
+    }
+    
+    // (เช็คว่ามีข้อมูลหลักหรือไม่)
+    if (!hotels || hotels.length === 0) {
+      return (
+        <div className="bg-white rounded-[10px] border border-gray-200 p-4 sm:p-5">
+          <div className="text-center p-10 text-gray-500">No hotel data found.</div>
+        </div>
+      )
+    }
+
+    // (เช็คว่าข้อมูลที่กรองแล้วมีหรือไม่)
+    if (filteredHotels.length === 0) {
+       return (
+        <div className="bg-white rounded-[10px] border border-gray-200 p-4 sm:p-5">
+          <div className="text-center p-10 text-gray-500">
+            No hotels match the "{activeFilter}" filter.
+          </div>
+        </div>
+      )
+    }
+
+    // ⭐️ [แก้ไข] ให้ map จาก 'filteredHotels'
+    return (
+      <div className="space-y-6">
+        {filteredHotels.map((hotel) => (
+          <div key={hotel.id} className="bg-white rounded-[10px] border border-gray-200 p-4 sm:p-5">
+            <div className="space-y-5">
+              {hotel.serviceImg && (
+                <div className="w-full max-w-2xl h-64 rounded-[10px] overflow-hidden relative shadow-md">
+                  <img
+                    src={hotel.serviceImg || "/placeholder.svg"}
+                    alt={hotel.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/800x400?text=Image+Not+Found")}
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <h2 className="text-2xl font-bold text-slate-900">{hotel.name}</h2>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
+                    hotel.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {hotel.status}
+                </span>
+              </div>
+
+              <p className="text-gray-700 text-lg">{hotel.description}</p>
+
+              {/* ⭐️ [FIX] เอารายละเอียดกลับมา */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <h3 className="text-xl font-semibold text-slate-900 mb-3">Details</h3>
+                <ul className="space-y-2">
+                  <li>
+                    <strong>Hotel ID:</strong> <span className="text-gray-600">{hotel.id}</span>
+                  </li>
+                  <li>
+                    <strong>Hotel Type:</strong> <span className="text-gray-600 capitalize">{hotel.type}</span>
+                  </li>
+                  <li>
+                    <strong>Location ID:</strong> <span className="text-gray-600">{hotel.locationId}</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* ⭐️ [FIX] เอาปุ่มกลับมา */}
+              <div className="flex justify-end gap-3 mt-6">
+                {/* <Link href={`/hotelmanagement/edit-hotel/${hotel.id}`} legacyBehavior>
+                  <a className="px-6 py-2 bg-sky-700 text-white text-base font-bold rounded-2xl shadow-lg hover:bg-sky-800">
+                    Edit Hotel
+                  </a>
+                </Link> */}
+                <button
+                  type="button"
+                  className="px-6 py-2 bg-red-700 text-white rounded-2xl shadow-lg hover:bg-red-800"
+                  onClick={() => handleOpenDeleteModal(hotel.id)}
+                >
+                  Delete Hotel
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // --- JSX หลักของหน้า (เหมือนเดิม) ---
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <Navbar />
 
-      <div className="flex">
-        {/* Left Sidebar - Categories */}
+      <div className="flex flex-col lg:flex-row">
         <VendorSideNav />
 
-        {/* Main Content */}
-        <main className="mt-1 flex-1 px-4 sm:px-6 md:px-12 lg:px-24 py-2.5">
-          {/* Search Bar */}
-          <div className="bg-white rounded-[10px] border border-gray-200 p-2 sm:p-5">
+        <main className="flex-1 flex flex-col">
+          {/* Header Box (เหมือนเดิม) */}
+          <div className="bg-white border-b border-gray-200 p-4 sm:p-7 sticky top-0 z-10">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">My Hotel</h1>
-              <Link href="/hotelmanagement/createhotel/" className="px-4 py-2 bg-sky-700 text-white text-base font-bold rounded-[10px] shadow-lg hover:bg-sky-800">
-                New Hotel
-              </Link>
             </div>
           </div>
 
-          <div className="flex flex-col xl:flex-row gap-2.5">
-            {/* Hotel Listings */}
-            <div className="mt-2 flex-1 flex flex-col gap-2.5">
-              {/* Header */}
-              <div className="px-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <div className="text-slate-900 text-base font-medium">Found 9999 hotels</div>
-                <div className="flex items-center gap-2.5">
-                  <div className="text-slate-900 text-base font-medium">Sort by option1</div>
-                  <button
-                    onClick={() => setFiltersOpen(!filtersOpen)}
-                    className="xl:hidden text-slate-900 text-base font-medium hover:text-blue-700"
-                  >
-                    Filters
-                  </button>
-                  <div className="hidden sm:block text-slate-900 text-base font-medium">View</div>
-                </div>
-              </div>
-
-              {/* Hotel Cards */}
-              {hotels.map((hotel) => (
-                <div
-                  key={hotel.id}
-                  className="bg-white rounded-[10px] border border-gray-200 p-2.5 flex flex-col sm:flex-row gap-2.5"
-                >
-                  {/* Hotel Image */}
-                  <div className="w-full sm:w-44 h-44 relative bg-gradient-to-b from-zinc-800/0 to-black/30 rounded-[10px]">
-                    <button className="absolute right-2 top-2 w-6 h-6 bg-white rounded-full shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] flex items-center justify-center hover:bg-gray-100">
-                      <div className="w-3 h-2.5 bg-slate-900" />
-                    </button>
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-                      <div className="w-[5px] h-[5px] bg-gray-50 rounded-full shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)]" />
-                      <div className="w-[5px] h-[5px] bg-zinc-100/50 rounded-full shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)]" />
-                      <div className="w-[5px] h-[5px] bg-zinc-100/50 rounded-full shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)]" />
-                    </div>
-                  </div>
-
-                  {/* Hotel Info */}
-                  <div className="flex-1 flex flex-col sm:flex-row justify-between gap-2">
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <div className="flex items-center gap-1">
-                        <div className="text-slate-900 text-lg font-semibold">{hotel.name}</div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="px-2 py-0.5 bg-sky-50 rounded-[20px]">
-                          <div className="text-blue-700 text-xs font-medium">{hotel.tag}</div>
-                        </div>
-                        <div className="flex gap-0.5">
-                          {[...Array(5)].map((_, i) => (
-                            <div key={i} className="w-3 h-3 bg-sky-700" />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="px-2 py-0.5 bg-sky-50 rounded-[20px]">
-                          <div className="text-blue-700 text-xs font-medium">{hotel.rating}</div>
-                        </div>
-                        <div className="text-blue-700 text-xs">{hotel.ratingText}</div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-2.5 h-3 bg-slate-900" />
-                        <div className="text-slate-900 text-xs">{hotel.location}</div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col justify-end items-end gap-1">
-                      <div className="flex items-end gap-0.5">
-                        <div className="text-gray-600 text-xs">From</div>
-                        <div className="flex items-start gap-0.5">
-                          <div className="text-blue-700 text-sm">฿</div>
-                          <div className="text-blue-700 text-sm font-medium">{hotel.price}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            {/* ManageHotelNav (ทำงานถูกต้อง) */}
+            <div className="hidden lg:flex w-48 flex-shrink-0 bg-white border-r border-gray-200">
+              <ManageHotelNav 
+                onAddNew={() => {}} 
+                activeFilter={activeFilter} 
+                onFilterChange={setActiveFilter} 
+              />
             </div>
 
-            {/* Right Sidebar - Map & Filters */}
-            <aside className={`${filtersOpen ? "block" : "hidden"} mt-3 xl:block w-full xl:w-60 flex flex-col gap-2.5`}>
-              {/* Map */}
-              <div className="w-full h-40 relative shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] rounded-[10px] overflow-hidden">
-                <img className="w-full h-full object-cover" src="https://placehold.co/240x160" alt="Map" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-10 h-12 bg-gradient-to-b from-blue-700 to-cyan-500" />
-                </div>
-                <button className="absolute bottom-4 left-1/2 -translate-x-1/2 px-2 py-1 bg-white rounded-[20px] shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] flex items-center gap-1 hover:bg-gray-50">
-                  <div className="text-slate-900 text-sm font-semibold">View on map</div>
-                  <div className="w-4 h-3.5 bg-slate-900" />
-                </button>
-              </div>
-
-              {/* Filter Sections */}
-              {filterSections.map((section, sectionIndex) => (
-                <div
-                  key={sectionIndex}
-                  className="py-1.5 bg-white rounded-[10px] shadow-[0px_0px_5px_0px_rgba(0,0,0,0.20)] flex flex-col gap-1"
-                >
-                  {section.items.map((item, itemIndex) => (
-                    <label
-                      key={itemIndex}
-                      className="h-7 px-2.5 py-[2.50px] flex items-center gap-1 hover:bg-gray-50 cursor-pointer"
-                    >
-                      <div className="w-5 h-5 bg-gray-200 rounded" />
-                      <div className="text-gray-600 text-sm font-medium">{item}</div>
-                    </label>
-                  ))}
-                </div>
-              ))}
-            </aside>
+            {/* Content Area (ทำงานถูกต้อง) */}
+            <div className="flex-1 p-4 sm:p-7 overflow-y-auto">
+              {renderContent()}
+            </div>
           </div>
         </main>
       </div>
+
+      {/* Modal (เหมือนเดิม) */}
+      <ConfirmModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        title="ลบโรงแรม"
+        message="แน่ใจมั้ยว่าจะลบโรงแรมนี้?"
+      />
     </div>
   )
 }

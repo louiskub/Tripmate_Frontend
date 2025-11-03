@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Statenav from "@/components/navbar/statenav";
 import Link from "next/link";
+import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
 
 // ---------- Types ----------
 type GuideBookingDTO = {
@@ -304,7 +304,7 @@ export default function GuideBookingCompletePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Statenav />
+      <BookNavbar book_state={3}/>
 
       <main className="px-4 sm:px-6 md:px-12 xl:px-24 pt-7 pb-2.5">
         {/* Header */}

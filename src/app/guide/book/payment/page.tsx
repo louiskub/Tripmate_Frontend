@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Statenav from "@/components/navbar/statenav";
+import BookNavbar from '@/components/navbar/default-nav-variants/book-navbar';
 
 type PaymentMethod = "card" | "qr";
 
@@ -64,95 +64,11 @@ export default function GuidePaymentPage() {
     cvv: "",
   });
 
-  // ---- QR state ----
-  const [qrImage, setQrImage] = useState<string | null>(null);
-  const [qrReady, setQrReady] = useState(false);
-
-  const validateCard = (): string | null => {
-    if (!card.holder.trim()) return "Please enter card holder name.";
-    if (!/^\d{12,19}$/.test(card.number.replace(/\s/g, ""))) return "Card number looks invalid.";
-    if (!/^\d{2}\/\d{2}$/.test(card.exp)) return "Expiration must be MM/YY.";
-    if (!/^\d{3,4}$/.test(card.cvv)) return "CVV/CVC must be 3–4 digits.";
-    return null;
-  };
-
-  const pay = async () => {
-    try {
-      setErrorMsg(null);
-      setSubmitting(true);
-
-      // simple guards
-      if (!bookingId) throw new Error("Missing bookingId.");
-      const body: CreatePaymentIntentBody =
-        paymentMethod === "card"
-          ? {
-              method: "card",
-              bookingId,
-              amount: total,
-              currency: "THB",
-              card,
-            }
-          : {
-              method: "qr",
-              bookingId,
-              amount: total,
-              currency: "THB",
-            };
-
-      const res = await fetch("/api/guide/payment/intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        // credentials: "include", // ถ้าใช้คุกกี้
-      });
-
-      if (!res.ok) {
-        const t = await res.text().catch(() => "");
-        throw new Error(t || `Request failed: ${res.status}`);
-      }
-
-      const json = (await res.json()) as CreatePaymentIntentResp;
-      if (!json.success || !json.paymentId) {
-        throw new Error(json.message || "Failed to create payment.");
-      }
-
-      if (paymentMethod === "qr") {
-        // แสดง QR ให้สแกน แล้วให้ผู้ใช้กด "I have paid" เพื่อไปหน้า complete
-        if (!json.qrImageDataUrl) throw new Error("QR image missing from response.");
-        setQrImage(json.qrImageDataUrl);
-        setQrReady(true);
-        return; // ยังไม่ redirect จนกว่าจะกดยืนยันว่าโอนแล้ว
-      }
-
-      // บัตร: ชำระสำเร็จ → ไปหน้า complete
-      const qs = new URLSearchParams({
-        bookingId,
-        paymentId: json.paymentId,
-        method: "card",
-        total: String(total),
-      }).toString();
-      router.push(`/bookguide/completebooking?${qs}`);
-    } catch (e: unknown) {
-      setErrorMsg(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const confirmQrPaid = () => {
-    // กรณีง่ายสุด: ผู้ใช้ยืนยันว่าโอนแล้ว → redirect พร้อมพารามิเตอร์
-    const qs = new URLSearchParams({
-      bookingId,
-      paymentId: "qr_confirmed", // ถ้า backend ส่ง id กลับมา ให้ใช้ของจริง
-      method: "qr",
-      total: String(total),
-    }).toString();
-    router.push(`/bookguide/completebooking?${qs}`);
-  };
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Statenav />
+      <BookNavbar book_state={2}/>
 
       <main className="px-4 sm:px-6 md:px-12 xl:px-24 pt-7 pb-2.5">
         {/* Header */}
@@ -298,22 +214,6 @@ export default function GuidePaymentPage() {
                           will be charged to the credit/debit card you provided.
                         </span>
                       </div>
-
-                      <button
-                        type="button"
-                        disabled={submitting}
-                        onClick={() => {
-                          const v = validateCard();
-                          if (v) {
-                            setErrorMsg(v);
-                            return;
-                          }
-                          void pay();
-                        }}
-                        className="mt-1 inline-flex h-10 items-center justify-center rounded-md bg-sky-600 px-4 text-white text-sm font-semibold shadow hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-60"
-                      >
-                        {submitting ? "Processing..." : "Pay ฿" + formatTHB(total)}
-                      </button>
                     </div>
                   ) : (
                     <div className="py-2 flex flex-col items-center gap-4">
@@ -327,40 +227,22 @@ export default function GuidePaymentPage() {
 
                       {/* QR area */}
                       <div className="w-48 h-48 sm:w-60 sm:h-60 bg-gray-200 rounded-lg flex items-center justify-center">
-                        {qrReady && qrImage ? (
-                          <img
-                            src={qrImage}
-                            alt="QR Code"
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <span className="text-xs text-gray-500">QR will appear here</span>
-                        )}
+                        <img src="/images/qrcode.jpg" alt="QR Code" className="w-60 h-60 object-cover rounded-lg"/>
                       </div>
 
                       {/* action buttons */}
                       <div className="flex flex-col sm:flex-row gap-2">
                         <button
                           type="button"
-                          disabled={submitting}
-                          onClick={() => void pay()}
-                          className="inline-flex h-10 items-center justify-center rounded-md bg-sky-600 px-4 text-white text-sm font-semibold shadow hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-60"
-                        >
-                          {submitting ? "Generating..." : qrReady ? "Regenerate QR" : "Generate QR"}
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={!qrReady}
-                          onClick={confirmQrPaid}
-                          className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-semibold text-slate-700 hover:bg-gray-50 disabled:opacity-60"
+                          onClick={() => setShowSuccessPopup(true)}
+                          className="inline-flex h-10 items-center justify-center rounded-md bg-sky-600 px-4 text-white text-sm font-semibold shadow hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                         >
                           I have paid
                         </button>
                       </div>
 
                       <p className="text-xs sm:text-sm font-medium text-slate-900 text-center">
-                        Your payment will be confirmed automatically after scanning.
+                        Your payment will be confirmed automatically after scanning. You can click &quot;I have paid&quot; when done.
                       </p>
                     </div>
                   )}
@@ -374,7 +256,7 @@ export default function GuidePaymentPage() {
                 type="button"
                 onClick={() => {
                   // เผื่อยังอยากกดไปหน้า complete ตรง ๆ (ไม่แนะนำถ้าใช้ flow ชำระจริง)
-                  router.push(`/bookguide/completebooking?bookingId=${encodeURIComponent(bookingId)}&total=${total}`);
+                  router.push(`/guide/book/completebooking`);
                 }}
                 className="inline-flex w-full h-7 md:h-10 items-center justify-center rounded-[10px] bg-sky-600 text-white text-sm md:text-base font-bold shadow transition-all duration-600 ease-in-out hover:scale-[1.02] hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
               >
@@ -482,6 +364,27 @@ export default function GuidePaymentPage() {
             Complete Booking
           </button>
         </div>
+
+        {showSuccessPopup && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 flex flex-col items-center gap-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Payment Success</h3>
+              <p className="text-center text-gray-600 text-sm">Your payment has been processed successfully.</p>
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="w-full h-10 bg-sky-600 text-white rounded-md font-semibold hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );
