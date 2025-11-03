@@ -41,8 +41,7 @@ export const endpoints = {
   },  
   profile: (id: string) => `${BASE_URL}/users/${id}`,
   upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
-  
-  },
+
   trip: {
     detail: (id: string) => `/trip/${id}`,
   },
@@ -104,7 +103,7 @@ export const endpoints = {
   booking: {
     getAllFromService: (id: string) => `${BASE_URL}/booking/getByService/${id}`
   },
-  user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`
+  user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`,
 
   location: {
     all: `${BASE_URL}/locations`,
