@@ -20,7 +20,7 @@ export const endpoints = {
     change_password: (id: string) => `${BASE_URL}/users/${id}/password`,
   },
   favorite: `${BASE_URL}/bookmark`,
-  unfavorite: (id: string) => `${BASE_URL}/bookmark/${id}`,
+  unfavorite: (user_id: string, service_id: string) => `${BASE_URL}/bookmark/${user_id}/${service_id}`,
   favorite_page: (id: string, type: string) => `${BASE_URL}/users/bookmark/${id}/${type}`,
   hotel: {
     all: (key?: string) => `${BASE_URL}/hotel?${key}`,
@@ -41,7 +41,6 @@ export const endpoints = {
   },  
   profile: (id: string) => `${BASE_URL}/users/${id}`,
   upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
-
   trip: {
     detail: (id: string) => `/trip/${id}`,
   },

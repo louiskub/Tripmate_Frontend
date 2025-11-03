@@ -31,9 +31,9 @@ export default function UserNavbar() {
                 <div className="text-center justify-start text-dark-blue text-2xl font-extrabold ">TripMate</div>
             </a>
             <div className="flex justify-end items-center gap-5">
-                <Button as='a' href={paths.account.notification}>
+                {/* <Button as='a' href={paths.account.notification}>
                     <BellIcon className="w-7.5" />
-                </Button>
+                </Button> */}
                 <Button
                     className="w-10 h-10 rounded-full overflow-hidden border border-light-gray"
                     onClick={showDropdown.toggle}>
@@ -97,9 +97,9 @@ export const ProfileDropdown = ({first_name = "first", last_name = "last", usern
                 <PageOptionDropdown text='Manage Account' href={paths.account.manage_account}>
                     <AccountIcon />
                 </PageOptionDropdown>
-                <PageOptionDropdown text='Notification' href={paths.account.notification}>
+                {/* <PageOptionDropdown text='Notification' href={paths.account.notification}>
                     <BellIcon />
-                </PageOptionDropdown>
+                </PageOptionDropdown> */}
                 <PageOptionDropdown text='Favorites' href={paths.account.favorite}>
                     <HeartIcon />
                 </PageOptionDropdown>

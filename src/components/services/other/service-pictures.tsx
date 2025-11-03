@@ -137,7 +137,7 @@ export const PicturePopup = ({ pictures, name, children, Close }: PicturePopupPr
                             )}
                             <PictureListItem active picture={pictures[pictureIdx]} idx={pictureIdx} onClick={setPictureIdx} />
                             {pictures.slice(pictureIdx + 1).map((picture, idx) =>
-                                <PictureListItem picture={picture} idx={idx + pictureIdx + 1} onClick={setPictureIdx} />
+                                <PictureListItem key={idx} picture={picture} idx={idx + pictureIdx + 1} onClick={setPictureIdx} />
                             )}
                         </div>
                     </div>

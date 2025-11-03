@@ -65,7 +65,7 @@ const RentalCarCard = (car: RentalCarCardProps) => {
                         {car.model && <Tag text={car.model}/>}
                     </div>}
                     
-                    {car.rating_count ? 
+                    {car.rating ? 
                         <div className="inline-flex items-center gap-[3px] mt-2">
                             <Tag text={(car.rating).toString()} /> 
                             <Caption className='text-dark-blue'>{ratingText(car.rating)}</Caption>

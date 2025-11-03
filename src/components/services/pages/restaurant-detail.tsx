@@ -123,8 +123,8 @@ type tab = {
               rating_meta={restaurantRatingMeta}
             />
 
-            <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
-                <MiniMap lat={service.lat} long={service.long} name={service.name} />
+            <div className='w-64 h-64 flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] row-start-1 col-start-2'>
+                <MiniMap className='w-64 h-64' lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (
@@ -150,13 +150,13 @@ type tab = {
       <section id='menu' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Menu</Title>
         <div className='flex justify-center px-4 py-2 gap-y-6'>
-          {/* <ImageSlide className='w-3/4 aspect-5/3' pictures={service.menu} /> */}
-          <iframe
+          <ImageSlide className='w-3/4' pictures={[service.menu]} />
+          {/* <iframe
             src={service.menu}
             width="100%"
             height="800px"
             style={{ border: "none" }}
-          ></iframe>
+          ></iframe> */}
         </div>
       </section>
 
@@ -173,10 +173,12 @@ type tab = {
       <section id='location' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Location</Title>
         <div className='flex gap-5'>
-          <LargeMap 
+          {/* <LargeMap 
           location_link=''
           className='basis-3/5'
-          />
+          /> */}
+          
+          <MiniMap className='basis-3/5 h-[410px]!' lat={service.lat} long={service.long} name={service.name} />
           <div className='basis-2/5'>
             <ul className='grid grid-cols-2 w-full py-2 gap-2.5'>
               {

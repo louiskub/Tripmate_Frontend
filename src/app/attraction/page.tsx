@@ -20,6 +20,7 @@ async function getService(key: string): Promise<AttractionCardProps[] | null> {
         }
       });
       const data = response.data;
+      console.log(data)
       
       const services: AttractionCardProps[] = data.map((d: any) => {
         return {
@@ -32,7 +33,11 @@ async function getService(key: string): Promise<AttractionCardProps[] | null> {
         };
       });
 
-      return services
+      const filteredServices = services.filter(service =>
+        service.name.toLowerCase().includes(key.toLowerCase())
+      );
+
+      return filteredServices
     } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);

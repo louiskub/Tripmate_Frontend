@@ -52,7 +52,7 @@ export default function MiniMap({name, lat=100.5018, long=13.7563, className =''
     return () => map.current?.remove()
   }, [])
 
-  return <div className={`w-full h-full relative ${className}`}>
+  return <div className={`w-full rounded-2xl overflow-hidden relative ${className}`}>
     <div ref={mapContainer} className="w-full h-full rounded-xl" />
     <button
         onClick={() => {window.location.href = `/map?name=${name}&lat=${lat}&long=${long}`}}

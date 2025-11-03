@@ -57,8 +57,8 @@ export default async function GuideDetailPage({ params }: { params: { id: string
       },
       id: data.id,
       favorite: data.favorite ?? false,
-      lat: 0,
-      long: 0
+      lat: data.service.location.lat,
+      long: data.service.location.long,
     }
     console.log(guide)
 

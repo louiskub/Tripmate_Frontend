@@ -17,7 +17,6 @@ export default async function HotelDetailPage({ params }: { params: { id: string
 
     
     const get_nearby_locations = await getNearbyLocations(data.service.location.lat.toFixed(2), data.service.location.long.toFixed(2))
-    console.log(get_nearby_locations)
 
     const reviews = await Promise.all(
       data.service.reviews.map(async (review: any) => {
@@ -33,37 +32,33 @@ export default async function HotelDetailPage({ params }: { params: { id: string
       })
     );
 
+    console.log(data)
+
+    // name: string;
+    // type: "hotel" | "resort";
+    // star: number;
+    // description: string;
+    // pictures: string[];
+    // facilities: Facility;
+    // rating: number;
+    // subtopic_ratings: HotelSubtopicRating;
+    // rating_count: number;
+    // review: Review[];
+    // location: string;
+    // nearby_locations: string[];
+    // favorite: boolean;
+    // room: Room[];
+    // policy: HotelPolicy;
+    // id: string;
+    // lat: number;
+    // long: number;
+
     const hotel: HotelDetailModel = {
-      ...data,
-      review: reviews,
-      subtopic_ratings: {
-        cleanliness: data.subtopicRatings.cleanliness || 0,
-        comfort: data.subtopicRatings.comfort || 0,
-        meal: data.subtopicRatings.meal || 0,
-        location: data.subtopicRatings.location || 0,
-        service: data.subtopicRatings.service || 0,
-        facilities: data.subtopicRatings.facilities || 0,
-      },
-      policy: {
-        breakfast: data.breakfast,
-        check_in: data.checkIn,
-        check_out: data.checkOut,
-        contact: data.contact
-      },
-      nearby_locations: get_nearby_locations || [],
-      room: data?.rooms?.map((room: any) => ({
-        id: room.id,
-        name: room.name,
-        pictures: room.pictures,
-        room_options: room?.options?.map((o:any) => ({
-          ...o
-        })),
-        size: room.sizeSqm,
-        facility: room.facilities,
-      })),
-      lat: data.service.location.lat,
-      long: data.service.location.long,
-      id: data.id,
+      name: data.name,
+      type: data.type,
+      star: data.star,
+      description: data.description,
+      pictures: data.pictures,
       facilities: {
         health: data.facilities.health,
         internet: data.facilities.internet,
@@ -72,7 +67,44 @@ export default async function HotelDetailPage({ params }: { params: { id: string
         service: data.facilities.service,
         transportation: data.facilities.transportation,
       },
-      favorite: data.service.bookmarks?.length > 0 ? true : false
+      rating: data.rating,
+      subtopic_ratings: {
+        cleanliness: data.subtopicRatings.cleanliness || 0,
+        comfort: data.subtopicRatings.comfort || 0,
+        meal: data.subtopicRatings.meal || 0,
+        location: data.subtopicRatings.location || 0,
+        service: data.subtopicRatings.service || 0,
+        facilities: data.subtopicRatings.facilities || 0,
+      },
+      rating_count: reviews.length,
+      review: reviews,
+      location: data.service.location.zone,
+      nearby_locations: get_nearby_locations || [],
+      favorite: data.service.bookmarks?.length > 0 ? true : false,
+      room: data?.rooms?.map((room: any) => ({
+        id: room.id,
+        name: room.name,
+        pictures: room.pictures,
+        room_options: room?.options?.map((o:any) => ({
+          name: o.name,
+          bed: o.bed,
+          max_guest: o.maxGuest,
+          price: o.price,
+          id: o.id,
+        })),
+        size: room.sizeSqm,
+        facility: room.facilities,
+      })),
+      policy: {
+        breakfast: data.breakfast,
+        check_in: data.checkIn,
+        check_out: data.checkOut,
+        contact: data.contact,
+        pet_allow: data.petAllow
+      },
+      id: data.id,
+      lat: data.service.location.lat,
+      long: data.service.location.long,
     }
 
     console.log(hotel)

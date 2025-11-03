@@ -36,7 +36,7 @@ const RestaurantCard = (service: RestaurantCardProps) => {
                     <div className='flex flex-col flex-1 gap-2'>
                         <Subtitle className='max-w-full line-clamp-2 leading-6'>{service.name}</Subtitle>
                         
-                        {service.rating_count ? 
+                        {service.rating ? 
                         <div className="inline-flex items-center gap-[3px] mt-2">
                             <Tag text={(service.rating).toString()} /> 
                             <Caption className='text-dark-blue'>{ratingText(service.rating)}</Caption>

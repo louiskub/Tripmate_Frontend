@@ -59,6 +59,7 @@ export const SearchServiceInput: FC = () => {
 
     const [focused, setFocused] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    useClickOutside(containerRef, () => setFocused(false));
 
     const dateRef = useRef<HTMLDivElement>(null);
     const roomRef = useRef<HTMLDivElement>(null);
@@ -170,6 +171,7 @@ const LocationPopup = ({onChange, close}: LocationPopupProps) => {
             <SubBody className="col-span-4 font-bold!">Popular locations</SubBody>
             {locations.map((location, idx) => (
                 <button
+                    type="button"
                     className="default-btn text-left hover:cursor-pointer"
                     onClick={() => {
                         onChange(location)
@@ -194,52 +196,64 @@ type RoomInfoPopupProps = {
 const RoomInfoPopup = ({guest, onChangeGuest, room, onChangeRoom, onClose}: RoomInfoPopupProps) => {
     return (
         <div className="absolute flex flex-col gap-4 rounded-2xl bg-custom-white w-full z-20 top-14.5 shadow-[var(--boxshadow-lifted)] p-4 select-none">
+            {/* Guest */}
             <div className="flex justify-between items-center">
                 <Body>Guest</Body>
                 <div className="flex items-center gap-2">
                     <button
-                    className={`bg-dark-blue text-custom-white rounded-full p-1 ${guest < 1 ? 'opacity-50 pointer-events-none' : ''}`}
-                    onClick={() => onChangeGuest(guest - 1)}
+                        type="button"
+                        className={`bg-dark-blue text-custom-white rounded-full p-1 ${guest <= 1 ? 'opacity-50 pointer-events-none' : ''}`}
+                        onClick={() => onChangeGuest(Math.max(1, guest - 1))}
                     >
-                    <MinusIcon width="14" />
+                        <MinusIcon width="14" />
                     </button>
 
                     <span className="px-2 w-8 text-center">{guest}</span>
 
                     <button
-                    className={`bg-dark-blue text-custom-white rounded-full p-1 ${guest >= 10 ? 'opacity-50 pointer-events-none' : ''}`}
-                    onClick={() => onChangeGuest(guest + 1)}
+                        type="button"
+                        className={`bg-dark-blue text-custom-white rounded-full p-1 ${guest >= 20 ? 'opacity-50 pointer-events-none' : ''}`}
+                        onClick={() => onChangeGuest(Math.min(20, guest + 1))}
                     >
-                    <PlusIcon width="14" />
+                        <PlusIcon width="14" />
                     </button>
                 </div>
             </div>
+
+            {/* Room */}
             <div className="flex justify-between items-center">
                 <Body>Room</Body>
                 <div className="flex items-center gap-2">
                     <button
-                    className={`bg-dark-blue text-custom-white rounded-full p-1 ${room < 1 ? 'opacity-50 pointer-events-none' : ''}`}
-                    onClick={() => onChangeRoom(room - 1)}
+                        type="button"
+                        className={`bg-dark-blue text-custom-white rounded-full p-1 ${room <= 1 ? 'opacity-50 pointer-events-none' : ''}`}
+                        onClick={() => onChangeRoom(Math.max(1, room - 1))}
                     >
-                    <MinusIcon width="14" />
+                        <MinusIcon width="14" />
                     </button>
 
                     <span className="px-2 w-8 text-center">{room}</span>
 
                     <button
-                    className={`bg-dark-blue text-custom-white rounded-full p-1 ${room >= 10 ? 'opacity-50 pointer-events-none' : ''}`}
-                    onClick={() => onChangeRoom(room + 1)}
+                        type="button"
+                        className={`bg-dark-blue text-custom-white rounded-full p-1 ${room >= 20 ? 'opacity-50 pointer-events-none' : ''}`}
+                        onClick={() => onChangeRoom(Math.min(20, room + 1))}
                     >
-                    <PlusIcon width="14" />
+                        <PlusIcon width="14" />
                     </button>
                 </div>
             </div>
+
             <Button
+                type="button"
                 onClick={onClose}
-                className="bg-dark-blue text-white h-8!" text="Done" />
+                className="bg-dark-blue text-white h-8!"
+                text="Done"
+            />
         </div>
     )
 }
+
 
 type CalendarPopupProps = {
     checkIn: Date | undefined

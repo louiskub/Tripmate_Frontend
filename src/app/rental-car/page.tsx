@@ -10,24 +10,24 @@ import RentalCarCardProps from '@/models/service/card/rental-car-card';
 import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
 import axios from 'axios';
-import { getCarRentalCenter, getProfile } from '@/utils/service/get-functions';
+import { getCarRentalCenter } from '@/utils/service/get-functions';
 
 async function getService(key: string): Promise<RentalCarCardProps[] | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     try {
-      
+      console.log(endpoints.rental_car.all(key))
       const response = await axios.get(endpoints.rental_car.all(key), {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
   const data = response.data;
+  console.log(data)
   
   const services: RentalCarCardProps[] = await Promise.all(
     data.map(async (d: any) => {
       const car_center = await getCarRentalCenter(d.crcId);
-      console.log(car_center)
       return {
         name: d.name ?? '',
         owner: {
@@ -48,8 +48,12 @@ async function getService(key: string): Promise<RentalCarCardProps[] | null> {
     })
   );
 
+  const filteredServices = services.filter(service =>
+        service.name.toLowerCase().includes(key.toLowerCase())
+      );
 
-  return services
+
+  return filteredServices
   } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);
