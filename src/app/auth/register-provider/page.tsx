@@ -62,7 +62,7 @@ export default function RegisterPage() {
         <div className="bg-[url('/images/wave2.jpg')] shadow-[var(--boxshadow-lifted)] min-h-screen bg-cover bg-center relative">
             <Navbar />
             <div className="flex flex-col absolute -translate-x-1/2 left-1/2 top-16 w-[600px] bg-gradient-to-br from-translucent-white to-transparent-white rounded-2xl shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)]  border-2 border-translucent-white backdrop-blur-lg">
-                <PageTitle className='text-center mt-6 mb-12'>Register Business Account</PageTitle>
+                <PageTitle className='text-center mt-5 mb-10'>Register Business Account</PageTitle>
                 <div className="flex-1 w-full items-center flex flex-col px-20 justify-between">
 
                     <div className='w-full flex flex-col gap-3'>
@@ -94,7 +94,7 @@ export default function RegisterPage() {
                         </div>
                     </div>
                     
-                    <div className='flex flex-col gap-1 w-full mb-8 mt-8'>
+                    <div className='flex flex-col gap-1 w-full mb-6 mt-6'>
                         <Button 
                         className='w-full border-2 rounded-[10px] border-custom-black' 
                         text='Register'

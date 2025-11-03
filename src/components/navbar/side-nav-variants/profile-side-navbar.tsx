@@ -26,9 +26,9 @@ export default function ProfileSideNavBar({current}: ProfileSideNavBarProps) {
                 <PageOptionSide text='Manage Account' href={paths.account.manage_account} active={current === 'manage_account'}>
                     <AccountIcon />
                 </PageOptionSide>
-                <PageOptionSide text='Notification' href={paths.account.notification} active={current === 'notification'}>
+                {/* <PageOptionSide text='Notification' href={paths.account.notification} active={current === 'notification'}>
                     <BellIcon />
-                </PageOptionSide>
+                </PageOptionSide> */}
                 <PageOptionSide text='Favorites' href={paths.account.favorite} active={current === 'favorite'}>
                     <HeartIcon />
                 </PageOptionSide>

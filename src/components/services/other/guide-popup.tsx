@@ -20,8 +20,8 @@ type PopupProps = {
     Close: () => void;
     type: string,
     service_id: string
-    room_id: string
-    room_option_id: string
+    room_id?: string
+    room_option_id?: string
 }
 
 const getGroups = async () => {

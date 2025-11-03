@@ -7,15 +7,16 @@ import { getCarRentalCenter, getNearbyLocations, getProfile } from '@/utils/serv
 import { formatDate } from '@/utils/service/string-formatter';
 
 export default async function RentalCarDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const { id } = await params;
   try {
     const response = await axios.get(endpoints.rental_car.detail(id));
     const data = response.data;
-    const profile = await getCarRentalCenter(data.crcId)
-    console.log(profile?.data)
+    // console.log(data)
+    const center = await getCarRentalCenter(data.crcId)
+    console.log(center?.data)
 
     const reviews = await Promise.all(
-      data.service.reviews.map(async (review: any) => {
+      center.data.service.reviews.map(async (review: any) => {
         const profile = await getProfile(review.userId);
         return {
           user: `${profile?.fname} ${profile?.lname}`, // fixed duplicate fname
@@ -27,19 +28,19 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
         };
       })
     );
-    const get_nearby_locations = await getNearbyLocations(data.service.location.lat, data.service.location.long)
+    const get_nearby_locations = await getNearbyLocations(center.data.service.location.lat, center.data.service.location.long)
     console.log(get_nearby_locations)
 
     const car: RentalcarDetailModel = {
       name: data.name ?? '',
       owner: {
         id: data.crcId ?? '',
-        profile_pic: profile?.data.image, // no profile_pic
-        name: profile?.data.name, // no owner name
+        profile_pic: center?.data.image, // no profile_pic
+        name: center?.data.name, // no owner name
       },
-      rating: data.rating ?? 0, //ไม่มี
+      rating: center.data.rating ?? 0, //ไม่มี
       rating_count: data.service?.reviews?.length ?? 0, //none
-      review: reviews,
+      review: center.data.service.reviews,
       location: data.service?.location?.zone ?? '', // if location exists
       nearby_locations: get_nearby_locations,
       price: data.pricePerDay ? Number(data.pricePerDay) : 0, // convert string to number
@@ -60,10 +61,10 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
       policy: {
         fuel: data.fuelPolicy || false,
         seats: data.seats,
-        contact: profile?.data.contacts.phone
+        contact: center?.data.contacts.phone
       },
-      lat: 0,
-      long: 0
+      lat: center.data.service.location.lat,
+      long: center.data.service.location.long,
     }
     return <RentalCarDetail service={car} />;
   } 
