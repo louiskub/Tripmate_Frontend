@@ -19,7 +19,6 @@ import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
 import { number } from 'framer-motion';
-import { useUser } from '@/context/userContext';
 
 type BookNavbarProps = {
     book_state: number;
