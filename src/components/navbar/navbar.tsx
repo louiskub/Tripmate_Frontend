@@ -29,14 +29,14 @@ const Navbar = () => {
     return <AuthNavbar />
   case paths.admin:
     return <AdminNavbar />
-  case paths.hotel.book:
-    return <BookNavbar book_state={1}/>
-  case paths.guide.book:
-    return <BookNavbar book_state={1}/>
-  case paths.rental_car.book:
-    return <BookNavbar book_state={1}/>
-  case paths.restaurant.book:
-    return <BookNavbar book_state={1} restaurant/>
+  // case paths.hotel.book:
+  //   return <BookNavbar book_state={1}/>
+  // case paths.guide.book:
+  //   return <BookNavbar book_state={1}/>
+  // case paths.rental_car.book:
+  //   return <BookNavbar book_state={1}/>
+  // case paths.restaurant.book:
+  //   return <BookNavbar book_state={1} restaurant/>
   default:
     return auth ? 
     <UserNavbar/> : <GuestNavbar />
