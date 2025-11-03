@@ -43,9 +43,11 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
                 headers: { Authorization: `Bearer ${token}` },
                 serviceId: id,
                 "userId": user_id,
-                "status": "place"
+                "status": type
 
             });
+
+            console.log(response)
             setAnimate(true);
             isFavorite.toggle();
         } catch (err) {
@@ -59,10 +61,13 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
         if (loading) return;
         setLoading(true)
         const token = Cookies.get("token");
+        const user_id = getUserIdFromToken(token)
+        if(!token || !user_id) return null;
         try {
-            const response = await axios.delete(endpoints.unfavorite(id), {
+            const response = await axios.delete(endpoints.unfavorite(user_id, id), {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            console.log(response)
             setAnimate(true);
             isFavorite.toggle();
         } catch (err) {
@@ -74,7 +79,7 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
 
     return (
         <Button 
-            onClick={favorite ? handleFavorite : handleUnFavorite}
+            onClick={favorite ? handleUnFavorite : handleFavorite}
             className={`absolute z-10 ${large ? 'w-[37px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
         >
             { isFavorite.value ? 

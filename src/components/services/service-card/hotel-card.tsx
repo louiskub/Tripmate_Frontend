@@ -41,7 +41,7 @@ const HotelCard = (hotel: HotelCardProps) => {
                         </span>
                     </div>
                     
-                    {hotel.rating_count ? 
+                    {hotel.rating ? 
                         <div className="inline-flex items-center gap-[3px] mt-2">
                             <Tag text={(hotel.rating).toString()} /> 
                             <Caption className='text-dark-blue'>{ratingText(hotel.rating)}</Caption>

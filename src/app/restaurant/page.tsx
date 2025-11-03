@@ -49,7 +49,11 @@ async function getService(key:string): Promise<RestaurantCardProps[] | null> {
         };
       });
 
-      return services
+      const filteredServices = services.filter(service =>
+        service.name.toLowerCase().includes(key.toLowerCase())
+      );
+
+      return filteredServices
     } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);

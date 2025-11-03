@@ -214,8 +214,8 @@ const starting_price = prices.length ? Math.min(...prices) : 0;
               rating_meta={hotelRatingMeta}
             />
 
-            <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] w-64 h-60'>
-                <MiniMap lat={service.lat} long={service.long} name={service.name} />
+            <div className='w-64 h-64 flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px]'>
+                <MiniMap className='w-64 h-64' lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
                     service.nearby_locations.slice(0, 4).map((location,idx) => (
@@ -289,15 +289,15 @@ const starting_price = prices.length ? Math.min(...prices) : 0;
           rating_meta={hotelRatingMeta} />
       </section>
 
-      <section id='location' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
+      <section id='location' className='h-[480px] bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Location</Title>
-        <div className='flex gap-5'>
+        <div className='flex h-full gap-5 flex-1'>
           {/* <MiniMap className='basis-3/5' lat={service.lat} long={service.long} name={service.name} /> */}
           {/* <LargeMap 
           location_link=''
           className='basis-3/5'
           /> */}
-          <MiniMap className='basis-3/5' lat={service.lat} long={service.long} name={service.name} />
+          <MiniMap className='basis-3/5 h-[410px]!' lat={service.lat} long={service.long} name={service.name} />
           <div className='basis-2/5'>
             <ul className='grid grid-cols-2 w-full py-2 gap-2.5'>
               {

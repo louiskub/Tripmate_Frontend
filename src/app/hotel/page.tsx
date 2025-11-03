@@ -47,10 +47,14 @@ async function getHotel(key: string): Promise<HotelCardProps[] | null> {
           id: d.id
         };
       });
-
       console.log(hotels)
 
-      return hotels
+      const filteredHotels = hotels.filter(hotel =>
+        hotel.name.toLowerCase().includes(key.toLowerCase())
+      );
+      
+
+      return filteredHotels
     } 
     catch (error: any) {
       console.log("API Error:", error.response?.data || error.message);

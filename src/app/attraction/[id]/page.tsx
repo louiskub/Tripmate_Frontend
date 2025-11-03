@@ -11,7 +11,7 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
     const response = await axios.get(endpoints.attraction.detail(id));
     const data = response.data;
 
-    const get_nearby_locations = await getNearbyLocations(data.service.location.lat, data.service.location.long)
+    const get_nearby_locations = await getNearbyLocations(data.location.lat, data.location.long)
     console.log(get_nearby_locations)
 
     const service: AttractionDetailModel = {
@@ -23,8 +23,8 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
       id: data.id,
       description: data.description ?? '',
       nearby_locations: get_nearby_locations,
-      lat: 0,
-      long: 0
+      lat: data.location.lat,
+      long: data.location.long,
     }
     return <AttractionDetail service={service} />;
   } 
