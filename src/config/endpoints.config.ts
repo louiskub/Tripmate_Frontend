@@ -36,6 +36,18 @@ export const endpoints = {
     detail: (id: string) => `${BASE_URL}/car/${id}`,
     book: (id: string) => `${BASE_URL}/car/book/${id}`,
   },
+  trip: {
+    detail: (id: string) => `/trip/${id}`,
+  },
+
+  group: {
+    // ✅ เพิ่มพอร์ตให้ครบ
+    all: "http://161.246.5.236:8800/group",
+    get: (id: string) => `http://161.246.5.236:8800/group/${id}`,
+    expense: (id: string) => `http://161.246.5.236:8800/group/${id}/expense-groups`,
+    summary: (id: string) => `http://161.246.5.236:8800/group/${id}/expense-summary`,
+    payment: (id: string) => `http://161.246.5.236:8800/group/${id}/payments`,
+  },
   attraction: {
     all: (key?: string) => `${BASE_URL}/place?${key}`,
     detail: (id: string) => `${BASE_URL}/place/${id}`,
