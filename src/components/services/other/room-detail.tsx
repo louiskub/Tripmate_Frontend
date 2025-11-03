@@ -26,11 +26,13 @@ import GuidePopup from './guide-popup'
 type RoomDetailProps = {
     room: Room
     service_id: string
+    room_id: string
 }
 
-export const RoomDetail = ({room, service_id}: RoomDetailProps) => {
+export const RoomDetail = ({room, service_id, room_id}: RoomDetailProps) => {
     const showPopup = useBoolean(false)
     const [guidePopup, setGuidePopup] = useState(false)
+    const [option, setOption] = useState('')
 
     return (
         <div className='border border-light-gray px-4 py-2 rounded-[10px] grid grid-cols-[240px_1fr] gap-1.5'>
@@ -62,42 +64,54 @@ export const RoomDetail = ({room, service_id}: RoomDetailProps) => {
                         </SubBody>
                     </TextButton>
             </div>
-            <div className='border border-light-gray rounded-[10px] overflow-hidden self-start'>
-                {
-                    room.room_options.map((option) => (
-                        <div className=' border-light-gray grid grid-cols-[1fr_120px_200px_100px] border-b h-24'
-                            key={option.name}>
-                            <div className='border-r border-light-gray h-full p-2.5'>
-                                <ButtonText>{option.name}</ButtonText>
-                                <Caption className='flex items-center gap-1'>
-                                    <BedIcon width='12'/>
-                                    {option.bed}
-                                </Caption>
-                            </div>
-                            <div className='border-r border-light-gray p-2.5 flex items-center justify-center'>
-                                <HotelGuest guest={option.max_guest}/>
-                            </div>
-                            <div className='border-r border-light-gray p-2.5 h-full flex flex-col items-end gap-1 justify-end'>
-                                <span className='flex items-baseline h-4.5 gap-1'>
-                                    <Body className='text-dark-blue leading-4'>฿</Body>
-                                    <ButtonText className='text-dark-blue'>{option.price}</ButtonText>
-                                </span>
-                                <SubCaption>incl. taxes & fees ฿ {(option.price * 1.17).toFixed(2)}</SubCaption>
-                            </div>
-                            <div className='flex justify-center p-2.5'>
-                                <Button
-                                    text='Book'
-                                    className='bg-dark-blue text-custom-white h-8! w-20'
-                                    onClick={() => setGuidePopup(true)}
-                                />
-                            </div>
-                        </div>
-                    ))
-                }
+        {room.room_options?.length > 0 && (
+        <div className="border border-light-gray rounded-[10px] overflow-hidden self-start">
+            {room.room_options.map((option) => (
+            <div
+                className="border-light-gray border-b grid grid-cols-[1fr_120px_200px_100px] h-24"
+                key={option.name}
+            >
+                <div className="border-r border-light-gray h-full p-2.5">
+                <ButtonText>{option.name}</ButtonText>
+                <Caption className="flex items-center gap-1">
+                    <BedIcon width="12" />
+                    {option.bed}
+                </Caption>
+                </div>
+
+                <div className="border-r border-light-gray p-2.5 flex items-center justify-center">
+                <HotelGuest guest={option.max_guest} />
+                </div>
+
+                <div className="border-r border-light-gray p-2.5 h-full flex flex-col items-end gap-1 justify-end">
+                <span className="flex items-baseline h-4.5 gap-1">
+                    <Body className="text-dark-blue leading-4">฿</Body>
+                    <ButtonText className="text-dark-blue">{option.price}</ButtonText>
+                </span>
+                <SubCaption>incl. taxes & fees ฿ {(option.price * 1.17).toFixed(2)}</SubCaption>
+                </div>
+
+                <div className="flex justify-center p-2.5">
+                <Button
+                    text="Book"
+                    className="bg-dark-blue text-custom-white h-8! w-20"
+                    onClick={() => {
+                        setOption(option.id)
+                        setGuidePopup(true)}}
+                />
+                </div>
             </div>
-            {showPopup.value && <RoomDetailPopup close={showPopup.setFalse} room={room}/>}
-            {guidePopup && <GuidePopup Close={() => setGuidePopup(false)} type='hotel' service_id={service_id}/>}
-        </div>
+        ))}
+    </div>
+)}
+        {showPopup.value && <RoomDetailPopup close={showPopup.setFalse} room={room}/>}
+        {guidePopup && <GuidePopup 
+            Close={() => setGuidePopup(false)}
+            type='hotel'
+            service_id={service_id}
+            room_id={room_id}
+            room_option_id={option}/>}
+    </div>
     )
 }
 
@@ -129,8 +143,9 @@ type RoomDetailPopupProps = {
 
 const RoomDetailPopup = ({close, room}: RoomDetailPopupProps) => {
     const starting_price = Math.min(
-        ...room.room_options.map((opt) => opt.price)
+    ...(room.room_options?.map((opt) => opt.price) || [0])
     );
+
     const [pictureIdx, setPictureIdx] = useState<number>(0);
 
         const prev = () => {
@@ -204,8 +219,12 @@ const RoomDetailPopup = ({close, room}: RoomDetailPopupProps) => {
                         <SubBody className='flex gap-2 px-1'>
                             <HeartIcon width='14'/> {room.size} m²
                         </SubBody>
+                        
                         <SubBody className='flex gap-2 px-1'>
-                            <PersonIcon width='14'/> {room.room_options[0].max_guest} guests
+                            <PersonIcon width='14'/> 
+                                {room.room_options?.[0]?.max_guest != null
+                                ? `${room.room_options[0].max_guest} guests`
+                                : 'not available'}
                         </SubBody>
                     </div>
                     <ul className='flex flex-col gap-2 auto-rows-auto px-3 flex-1'>

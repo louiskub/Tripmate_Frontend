@@ -6,11 +6,15 @@ import { useState } from 'react';
 import HeartIcon from '@/assets/icons/heart.svg'
 import HeartFilledIcon from '@/assets/icons/heart-filled.svg'
 import { useBoolean } from '@/hooks/use-boolean';
+import axios from 'axios';
+import { endpoints } from '@/config/endpoints.config';
+import Cookies from 'js-cookie';
+import { getUserIdFromToken } from '@/utils/service/cookie';
 
 type FavoriteButtonProps = {
     favorite: boolean
     id: string
-    type: "hotel" | "restaurant" | "rental_car" | "guide" | "attraction"
+    type: "trip" | "service" | "place"
     large?: boolean
 }
 
@@ -26,19 +30,43 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
     async function handleFavorite() {
         if (loading) return;
         setLoading(true)
+        // try {
+        // const response = await fetch(`/api/hotels/${id}/favorite`, {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ favorite: !isFavorite }),
+        // });
+        const token = Cookies.get("token");
+        const user_id = getUserIdFromToken(token)
         try {
-        const response = await fetch(`/api/hotels/${id}/favorite`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ favorite: !isFavorite }),
-        });
+            const response = await axios.post(endpoints.favorite, {
+                headers: { Authorization: `Bearer ${token}` },
+                serviceId: id,
+                "userId": user_id,
+                "status": "place"
 
-        setAnimate(true);
-
-        if (response.ok) throw new Error('Failed to update');
+            });
+            setAnimate(true);
             isFavorite.toggle();
-        } catch (error) {
-        console.error(error);
+        } catch (err) {
+            console.error("Failed Favorite", err);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+    async function handleUnFavorite() {
+        if (loading) return;
+        setLoading(true)
+        const token = Cookies.get("token");
+        try {
+            const response = await axios.delete(endpoints.unfavorite(id), {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setAnimate(true);
+            isFavorite.toggle();
+        } catch (err) {
+            console.error("Failed Favorite", err);
         } finally {
         setLoading(false);
         }
@@ -46,17 +74,17 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
 
     return (
         <Button 
-            onClick={handleFavorite}
-            className={`absolute top-0 left-0 z-10 ${large ? 'w-[35px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
+            onClick={favorite ? handleFavorite : handleUnFavorite}
+            className={`absolute z-10 ${large ? 'w-[37px] right-2.5 top-2.5' : 'w-[23px] left-1.5 top-1.5'} bg-custom-white shadow-[var(--boxshadow-lifted)] text-dark-blue rounded-full`}
         >
             { isFavorite.value ? 
                 <HeartFilledIcon 
-                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`}
-                    width = {large ? '18' : '14'} 
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[2px]`}
+                    width = {large ? '20' : '14'} 
                     onAnimationEnd={handleAnimationEnd} />:
                 <HeartIcon 
-                    className={`${ animate ? 'filled-heart' : ''} translate-y-[1px]`} 
-                    width = {large ? '18' : '14'}
+                    className={`${ animate ? 'filled-heart' : ''} translate-y-[2px]`} 
+                    width = {large ? '20' : '14'}
                     onAnimationEnd={handleAnimationEnd} />
             }
         </Button>
