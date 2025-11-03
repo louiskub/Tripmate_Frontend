@@ -52,9 +52,10 @@ export default async function HotelDetailPage({ params }: { params: { id: string
       },
       nearby_locations: get_nearby_locations || [],
       room: data?.rooms?.map((room: any) => ({
+        id: room.id,
         name: room.name,
         pictures: room.pictures,
-        room_options: room?.option?.map((o:any) => ({
+        room_options: room?.options?.map((o:any) => ({
           ...o
         })),
         size: room.sizeSqm,

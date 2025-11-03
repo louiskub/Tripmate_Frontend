@@ -26,11 +26,13 @@ import GuidePopup from './guide-popup'
 type RoomDetailProps = {
     room: Room
     service_id: string
+    room_id: string
 }
 
-export const RoomDetail = ({room, service_id}: RoomDetailProps) => {
+export const RoomDetail = ({room, service_id, room_id}: RoomDetailProps) => {
     const showPopup = useBoolean(false)
     const [guidePopup, setGuidePopup] = useState(false)
+    const [option, setOption] = useState('')
 
     return (
         <div className='border border-light-gray px-4 py-2 rounded-[10px] grid grid-cols-[240px_1fr] gap-1.5'>
@@ -93,16 +95,23 @@ export const RoomDetail = ({room, service_id}: RoomDetailProps) => {
                 <Button
                     text="Book"
                     className="bg-dark-blue text-custom-white h-8! w-20"
-                    onClick={() => setGuidePopup(true)}
+                    onClick={() => {
+                        setOption(option.id)
+                        setGuidePopup(true)}}
                 />
                 </div>
             </div>
         ))}
     </div>
 )}
-            {showPopup.value && <RoomDetailPopup close={showPopup.setFalse} room={room}/>}
-            {guidePopup && <GuidePopup Close={() => setGuidePopup(false)} type='hotel' service_id={service_id}/>}
-        </div>
+        {showPopup.value && <RoomDetailPopup close={showPopup.setFalse} room={room}/>}
+        {guidePopup && <GuidePopup 
+            Close={() => setGuidePopup(false)}
+            type='hotel'
+            service_id={service_id}
+            room_id={room_id}
+            room_option_id={option}/>}
+    </div>
     )
 }
 

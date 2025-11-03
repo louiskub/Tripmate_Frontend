@@ -54,6 +54,7 @@ export type Room = {
     room_options: RoomOption[]
     size: number
     facility: string[]
+    id: string
 }
 
 type RoomOption = {
@@ -61,6 +62,7 @@ type RoomOption = {
     bed: string
     max_guest: number
     price: number
+    id: string
 }
 
 type HotelPolicy = {

@@ -20,6 +20,8 @@ type PopupProps = {
     Close: () => void;
     type: string,
     service_id: string
+    room_id: string
+    room_option_id: string
 }
 
 const getGroups = async () => {
@@ -53,7 +55,7 @@ const getGroups = async () => {
 }
 }
 
-export default function GuidePopup({ Close, type, service_id }: PopupProps) {
+export default function GuidePopup({ Close, type, service_id, room_id, room_option_id }: PopupProps) {
     const [groups, setGroups] = useState<any[]>([]);
 
     useEffect(() => {
@@ -92,7 +94,7 @@ export default function GuidePopup({ Close, type, service_id }: PopupProps) {
                 <PageOptionSide
                 key={idx}
                 href={typeof pathFn === "function"
-                    ? pathFn(service_id, group.id)
+                    ? pathFn(service_id, group.id, room_id, room_option_id)
                     : pathFn}
                 text={group.name}
                 className="hover:bg-dark-white px-2!"

@@ -28,7 +28,7 @@ export const paths = {
   hotel: {
     all: '/hotel',
     detail: (id: string) => `/hotel/${id}`,
-    book: (service_id: string, group_id:string) => `/bookhotel/confirmbooking?service_id=${service_id}&group_id=${group_id}`,
+    book: (service_id: string, group_id:string, room_id: string, option_id: string) => `/bookhotel/confirmbooking?service_id=${service_id}&group_id=${group_id}&room_id=${room_id}&option_id=${option_id}`,
   },
   restaurant: {
     all: '/restaurant',

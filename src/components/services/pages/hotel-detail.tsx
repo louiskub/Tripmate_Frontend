@@ -246,6 +246,7 @@ const starting_price = prices.length ? Math.min(...prices) : 0;
               key={room.name}
               room={room}
               service_id={service.id}
+              room_id= {room.id}
             />
           ))
         }
