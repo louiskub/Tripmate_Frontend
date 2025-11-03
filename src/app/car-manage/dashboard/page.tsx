@@ -62,12 +62,16 @@ const ReviewsSection = () => (
 );
 
 const MapSection = () => (
-  <div className="w-auto h-50 bg-white rounded-xl border border-neutral-200 shadow-sm flex flex-col items-center justify-center">
-     <img 
-        className="w-full h-full object-cover rounded-xl" 
-        src="https://placehold.co/240x239" 
-        alt="Map placeholder" 
-      />
+  <div className="w-auto h-50 bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3259.1622646632577!2d100.77662614101125!3d13.72940841411477!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x311d664a24b4a651%3A0x1deb4e950f2fbd07!2z4Lig4Liy4LiE4Lin4Li04LiK4Liy4Lin4Li04Lio4Lin4LiB4Lij4Lij4Lih4LiE4Lit4Lih4Lie4Li04Lin4LmA4LiV4Lit4Lij4LmMIOC4hOC4k-C4sOC4p-C4tOC4qOC4p-C4geC4o-C4o-C4oeC4qOC4suC4quC4leC4o-C5jCAoS01JVEwp!5e0!3m2!1sth!2sth!4v1762149309575!5m2!1sth!2sth"
+      width="100%"
+      height="250"
+      allowFullScreen
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+      className="rounded-xl"
+    ></iframe>
   </div>
 );
 
