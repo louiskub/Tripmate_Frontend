@@ -88,29 +88,34 @@ export default function GroupDetailPage() {
 
   // --- Fetch data ---
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log("[FetchGroupDetails] Fetching data for group:", groupId)
-        const headers = { Authorization: `Bearer ${token}` }
+  const fetchData = async () => {
+    try {
+      const id = getUserFromToken()
+      setCurrentUserId(id)
+      console.log("[Auth] Current user ID:", id)
 
-        const [groupRes, expenseRes, summaryRes, paymentRes] = await Promise.all([
-          axios.get(`http://161.246.5.236:8800/group/${groupId}/details`, { headers }),
-          axios.get(`http://161.246.5.236:8800/group/${groupId}/expense-groups`, { headers }),
-          axios.get(`http://161.246.5.236:8800/group/${groupId}/expense-summary`, { headers }), // ✅ fixed summary
-          axios.get(`http://161.246.5.236:8800/group/${groupId}/payments`, { headers }),
-        ])
+      console.log("[FetchGroupDetails] Fetching data for group:", groupId)
+      const headers = { Authorization: `Bearer ${token}` }
 
-        const g = groupRes.data
-        const payments = paymentRes.data
-        console.log("[FetchGroupDetails] Raw group:", g)
+      const [groupRes, expenseRes, summaryRes, paymentRes] = await Promise.all([
+        axios.get(`http://161.246.5.236:8800/group/${groupId}/details`, { headers }),
+        axios.get(`http://161.246.5.236:8800/group/${groupId}/expense-groups`, { headers }),
+        axios.get(`http://161.246.5.236:8800/group/${groupId}/expense-summary`, { headers }),
+        axios.get(`http://161.246.5.236:8800/group/${groupId}/payments`, { headers }),
+      ])
 
-        if (groupRes && g && currentUserId) {
-          const ownerCheck = g.ownerId === currentUserId
-          const memberCheck = g.members?.some((m: any) => m.userId === currentUserId)
-          setIsOwner(ownerCheck)
-          setIsMember(memberCheck)
-          console.log("[UserRoleCheck]", { ownerCheck, memberCheck })
-        }
+      const g = groupRes.data
+      const payments = paymentRes.data
+      console.log("[FetchGroupDetails] Raw group:", g)
+
+      // ✅ ตรวจสอบสิทธิ์หลังได้ token แน่ชัด
+      if (id) {
+        const ownerCheck = g.ownerId === id
+        const memberCheck = g.members?.some((m: any) => m.userId === id)
+        setIsOwner(ownerCheck)
+        setIsMember(memberCheck)
+        console.log("[UserRoleCheck]", { ownerCheck, memberCheck })
+      }
 
         const mappedMembers: Member[] = (g.members || []).map((m: any, i: number) => {
           const payment = payments.find((p: any) => p.userId === m.userId)
@@ -761,15 +766,17 @@ export default function GroupDetailPage() {
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      setSelectedMember(member)
-                      setIsEditPaymentOpen(true)
-                    }}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
-                  >
-                    Edit
-                  </button>
+                  {currentUserId === member.id && (
+                    <button
+                      onClick={() => {
+                        setSelectedMember(member)
+                        setIsEditPaymentOpen(true)
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               ))}
             </>
