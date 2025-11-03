@@ -1,5 +1,5 @@
-import Navbar from '@/components/navbar/nav';
-import VendorSideNav from '@/components/navbar/vendorsidenav';
+import Navbar from '@/components/navbar/navbar';
+import VendorSideNav from '@/components/navbar/hotelvendorsidenav';
 
 export default function MapPage() {
     return (

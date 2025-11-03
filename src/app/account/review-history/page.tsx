@@ -1,11 +1,19 @@
 "use client";
 import DefaultPage from "@/components/layout/default-layout";
 import ProfileNavbar from "@/components/navbar/side-nav-variants/profile-side-navbar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import EditReviewPopup from "./edit-review-popup";
 
+import axios from "axios";
+import { authJsonHeader } from "@/utils/service/get-header";
+import { endpoints } from "@/config/endpoints.config";
+
 type ReviewCardProps = {
+  // --- [MODIFIED] ---
+  // เพิ่ม ID เพื่อให้แน่ใจว่า key ไม่ซ้ำ
+  // และใช้ในการอ้างอิงตอน Edit/Delete
+  id: string;
   name: string;
   coverImg?: string;
   service?: string;
@@ -17,36 +25,13 @@ type ReviewCardProps = {
   location?: string;
 };
 
-// ---------------- Sample Reviews ----------------
-const reviewsData: ReviewCardProps[] = [
-  {
-    name: "Pool Villa Resort",
-    coverImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh3PEPFGu-DCyBRIYE09C1ZKbM5MiTqA5hww&s",
-    service: "Hotel",
-    location: "Phuket, Thailand",
-    score: {
-      Cleanliness: 9,
-      Service: 8,
-      Facilities: 9,
-      Comfort: 8,
-      Value_for_money: 8,
-    },
-    review:
-      "The staff are friendly and listen to customer feedback and use it to improve. The hotel is constantly being developed and improved.",
-    date: "12 Aug 2025",
-    img: [
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
-    ],
-    viewOption: "List",
-  },
-];
-
 // ---------------- ReviewCard ----------------
 const ReviewCard = ({
+  id, // --- [NEW] ---
   name,
   coverImg,
   location,
+  service, // --- [FIXED] --- เพิ่ม service ใน destructuring
   score,
   review,
   date,
@@ -71,10 +56,18 @@ const ReviewCard = ({
       <div className="w-full p-4 rounded-[10px] border border-light-gray flex flex-col gap-3 bg-custom-white hover:shadow-sm transition">
         <div className="flex justify-between items-start">
           <div className="flex items-start gap-3">
-            {/* <div className="w-10 h-10 rounded-full border border-light-gray flex items-center justify-center bg-white" /> */}
-            <img src={coverImg}  
-            // onError={"this.onerror=null; this.src='https://i.sstatic.net/y9DpT.jpg'"}
-            alt="" className="w-10 h-10 rounded-full border border-light-gray flex items-center justify-center bg-white" />
+            <img
+              src={coverImg}
+              onError={(e) => {
+                // --- [NEW] ---
+                // เพิ่ม fallback image ที่ดีขึ้น
+                (e.target as HTMLImageElement).onerror = null;
+                (e.target as HTMLImageElement).src =
+                  "https://i.sstatic.net/y9DpT.jpg";
+              }}
+              alt={name}
+              className="w-10 h-10 rounded-full border border-light-gray flex items-center justify-center bg-white object-cover" // --- [MODIFIED] ---
+            />
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-custom-black">
                 {name}
@@ -98,6 +91,7 @@ const ReviewCard = ({
                   onClick={() => {
                     setMenuOpen(false);
                     onEdit({
+                      id, // --- [NEW] ---
                       name,
                       location,
                       score,
@@ -105,6 +99,8 @@ const ReviewCard = ({
                       date,
                       viewOption,
                       img,
+                      coverImg, // --- [NEW] ---
+                      service, // --- [FIXED] --- 'service' ตอนนี้ถูก define แล้ว
                     });
                   }}
                   className="block w-full text-left px-3 py-1.5 text-sm text-custom-black hover:bg-gray-100"
@@ -115,6 +111,7 @@ const ReviewCard = ({
                   onClick={() => {
                     setMenuOpen(false);
                     onDelete({
+                      id, // --- [NEW] ---
                       name,
                       location,
                       score,
@@ -122,6 +119,8 @@ const ReviewCard = ({
                       date,
                       viewOption,
                       img,
+                      coverImg, // --- [NEW] ---
+                      service, // --- [FIXED] --- 'service' ตอนนี้ถูก define แล้ว
                     });
                   }}
                   className="block w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-gray-100"
@@ -161,7 +160,16 @@ const ReviewCard = ({
                 />
               ))}
             </div>
-            <span className="text-xs text-gray text-right block">{date}</span>
+            {/* --- [MODIFIED] ---
+                จัดรูปแบบวันที่ให้แสดงผลสวยงามขึ้น
+            */}
+            <span className="text-xs text-gray text-right block">
+              {new Date(date).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </div>
         )}
       </div>
@@ -169,12 +177,186 @@ const ReviewCard = ({
   );
 };
 
+const RatingGroupByType = (type: string) => {
+  if (type === "hotel") return ["cleanliness", "comfort", "meal", "location", "service", "facilities"];
+  // if (type === "restaurant") return ["Food Quality", "Service", "Ambiance", "Value for Money"];
+  if (type === "attraction") return ["overall"];
+  if (type === "car") return ["overall"];
+  if (type === "guide") return ["knowledge", "communication", "punctuality", "safety", "route_planning", "local_insights"];
+  return [];
+};
+
+
 // ---------------- ReviewHistory ----------------
 export default function ReviewHistory() {
-  // const [sortOption, setSortOption] = useState("option1");
   const [viewOption, setViewOption] = useState("List");
   const [filterReview, setFilterReview] = useState("All");
-  const [remainReview, setRemainReview] = useState(reviewsData);
+
+  // --- [NEW] ---
+  // State สำหรับเก็บข้อมูลทั้งหมดที่ดึงมาจาก API
+  const [allReviews, setAllReviews] = useState<ReviewCardProps[]>([]);
+  // State สำหรับแสดงผล (หลังจากการกรอง/จัดเรียง)
+  const [remainReview, setRemainReview] = useState<ReviewCardProps[]>([]);
+  // State สำหรับ loading
+  const [isLoading, setIsLoading] = useState(true);
+
+  // --- [MODIFIED] ---
+  // แก้ไข useEffect ทั้งหมดเพื่อดึงและประมวลผลข้อมูล
+  useEffect(() => {
+    async function fetchReview() {
+      setIsLoading(true);
+      try {
+        const res = await axios.get(
+          endpoints.review.getAll,
+          authJsonHeader()
+        );
+        const reviewsList = res.data; // นี่คือ Array ของรีวิว
+        console.log("data, ", reviewsList);
+
+        // Helper function สำหรับแปลง score1, score2... เป็น Object
+        const mapScores = (reviewData: any, type: string): Record<string, number> => {
+          const scores: Record<string, number> = {};
+          const metrics = RatingGroupByType(type);
+          console.log(metrics)
+          for (let i = 1; i <= 6; i++) {
+            if (
+              reviewData[`score${i}`] !== null &&
+              reviewData[`score${i}`] !== undefined
+            ) {
+              // ใช้ชื่อ generic ไปก่อน
+              // คุณสามารถเปลี่ยนชื่อ 'Metric ${i}' เป็นชื่อที่เฉพาะเจาะจงได้
+              scores[metrics[i-1]] = reviewData[`score${i}`];
+            }
+          }
+          console.log("score", scores)
+          return scores;
+        };
+
+        // สร้าง Array ของ Promises เพื่อดึงข้อมูลรายละเอียดของแต่ละรีวิว
+        const reviewPromises = reviewsList.map(
+          async (reviewData: any): Promise<ReviewCardProps | null> => {
+            // ตรวจสอบ status และกำหนด serviceType ให้ตรงกับ Filter
+            let type = reviewData.status; // "hotel", "place", null
+            let serviceType: string;
+
+            if (type === "hotel") {
+              serviceType = "Hotel";
+            } else if (type === "place") {
+              serviceType = "Attraction"; // แมพ "place" ไปเป็น "Attraction"
+            } else if (!type) {
+              serviceType = "Attraction"; // ถ้า null ก็ให้เป็น "Attraction"
+            } else {
+              // สำหรับ "Rental Car", "Guide" (ถ้ามี)
+              serviceType = type.charAt(0).toUpperCase() + type.slice(1);
+            }
+
+            try {
+              // --- กรณี Hotel ---
+              if (type === "hotel" && reviewData.serviceId) {
+                const detailRes = await axios.get(
+                  endpoints.hotel.detail(reviewData.serviceId),
+                  authJsonHeader()
+                );
+                const details = detailRes.data;
+
+                // --- [FIXED] ---
+                // 1. เข้าถึง location ที่ถูกต้อง: details.service.location
+                // 2. ใช้ Optional Chaining (?. ) เพื่อป้องกัน error ถ้า service หรือ location เป็น undefined
+                const loc = details.service?.location;
+
+                // 3. ใช้ (?. ) ตอนดึงค่า name, province, country ด้วย
+                const locationString = [
+                  loc?.name,
+                  loc?.province,
+                  loc?.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ");
+                console.log("print :", reviewData)
+
+                return {
+                  id: reviewData.id,
+                  review: reviewData.comment,
+                  date: reviewData.createdAt,
+                  img: reviewData.image,
+                  score: mapScores(reviewData, type),
+                  service: serviceType, // "Hotel"
+                  name: details.name, // `details.name` คือชื่อโรงแรม ถูกต้องแล้ว
+                  coverImg:
+                    details.service?.serviceImg || details.pictures?.[0],
+                  location: locationString,
+                  viewOption: "List",
+                };
+              }
+              // --- กรณี Place (ที่เราแมพเป็น Attraction) ---
+              else if (type === "place" && reviewData.placeId) {
+                // !!! ข้อควรระวัง: คุณต้องเพิ่ม endpoint สำหรับ "place"
+                // ผมจะสมมติว่ามี endpoints.place.detail(id)
+                // const detailRes = await axios.get(endpoints.place.detail(reviewData.placeId), authJsonHeader());
+                // const details = detailRes.data;
+
+                // --- MOCK DATA (ชั่วคราว) ---
+                // ลบส่วนนี้ออกเมื่อคุณมี endpoint ของ place
+                const details = {
+                  name: "Mocked Place Name",
+                  coverImg: "https://i.sstatic.net/y9DpT.jpg",
+                  location: { name: "Mocked Location", country: "Thailand" },
+                };
+                // --- จบส่วน MOCK DATA ---
+
+                const loc = details.location;
+                const locationString = [loc?.name, loc?.country]
+                  .filter(Boolean)
+                  .join(", ");
+
+                return {
+                  id: reviewData.id,
+                  review: reviewData.comment,
+                  date: reviewData.createdAt,
+                  img: reviewData.image,
+                  score: mapScores(reviewData, "attraction"),
+                  service: serviceType, // "Attraction"
+                  name: details.name,
+                  coverImg: details.coverImg,
+                  location: locationString,
+                  viewOption: "List",
+                };
+              }
+
+              // หากมี type อื่นๆ ที่ยังไม่รองรับ
+              console.warn(`Unhandled review type or missing ID: ${type}`);
+              return null;
+            } catch (err) {
+              console.error(
+                `Failed to fetch details for review ${reviewData.id}:`,
+                err
+              );
+              return null; // คืนค่า null ถ้า fetch ย่อยล้มเหลว
+            }
+          }
+        );
+
+        // รอให้ทุก Promises ทำงานเสร็จ
+        const resolvedReviews = await Promise.all(reviewPromises);
+
+        // กรองค่า null (ที่เกิดจาก error หรือ type ที่ไม่รองรับ)
+        const validReviews = resolvedReviews.filter(
+          (r) => r !== null
+        ) as ReviewCardProps[];
+
+        console.log("Mapped data: ", validReviews);
+
+        // อัปเดต State ทั้งสอง
+        setAllReviews(validReviews);
+        setRemainReview(validReviews);
+      } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchReview();
+  }, []); // ทำงานครั้งเดียวเมื่อ component โหลด
 
   // Popup state
   const [isEditing, setIsEditing] = useState(false);
@@ -186,32 +368,62 @@ export default function ReviewHistory() {
     setIsEditing(true);
   };
 
-  const handleDelete = (review: ReviewCardProps) => {
-    if (!confirm(`Delete review by ${review.name}?`)) return;
-    setRemainReview((prev) =>
-      prev.filter((r) => r.name !== review.name || r.date !== review.date)
-    );
+  // --- [MODIFIED] ---
+  // เชื่อมต่อ API Delete
+  const handleDelete = async (review: ReviewCardProps) => {
+    // 1. ลบ `confirm()` ออกตามข้อกำหนดของระบบ
+    //    คุณควรเพิ่ม Custom Modal ยืนยันการลบตรงนี้
+    //    เช่น if (!myCustomConfirm(`Delete review for ${review.name}?`)) return;
+
+    try {
+      // 2. เพิ่มการเรียก axios.delete
+      //    (ใส่ URL ของคุณแทนที่ 'YOUR_DELETE_API_ENDPOINT')
+      // const DELETE_URL = `YOUR_DELETE_API_ENDPOINT/${review.id}`;
+      
+      await axios.delete(
+        endpoints.review.delete(review.id),
+        // หรือ ถ้าคุณมี endpoint ใน config:
+        // endpoints.review.delete(review.id), 
+        authJsonHeader()
+      );
+
+      // 3. อัปเดต State *หลังจาก* ลบสำเร็จ
+      setAllReviews((prev) => prev.filter((r) => r.id !== review.id));
+      setRemainReview((prev) => prev.filter((r) => r.id !== review.id));
+
+      console.log(`Review ${review.id} deleted successfully`);
+
+    } catch (error) {
+      console.error(`Failed to delete review ${review.id}:`, error);
+      // คุณสามารถแสดง Toast notification หรือข้อความ error ตรงนี้
+    }
   };
 
   const filterRemainReview = (filter: string) => {
     setFilterReview(filter === filterReview ? "All" : filter);
-    if (filter === "All" || filter === filterReview) setRemainReview(reviewsData);
-    else setRemainReview(reviewsData.filter((r) => r.service === filter));
+    if (filter === "All" || filter === filterReview) {
+      // --- [MODIFIED] ---
+      // ใช้ allReviews
+      setRemainReview(allReviews);
+    } else {
+      // --- [MODIFIED] ---
+      // ใช้ allReviews และ r.service === filter
+      setRemainReview(allReviews.filter((r) => r.service === filter));
+    }
   };
 
   const sortByOption = (option: string) => {
     console.log("Sorting by:", option);
 
-    const sortedReviews = [...remainReview]; // copy เพื่อไม่ mutate state เดิม
+    const sortedReviews = [...remainReview];
 
     if (option === "date") {
       sortedReviews.sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
-        return dateB - dateA; // เรียงจากใหม่ → เก่า
+        return dateB - dateA;
       });
-    } 
-    else if (option === "score") {
+    } else if (option === "score") {
       sortedReviews.sort((a, b) => {
         const avgA =
           Object.values(a.score).reduce((sum, val) => sum + val, 0) /
@@ -219,7 +431,7 @@ export default function ReviewHistory() {
         const avgB =
           Object.values(b.score).reduce((sum, val) => sum + val, 0) /
           Object.keys(b.score).length;
-        return avgB - avgA; // คะแนนมาก → น้อย
+        return avgB - avgA;
       });
     }
 
@@ -227,12 +439,13 @@ export default function ReviewHistory() {
   };
 
   const handleSave = (updatedReview: ReviewCardProps) => {
+    // --- [MODIFIED] ---
+    // อัปเดตทั้ง allReviews และ remainReview โดยใช้ id
+    setAllReviews((prev) =>
+      prev.map((r) => (r.id === updatedReview.id ? updatedReview : r))
+    );
     setRemainReview((prev) =>
-      prev.map((r) =>
-        r.name === updatedReview.name && r.date === updatedReview.date
-          ? updatedReview
-          : r
-      )
+      prev.map((r) => (r.id === updatedReview.id ? updatedReview : r))
     );
   };
 
@@ -242,28 +455,28 @@ export default function ReviewHistory() {
         <div className="flex gap-5">
           <ProfileNavbar />
           <div className="flex-1 flex flex-col gap-4 ">
-            <h1 className="text-2xl font-extrabold text-custom-black">Reviews</h1>
+            <h1 className="text-2xl font-extrabold text-custom-black">
+              Reviews
+            </h1>
 
             {/* Filter Tabs */}
             <div className="flex gap-2 bg-custom-white shadow p-2 rounded-[10px]">
-              {["Hotel", "Rental Car", "Guide", "Attraction"].map(
-                (tab) => (
-                  <button
-                    key={tab}
-                    className={`px-4 py-1 rounded-md text-base font-medium text-gray hover:bg-pale-blue hover:text-dark-blue 
+              {["Hotel", "Rental Car", "Guide", "Attraction"].map((tab) => (
+                <button
+                  key={tab}
+                  className={`px-4 py-1 rounded-md text-base font-medium text-gray hover:bg-pale-blue hover:text-dark-blue 
                       ${
                         filterReview === tab
                           ? "bg-pale-blue text-dark-blue"
                           : ""
                       }`}
-                    onClick={() => filterRemainReview(tab)}
-                  >
-                    {tab}
-                  </button>
-                )
-              )}
+                  onClick={() => filterRemainReview(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
-            
+
             {/* Header */}
             <div className="flex justify-between items-center">
               <span className="text-base font-medium text-custom-black">
@@ -275,7 +488,6 @@ export default function ReviewHistory() {
                   className="text-custom-black d-select pr-5 pl-2 w-[10rem]"
                   onChange={(e) =>
                     sortByOption((e.target as HTMLSelectElement).value)
-                    // setSortOption((e.target as HTMLSelectElement).value)
                   }
                 >
                   <option value="" disabled>
@@ -300,24 +512,35 @@ export default function ReviewHistory() {
               </div>
             </div>
 
-            {/* Reviews List */}
-            <div
-              className={`gap-4 ${
-                viewOption === "Grid"
-                  ? "grid grid-cols-2 lg:grid-cols-3"
-                  : "flex flex-col"
-              }`}
-            >
-              {remainReview.map((r) => (
-                <ReviewCard
-                  key={`${r.name}-${r.date}`}
-                  viewOption={viewOption}
-                  {...r}
-                  onEdit={() => handleEdit(r)}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
+            {/* --- [NEW] --- Loading state */}
+            {isLoading ? (
+              <div className="text-center p-10">Loading reviews...</div>
+            ) : (
+              /* Reviews List */
+              <div
+                className={`gap-4 ${
+                  viewOption === "Grid"
+                    ? "grid grid-cols-2 lg:grid-cols-3"
+                    : "flex flex-col"
+                }`}
+              >
+                {remainReview.length > 0 ? (
+                  remainReview.map((r) => (
+                    <ReviewCard
+                      key={r.id} // --- [MODIFIED] --- ใช้ id ที่ไม่ซ้ำกัน
+                      viewOption={viewOption}
+                      {...r}
+                      onEdit={() => handleEdit(r)}
+                      onDelete={() => handleDelete(r)} // --- [MODIFIED] --- ส่ง r ไปเลย
+                    />
+                  ))
+                ) : (
+                  <div className="text-center p-10 text-gray-500">
+                    No reviews found for this category.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -334,3 +557,4 @@ export default function ReviewHistory() {
     </DefaultPage>
   );
 }
+

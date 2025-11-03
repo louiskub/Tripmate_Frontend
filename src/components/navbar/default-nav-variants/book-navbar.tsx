@@ -4,6 +4,8 @@ import { PageOptionDropdown } from '../navbar-button';
 import { SubBody, ButtonText, SmallTag } from '@/components/text-styles/textStyles';
 import { paths } from '@/config/paths.config'
 import { useBoolean } from '@/hooks/use-boolean'
+import { endpoints, BASE_URL } from "@/config/endpoints.config";
+import { usePathname } from 'next/navigation';
 
 import { ProfileDropdown } from '@/components/navbar/default-nav-variants/user-navbar'
 
@@ -16,6 +18,8 @@ import GroupIcon from '@/assets/icons/group.svg'
 import TripIcon from '@/assets/icons/trip.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import LogOutIcon from '@/assets/icons/logout.svg'
+import { number } from 'framer-motion';
+import { useUser } from '@/context/userContext';
 
 type BookNavbarProps = {
     book_state: number;
