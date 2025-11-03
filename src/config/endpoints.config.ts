@@ -11,6 +11,10 @@ export const endpoints = {
   },
   profile: (id: string) => `${BASE_URL}/users/${id}`,
   upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
+  favorite: `${BASE_URL}/bookmark`,
+  unfavorite: (id: string) => `${BASE_URL}/bookmark/${id}`,
+  favorite_page: (id: string, type: string) => `${BASE_URL}/users/bookmark/${id}/${type}`,
+
   hotel: {
     all: (key?: string) => `${BASE_URL}/hotel?${key}`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
@@ -36,6 +40,7 @@ export const endpoints = {
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     book: (id: string) => `${BASE_URL}/guide/book/${id}`,
   },
+  nearby_location: (lat:number, long:number) => `${BASE_URL}/locations/nearby?lat=${lat}&lng=${long}&radiusKm=50&limit=10`,
   car_center: (id: string) => `${BASE_URL}/car-rental-center/${id}`,
 
   serviceManage: {

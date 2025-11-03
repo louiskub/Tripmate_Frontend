@@ -7,7 +7,7 @@ import {
   MapPin
 } from "lucide-react"
 
-export default function MiniMap({name, lat=100.5018, long=13.7563}: {name: string, lat: number, long: number}) {
+export default function MiniMap({name, lat=100.5018, long=13.7563, className =''}: {name: string, lat: number, long: number, className?:string}) {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<maplibregl.Map | null>(null)
 
@@ -52,7 +52,7 @@ export default function MiniMap({name, lat=100.5018, long=13.7563}: {name: strin
     return () => map.current?.remove()
   }, [])
 
-  return <div className="w-full h-full relative">
+  return <div className={`w-full h-full relative ${className}`}>
     <div ref={mapContainer} className="w-full h-full rounded-xl" />
     <button
         onClick={() => {window.location.href = `/map?name=${name}&lat=${lat}&long=${long}`}}

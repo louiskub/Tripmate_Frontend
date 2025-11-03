@@ -3,7 +3,8 @@ import { endpoints } from '@/config/endpoints.config';
 import RentalcarDetailModel from '@/models/service/detail/rental-car';
 import RentalCarDetail from '@/components/services/pages/rental-car-detail';
 import { rental_car_detail } from '@/mocks/rental-cars';
-import { getCarRentalCenter } from '@/utils/service/profile(server)';
+import { getCarRentalCenter, getNearbyLocations, getProfile } from '@/utils/service/get-functions';
+import { formatDate } from '@/utils/service/string-formatter';
 
 export default async function RentalCarDetailPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -12,6 +13,23 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
     const data = response.data;
     const profile = await getCarRentalCenter(data.crcId)
     console.log(profile?.data)
+
+    const reviews = await Promise.all(
+      data.service.reviews.map(async (review: any) => {
+        const profile = await getProfile(review.userId);
+        return {
+          user: `${profile?.fname} ${profile?.lname}`, // fixed duplicate fname
+          user_profile: profile?.profileImg,
+          rating: review.rating,
+          comment: review.comment,
+          pictures: review.image,
+          date: formatDate(review.createdAt),
+        };
+      })
+    );
+    const get_nearby_locations = await getNearbyLocations(data.service.location.lat, data.service.location.long)
+    console.log(get_nearby_locations)
+
     const car: RentalcarDetailModel = {
       name: data.name ?? '',
       owner: {
@@ -21,9 +39,9 @@ export default async function RentalCarDetailPage({ params }: { params: { id: st
       },
       rating: data.rating ?? 0, //ไม่มี
       rating_count: data.service?.reviews?.length ?? 0, //none
-      review: data.service?.reviews,
+      review: reviews,
       location: data.service?.location?.zone ?? '', // if location exists
-      nearby_locations: data.nearbyLocations || [],
+      nearby_locations: get_nearby_locations,
       price: data.pricePerDay ? Number(data.pricePerDay) : 0, // convert string to number
       brand: data.brand ?? '',
       model: data.model ?? '',

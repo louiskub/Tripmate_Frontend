@@ -26,11 +26,12 @@ import { mockHotel1 } from '@/mocks/hotels'
 import { hotelRatingMeta } from '@/utils/service/rating';
 import { PicturePopup } from '@/components/services/other/service-pictures';
 import HotelDetailModel from '@/models/service/detail/hotel-detail';
+import { start } from 'repl';
 
 
 type HotelDetailProps = {
-  service: HotelDetailModel
-}
+  service: HotelDetailModel;
+};
 
 export default function HotelDetail({service}: HotelDetailProps) {
   const [currentTab, setCurrentTab] = useState("overview");
@@ -116,10 +117,15 @@ type tab = {
   
   const rooms = service.room;
 
-  
-  const starting_price = rooms ? Math.min(
-      ...rooms.flatMap((room) => room.room_options.map((opt) => opt.price))
-  ) : 0;
+  let prices: number[] = [];
+
+  rooms?.forEach(room => {
+    if (room.room_options?.length) {
+      prices.push(...room.room_options.map(opt => opt.price));
+    }
+  });
+
+const starting_price = prices.length ? Math.min(...prices) : 0;
 
   const first_comment: string | undefined = service.review[0]?.comment;
 
@@ -136,7 +142,7 @@ type tab = {
       </div>
       <section id='overview' className='rounded-[10px] flex flex-col gap-2'>
         <ServicePictures pictures={service.pictures} onClick={() => setPicturePopUp(true)}>
-          <FavoriteButton favorite={false} id={'1'} type='hotel' large/>
+          <FavoriteButton favorite={service.favorite ?? false} id={service.id} type='service' large/>
         </ServicePictures>
         {PicturePopUp && 
           <PicturePopup pictures={service.pictures}
@@ -161,17 +167,24 @@ type tab = {
                 </span>
               </div>
               <div className='flex items-center justify-end gap-2 col-start-2 row-start-1 row-span-2'>
-                <span className='flex items-baseline gap-1'>
+                {
+                  starting_price == 0 ? 
+                  <Title className='text-dark-blue'>not available</Title> :
+                  <>
+                  <span className='flex items-baseline gap-1'>
                     <Body className='text-dark-gray'>From</Body>
                     <Title className='text-dark-blue'>฿</Title>
                     <Title className='text-dark-blue'>{starting_price}</Title>
-                </span>
-                <Button
-                  as='button'
-                  onClick={() => document.getElementById('room')?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                  text='Select Rooms'
-                  className='bg-dark-blue rounded-[10px] !px-2.5 text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
-                />
+                  </span>
+                  <Button
+                      as='button'
+                      onClick={() => document.getElementById('room')?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                      text='Select Rooms'
+                      className='bg-dark-blue rounded-[10px] !px-2.5 text-white hover:bg-darker-blue border-b-3 active:scale-[98%]'
+                  />
+                  </>
+                }
+                
               </div>
           </header>
 
@@ -201,7 +214,7 @@ type tab = {
               rating_meta={hotelRatingMeta}
             />
 
-            <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px]'>
+            <div className='flex flex-col gap-2.5 p-2.5 border border-light-gray rounded-[10px] w-64 h-60'>
                 <MiniMap lat={service.lat} long={service.long} name={service.name} />
                 <ul>
                   {
@@ -226,7 +239,7 @@ type tab = {
       </section>
 
       <section id='room' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
-        <Title className='border-b border-light-gray py-1.5 px-4'>Rooms</Title>
+        <Title className='border-light-gray py-1.5 px-4'>Rooms</Title>
         {
           service.room.map((room) => (
             <RoomDetail 
@@ -278,10 +291,12 @@ type tab = {
       <section id='location' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4 mb-2'>Location</Title>
         <div className='flex gap-5'>
-          <LargeMap 
+          {/* <MiniMap className='basis-3/5' lat={service.lat} long={service.long} name={service.name} /> */}
+          {/* <LargeMap 
           location_link=''
           className='basis-3/5'
-          />
+          /> */}
+          <MiniMap className='basis-3/5' lat={service.lat} long={service.long} name={service.name} />
           <div className='basis-2/5'>
             <ul className='grid grid-cols-2 w-full py-2 gap-2.5'>
               {

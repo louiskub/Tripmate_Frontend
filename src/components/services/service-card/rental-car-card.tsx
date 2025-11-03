@@ -17,7 +17,6 @@ import {ratingText} from '@/utils/service/rating'
 import FavoriteButton from '@/components/services/other/favorite-button'
 import { useRouter } from "next/navigation"
 
-import Link from "next/link";
 import RentalCarCardProps from '@/models/service/card/rental-car-card';
 
 const RentalCarCard = (car: RentalCarCardProps) => {
@@ -27,7 +26,7 @@ const RentalCarCard = (car: RentalCarCardProps) => {
                     hover:bg-dark-white hover:cursor-pointer"
             onClick={() => router.push(paths.rental_car.detail(car.id))}>
             <ImageSlide pictures={car.pictures}>
-                <FavoriteButton favorite={car.favorite} id={car.id} type='rental_car'/>
+                <FavoriteButton favorite={car.favorite ?? false} id={car.id} type='service'/>
             </ImageSlide>
 
             <div className="w-full flex overflow-hidden">
