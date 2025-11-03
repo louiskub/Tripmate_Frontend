@@ -88,6 +88,7 @@ const TripHeroSection: React.FC = () => {
     const locationInput = locationRef.current;
     // console.log(locationInput?.value)
     clickState.toLowerCase()
+    const test = clickState == "rental car" ? "rental-car" : clickState
     window.location.href = `/${clickState.toLowerCase()}?q=${locationInput?.value}`
     // console.log(dateRange, )
   }
