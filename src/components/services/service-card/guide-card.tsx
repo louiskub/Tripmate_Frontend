@@ -67,7 +67,7 @@ const GuideCard = (service: GuideCardProps) => {
                         </div> */}
                     </div>
 
-                    {service.rating_count ? 
+                    {service.rating ? 
                         <div className="inline-flex items-center gap-[3px] mt-2">
                             <Tag text={(service.rating).toString()} /> 
                             <Caption className='text-dark-blue'>{ratingText(service.rating)}</Caption>

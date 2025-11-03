@@ -150,13 +150,13 @@ type tab = {
       <section id='menu' className='bg-custom-white mt-4 p-2.5 rounded-[10px] shadow-[var(--light-shadow)]'>
         <Title className='border-b border-light-gray py-1.5 px-4'>Menu</Title>
         <div className='flex justify-center px-4 py-2 gap-y-6'>
-          {/* <ImageSlide className='w-3/4 aspect-5/3' pictures={service.menu} /> */}
-          <iframe
+          <ImageSlide className='w-3/4' pictures={[service.menu]} />
+          {/* <iframe
             src={service.menu}
             width="100%"
             height="800px"
             style={{ border: "none" }}
-          ></iframe>
+          ></iframe> */}
         </div>
       </section>
 

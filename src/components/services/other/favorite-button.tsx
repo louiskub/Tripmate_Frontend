@@ -61,8 +61,10 @@ const FavoriteButton = ({ favorite, id,  type, large=false}: FavoriteButtonProps
         if (loading) return;
         setLoading(true)
         const token = Cookies.get("token");
+        const user_id = getUserIdFromToken(token)
+        if(!token || !user_id) return null;
         try {
-            const response = await axios.delete(endpoints.unfavorite(id), {
+            const response = await axios.delete(endpoints.unfavorite(user_id, id), {
                 headers: { Authorization: `Bearer ${token}` },
             });
             console.log(response)

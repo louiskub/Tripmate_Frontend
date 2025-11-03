@@ -105,9 +105,6 @@ export default async function HotelDetailPage({ params }: { params: { id: string
       id: data.id,
       lat: data.service.location.lat,
       long: data.service.location.long,
-      
-      
-      
     }
 
     console.log(hotel)
