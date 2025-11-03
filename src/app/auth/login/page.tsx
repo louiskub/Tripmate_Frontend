@@ -34,6 +34,27 @@ export default function LoginPage() {
             localStorage.setItem("username", data.username)
             localStorage.setItem("userId", data.sub)
 
+        try {
+            const res = await axios.get(endpoints.profile(data.sub), {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const profile = {
+                fname: res.data.fname,
+                lname: res.data.lname,
+                profileImg: res.data.profileImg ?? "", // fallback if missing
+            };
+
+            // Example: save to localStorage
+            localStorage.setItem("fname", profile.fname);
+            localStorage.setItem("lname", profile.lname);
+            localStorage.setItem("profileImg", profile.profileImg);
+
+        } catch (err) {
+            console.error("Failed to fetch user", err);
+        }
+
+
             if (data.userRole == "hotel-manager")
                 localStorage.setItem("userRole", "hotel")
             else if (data.userRole == "car-manager")
@@ -51,6 +72,7 @@ export default function LoginPage() {
                 localStorage.setItem("serviceId", res.data[0].id)
             }
             router.push(paths.home)
+            
         } catch (error: any) {
             console.error("Login failed:", error.response?.data || error.message);
             alert("Login failed. Please check your credentials.");

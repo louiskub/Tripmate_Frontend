@@ -29,18 +29,31 @@ export default function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGr
   }
 
   const handleSubmit = () => {
+    console.log("[v0] Modal handleSubmit called")
+    console.log("[v0] Group name:", groupName)
+    console.log("[v0] Description:", description)
+    console.log("[v0] Has image:", !!selectedImage)
+
     if (groupName.trim()) {
-      onSubmit({
+      console.log("[v0] Calling onSubmit callback")
+      const data = {
         name: groupName,
         description: description,
         image: selectedImage || undefined,
-      })
+      }
+      console.log("[v0] Data being sent:", data)
+      onSubmit(data)
+
       // Reset form
+      console.log("[v0] Resetting form")
       setGroupName("")
       setDescription("")
       setSelectedImage(null)
       setImagePreview(null)
       onClose()
+      console.log("[v0] Modal closed")
+    } else {
+      console.log("[v0] Group name is empty, not submitting")
     }
   }
 
