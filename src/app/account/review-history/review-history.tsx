@@ -40,6 +40,22 @@ const reviewsData: ReviewCardProps[] = [
     ],
     viewOption: "List",
   },
+  {
+    name: "Seafood Delight",
+    coverImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWtBwPjoEDAH_Q_XsApIT9VSZ6p-qupAycyQ&s",
+    service: "Restaurant",
+    location: "Phuket, Thailand",
+    score: {
+      Overall: 9,
+    },
+    review:
+      "Delicious seafood with a nice atmosphere. Friendly staff and great service!",
+    date: "15 Aug 2025",
+    img: [
+      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/17/7f/a5/big-beach.jpg?w=900&h=500&s=1",
+    ],
+    viewOption: "List",
+  },
 ];
 
 // ---------------- ReviewCard ----------------
@@ -246,7 +262,7 @@ export default function ReviewHistory() {
 
             {/* Filter Tabs */}
             <div className="flex gap-2 bg-custom-white shadow p-2 rounded-[10px]">
-              {["Hotel", "Rental Car", "Guide", "Attraction"].map(
+              {["Hotel", "Restaurant", "Rental Car", "Guide", "Attraction"].map(
                 (tab) => (
                   <button
                     key={tab}
@@ -272,7 +288,7 @@ export default function ReviewHistory() {
               <div className="flex gap-4">
                 <select
                   defaultValue=""
-                  className="text-custom-black d-select pr-5 pl-2 w-[10rem]"
+                  className="text-custom-black d-select w-fit"
                   onChange={(e) =>
                     sortByOption((e.target as HTMLSelectElement).value)
                     // setSortOption((e.target as HTMLSelectElement).value)
@@ -286,7 +302,7 @@ export default function ReviewHistory() {
                 </select>
                 <select
                   defaultValue=""
-                  className="text-custom-black d-select pr-2 pl-2 max-w-[5rem]"
+                  className="text-custom-black d-select w-fit"
                   onChange={(e) =>
                     setViewOption((e.target as HTMLSelectElement).value)
                   }
