@@ -54,6 +54,7 @@ export const endpoints = {
     }
   },
   review: {
+    getAll: `${BASE_URL}/review`,
     create: `${BASE_URL}/review`,
     uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
   },

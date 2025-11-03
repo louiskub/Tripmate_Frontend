@@ -13,7 +13,7 @@ type ReviewCardProps = {
   // --- [MODIFIED] ---
   // เพิ่ม ID เพื่อให้แน่ใจว่า key ไม่ซ้ำ
   // และใช้ในการอ้างอิงตอน Edit/Delete
-  id: string;
+  id: string; 
   name: string;
   coverImg?: string;
   service?: string;
@@ -25,13 +25,17 @@ type ReviewCardProps = {
   location?: string;
 };
 
+// ---------------- Sample Reviews ----------------
+// --- [REMOVED] ---
+// ไม่จำเป็นต้องใช้ reviewsData ที่เป็น static อีกต่อไป
+// const reviewsData: ReviewCardProps[] = [ ... ];
+
 // ---------------- ReviewCard ----------------
 const ReviewCard = ({
   id, // --- [NEW] ---
   name,
   coverImg,
   location,
-  service, // --- [FIXED] --- เพิ่ม service ใน destructuring
   score,
   review,
   date,
@@ -100,7 +104,7 @@ const ReviewCard = ({
                       viewOption,
                       img,
                       coverImg, // --- [NEW] ---
-                      service, // --- [FIXED] --- 'service' ตอนนี้ถูก define แล้ว
+                      service, // --- [NEW] ---
                     });
                   }}
                   className="block w-full text-left px-3 py-1.5 text-sm text-custom-black hover:bg-gray-100"
@@ -120,7 +124,7 @@ const ReviewCard = ({
                       viewOption,
                       img,
                       coverImg, // --- [NEW] ---
-                      service, // --- [FIXED] --- 'service' ตอนนี้ถูก define แล้ว
+                      service, // --- [NEW] ---
                     });
                   }}
                   className="block w-full text-left px-3 py-1.5 text-sm text-red-600 hover:bg-gray-100"
@@ -177,6 +181,9 @@ const ReviewCard = ({
   );
 };
 
+// --- [REMOVED] ---
+// async function getHotel(){ ... }
+
 // ---------------- ReviewHistory ----------------
 export default function ReviewHistory() {
   const [viewOption, setViewOption] = useState("List");
@@ -222,6 +229,7 @@ export default function ReviewHistory() {
         // สร้าง Array ของ Promises เพื่อดึงข้อมูลรายละเอียดของแต่ละรีวิว
         const reviewPromises = reviewsList.map(
           async (reviewData: any): Promise<ReviewCardProps | null> => {
+            
             // ตรวจสอบ status และกำหนด serviceType ให้ตรงกับ Filter
             let type = reviewData.status; // "hotel", "place", null
             let serviceType: string;
@@ -245,18 +253,8 @@ export default function ReviewHistory() {
                   authJsonHeader()
                 );
                 const details = detailRes.data;
-
-                // --- [FIXED] ---
-                // 1. เข้าถึง location ที่ถูกต้อง: details.service.location
-                // 2. ใช้ Optional Chaining (?. ) เพื่อป้องกัน error ถ้า service หรือ location เป็น undefined
-                const loc = details.service?.location;
-
-                // 3. ใช้ (?. ) ตอนดึงค่า name, province, country ด้วย
-                const locationString = [
-                  loc?.name,
-                  loc?.province,
-                  loc?.country,
-                ]
+                const loc = details.location;
+                const locationString = [loc.name, loc.province, loc.country]
                   .filter(Boolean)
                   .join(", ");
 
@@ -267,7 +265,7 @@ export default function ReviewHistory() {
                   img: reviewData.image,
                   score: mapScores(reviewData),
                   service: serviceType, // "Hotel"
-                  name: details.name, // `details.name` คือชื่อโรงแรม ถูกต้องแล้ว
+                  name: details.name,
                   coverImg:
                     details.service?.serviceImg || details.pictures?.[0],
                   location: locationString,
@@ -276,6 +274,7 @@ export default function ReviewHistory() {
               }
               // --- กรณี Place (ที่เราแมพเป็น Attraction) ---
               else if (type === "place" && reviewData.placeId) {
+                
                 // !!! ข้อควรระวัง: คุณต้องเพิ่ม endpoint สำหรับ "place"
                 // ผมจะสมมติว่ามี endpoints.place.detail(id)
                 // const detailRes = await axios.get(endpoints.place.detail(reviewData.placeId), authJsonHeader());
@@ -291,7 +290,7 @@ export default function ReviewHistory() {
                 // --- จบส่วน MOCK DATA ---
 
                 const loc = details.location;
-                const locationString = [loc?.name, loc?.country]
+                const locationString = [loc.name, loc.country]
                   .filter(Boolean)
                   .join(", ");
 
@@ -308,10 +307,11 @@ export default function ReviewHistory() {
                   viewOption: "List",
                 };
               }
-
+              
               // หากมี type อื่นๆ ที่ยังไม่รองรับ
               console.warn(`Unhandled review type or missing ID: ${type}`);
               return null;
+
             } catch (err) {
               console.error(
                 `Failed to fetch details for review ${reviewData.id}:`,
@@ -344,6 +344,11 @@ export default function ReviewHistory() {
     fetchReview();
   }, []); // ทำงานครั้งเดียวเมื่อ component โหลด
 
+  // --- [MODIFIED] ---
+  // ลบ State ที่ไม่ได้ใช้ (remainReview)
+  // และเปลี่ยนไปใช้ allReviews แทน reviewsData
+  // const [remainReview, setRemainReview] = useState(reviewsData);
+
   // Popup state
   const [isEditing, setIsEditing] = useState(false);
   const [selectedReview, setSelectedReview] =
@@ -367,11 +372,12 @@ export default function ReviewHistory() {
     setFilterReview(filter === filterReview ? "All" : filter);
     if (filter === "All" || filter === filterReview) {
       // --- [MODIFIED] ---
-      // ใช้ allReviews
+      // ใช้ allReviews แทน reviewsData
       setRemainReview(allReviews);
     } else {
       // --- [MODIFIED] ---
-      // ใช้ allReviews และ r.service === filter
+      // ใช้ allReviews แทน reviewsData
+      // และใช้ r.service === filter (ตัวพิมพ์ใหญ่ตรงกัน)
       setRemainReview(allReviews.filter((r) => r.service === filter));
     }
   };
