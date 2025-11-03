@@ -13,22 +13,29 @@ export const endpoints = {
     edit_profile: (id: string) => `${BASE_URL}/users/${id}/edit`,
     upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
   },
+  history: {
+      booking: (vendorType: string) => `${BASE_URL}/transaction?type=${vendorType}`
+    },
   manage_account: {
     change_password: (id: string) => `${BASE_URL}/users/${id}/password`,
   },
+  favorite: `${BASE_URL}/bookmark`,
+  unfavorite: (id: string) => `${BASE_URL}/bookmark/${id}`,
+  favorite_page: (id: string, type: string) => `${BASE_URL}/users/bookmark/${id}/${type}`,
   hotel: {
-    all: (key?: string) => `${BASE_URL}/search/hotels?${key}`,
+    all: (key?: string) => `${BASE_URL}/hotel?${key}`,
     detail: (id: string) => `${BASE_URL}/hotel/${id}`,
     delete: (id: string) => `/hotel/${id}`,
     book: (id: string) => `${BASE_URL}/hotel/book/${id}`,
+    room: (roomId: string, hotelId: string) => `${BASE_URL}/room/${roomId}/${hotelId}`,
   },
   restaurant: {
-    all: (key?: string) => `${BASE_URL}/search/rentaurants?${key}`,
+    all: (key?: string) => `${BASE_URL}/restaurant?${key}`,
     detail: (id: string) => `${BASE_URL}/restaurant/${id}`,
     book: (id: string) => `${BASE_URL}/restaurant/book/${id}`,
   },
   rental_car: {
-    all: (key?: string) => `${BASE_URL}/search/rentals?${key}`,
+    all: (key?: string) => `${BASE_URL}/car?${key}`,
     detail: (id: string) => `${BASE_URL}/car/${id}`,
     book: (id: string) => `${BASE_URL}/car/book/${id}`,
   },  
@@ -36,12 +43,12 @@ export const endpoints = {
   upload_profile: (id: string) => `${BASE_URL}/users/upload/${id}`,
   
   attraction: {
-    all: (key?: string) => `${BASE_URL}/search/attractions?${key}`,
+    all: (key?: string) => `${BASE_URL}/place?${key}`,
     detail: (id: string) => `${BASE_URL}/place/${id}`,
     book: (id: string) => `${BASE_URL}/attraction/book/${id}`,
   },
   guide: {
-    all: (key?: string) => `${BASE_URL}/search/guide?${key}`,
+    all: (key?: string) => `${BASE_URL}/guide?${key}`,
     detail: (id: string) => `${BASE_URL}/guide/${id}`,
     // book: `${BASE_URL}/booking`,
   },
@@ -58,6 +65,8 @@ export const endpoints = {
     createhotel: `${BASE_URL}/user-services/hotel/`,
   }, 
 
+  nearby_location: (lat:number, long:number) => `${BASE_URL}/locations/nearby?lat=${lat}&lng=${long}&radiusKm=50&limit=10`,
+
   car_center: (id: string) => `${BASE_URL}/car-rental-center/${id}`,
 
   serviceManage: {
@@ -69,7 +78,10 @@ export const endpoints = {
       uploadImg: (id: string) => `${BASE_URL}/car/upload/${id}`
     }
   },
-
+  review: {
+    create: `${BASE_URL}/review`,
+    uploadImg: (id: string) => `${BASE_URL}/review/upload/${id}`
+  },
   user_groups: (id: string) => `${BASE_URL}/group/groupByuser/${id}`,
 
   location: {

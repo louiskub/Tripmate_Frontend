@@ -19,21 +19,36 @@ async function getHotel(key: string): Promise<HotelCardProps[] | null> {
           Authorization: `Bearer ${token}`
         }
       });
-      const data = response.data.data;
-      console.log(response)
-            
+      const data = response.data;
+      console.log(data)
+    //   name: string
+    // star: number
+    // rating: number
+    // rating_count: number
+    // location: string
+    // price: number
+    // type: string
+    // pictures: Array<string>
+    // favorite: boolean
+    // id: string      
       const hotels: HotelCardProps[] = data.map((d: any) => {
         const prices = d.rooms?.flatMap((r: any) => r.room_options?.map((opt: any) => opt.price) ?? []) ?? [];
 
         return {
-          ...d,
+          name: d.name,
+          star: d.star,
+          rating: d.rating,
           rating_count: d.service?.reviews?.length ?? 0,
-          location: d.service.location.zone ?? '',
+          location: d.service.location.zone ?? null,
           price: prices.length ? Math.min(...prices) : 0, // fallback to 0 if no price
+          type: d.type,
           pictures: d.pictures?.slice(0, 3) ?? [],
-          favorite: d.favorite ?? false,
+          favorite: d.service.bookmarks.length > 0 ? true: false,
+          id: d.id
         };
       });
+
+      console.log(hotels)
 
       return hotels
     } 

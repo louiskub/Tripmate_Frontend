@@ -3,7 +3,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from "react
 import axios from "axios";
 import Cookies from "js-cookie";
 import { endpoints } from "@/config/endpoints.config";
-import { getProfile } from "@/utils/service/profile(server)";
+import { getProfile } from "@/utils/service/get-functions";
 import { getUserIdFromToken } from "@/utils/service/cookie";
 
 type navbarData = {

@@ -5,7 +5,7 @@ import ServiceFilter from '@/components/inputs/service-filter'
 import {PageTitle, SubBody, Subtitle, Body, ButtonText} from '@/components/text-styles/textStyles'
 import { guides } from '@/mocks/guide';
 import GuideCardProps from '@/models/service/card/guide-card';
-import { getProfile } from '@/utils/service/profile(server)';
+import { getProfile } from '@/utils/service/get-functions';
 
 import { cookies } from 'next/headers';
 import { endpoints } from '@/config/endpoints.config';
@@ -41,7 +41,7 @@ async function getService(key: string): Promise<GuideCardProps[] | null> {
             price: d.dayRate || 0,
             type: d.specialties,
             pictures: d.pictures?.slice(0, 3) ?? [],
-            favorite: d.favorite ?? false,
+            favorite: d.service?.bookmarks.length > 0 ? true: false,
             id: d.id,
           };
         })

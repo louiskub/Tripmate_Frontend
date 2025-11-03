@@ -10,6 +10,7 @@ import { Button } from '../buttons/buttons'
 
 type MiniMapProps = {
     location_link: string
+
 }
 
 export const MiniMap = ({location_link}: MiniMapProps) => {
