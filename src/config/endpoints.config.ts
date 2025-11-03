@@ -30,8 +30,10 @@ export const endpoints = {
     detail: (id: string) => `/trip/${id}`,
   },
 
-  group:{
-    all: `http://161.246.5.236:8800/group`,
+  group: {
+    // ✅ เพิ่มพอร์ตให้ครบ
+    all: "http://161.246.5.236:8800/group",
+    get: (id: string) => `http://161.246.5.236:8800/group/${id}`,
     expense: (id: string) => `http://161.246.5.236:8800/group/${id}/expense-groups`,
     summary: (id: string) => `http://161.246.5.236:8800/group/${id}/expense-summary`,
     payment: (id: string) => `http://161.246.5.236:8800/group/${id}/payments`,

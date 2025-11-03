@@ -2,9 +2,9 @@
 
 import { Heart, Users, X } from "lucide-react"
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 
+// --- Interfaces ---
 interface Member {
   id: string
   avatar?: string
@@ -16,9 +16,23 @@ interface GroupCardProps {
   description: string
   imageUrl?: string
   members: Member[]
-  isFavorite: boolean 
+  isFavorite: boolean
   onToggleFavorite: (id: string) => void
-  onJoinGroup: (groupName: string) => void
+  onJoinGroup: (groupId: string, groupName: string) => void
+  onViewGroup?: (groupId: string) => void // เพิ่มสำหรับเปิดหน้า group/id
+}
+
+// --- Decode userId จาก token ใน cookie ---
+function getUserIdFromToken(): string | null {
+  try {
+    const token = document.cookie.split("; ").find(r => r.startsWith("token="))?.split("=")[1]
+    if (!token) return null
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    return payload.sub || null
+  } catch (err) {
+    console.error("[getUserIdFromToken] Failed to decode:", err)
+    return null
+  }
 }
 
 export default function GroupCard({
@@ -30,12 +44,20 @@ export default function GroupCard({
   isFavorite,
   onToggleFavorite,
   onJoinGroup,
+  onViewGroup,
 }: GroupCardProps) {
   const [showPopup, setShowPopup] = useState(false)
+  const [isMember, setIsMember] = useState(false)
 
   useEffect(() => {
     document.body.style.overflow = showPopup ? "hidden" : "auto"
-  }, [showPopup])
+
+    // ตรวจสอบว่า user ปัจจุบันเป็นสมาชิกกลุ่มไหม
+    const currentUserId = getUserIdFromToken()
+    const memberIds = members.map(m => m.id)
+    const checkMember = currentUserId ? memberIds.includes(currentUserId) : false
+    setIsMember(checkMember)
+  }, [showPopup, members])
 
   const hasDescription = description && description.trim() !== ""
   const MAX_LENGTH = 200
@@ -58,18 +80,8 @@ export default function GroupCard({
     return Math.abs(hash) % colorPalette.length
   }
 
-  // 🧩 พาเลตสีสด ๆ
-  const colorPalette = [
-    "3B82F6", // ฟ้า
-    "F59E0B", // เหลือง
-    "10B981", // เขียว
-    "EF4444", // แดง
-    "8B5CF6", // ม่วง
-    "EC4899", // ชมพู
-    "14B8A6", // teal
-  ]
+  const colorPalette = ["3B82F6", "F59E0B", "10B981", "EF4444", "8B5CF6", "EC4899", "14B8A6"]
 
-  // 🧩 สร้าง URL avatar แบบมีสีสุ่ม
   const getPlaceholderUrl = (name: string | undefined, id: string): string => {
     const initials = getInitials(name)
     const colorIndex = stringToColorIndex(id || name || "user")
@@ -79,118 +91,135 @@ export default function GroupCard({
 
   return (
     <>
-      <Link href={`/group/${id}`} className="block group">
-        <div
-          className={`relative bg-white rounded-2xl overflow-hidden shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition-all flex flex-col sm:flex-row gap-6 p-4 ${
-            isFavorite ? "border-2 border-pink-300" : ""
-          }`}
-        >
-          {/* --- รูปภาพหลักของกลุ่ม --- */}
-          <div className="relative w-full sm:w-48 h-48 rounded-xl overflow-hidden flex-shrink-0">
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={name}
-                className="object-cover w-full h-full"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = getPlaceholderUrl(name, id)
-                }}
-              />
-            ) : (
-              <img
-                src={getPlaceholderUrl(name, id)}
-                alt={name}
-                className="object-cover w-full h-full"
-              />
-            )}
-
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onToggleFavorite(id)
+      {/* เอา Link ออก กลายเป็น div กดได้เฉพาะปุ่ม */}
+      <div
+        className={`relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.02] transition-all flex flex-col sm:flex-row gap-6 p-4 ${
+          isFavorite ? "border-2 border-pink-300" : ""
+        }`}
+      >
+        {/* --- รูปภาพหลักของกลุ่ม --- */}
+        <div className="relative w-full sm:w-48 h-48 rounded-xl overflow-hidden flex-shrink-0">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              className="object-cover w-full h-full"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getPlaceholderUrl(name, id)
               }}
-              className="absolute top-2 right-2 w-8 h-8 bg-white backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-[1.3] transition-all shadow-md z-10"
-            >
-              <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
-            </button>
-          </div>
+            />
+          ) : (
+            <img
+              src={getPlaceholderUrl(name, id)}
+              alt={name}
+              className="object-cover w-full h-full"
+            />
+          )}
 
-          {/* --- ข้อมูลกลุ่ม --- */}
-          <div className="flex-1 flex flex-col">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-2xl font-bold text-gray-800">{name}</h3>
-                <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-full text-sm font-medium text-blue-600">
-                  <Users className="w-4 h-4" />
-                  <span>{members.length} Members</span>
-                </div>
-              </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onToggleFavorite(id)
+            }}
+            className="absolute top-2 right-2 w-8 h-8 bg-white backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-[1.3] transition-all shadow-md z-10"
+          >
+            <Heart
+              className={`h-4 w-4 ${
+                isFavorite ? "fill-red-500 text-red-500" : "text-gray-500"
+              }`}
+            />
+          </button>
+        </div>
 
-              <div className="text-sm text-gray-600 mt-3 mb-2 break-all min-h-[40px]">
-                {hasDescription ? (
-                  <>
-                    <p className={`whitespace-pre-wrap break-words ${isLongText ? "line-clamp-3" : ""}`}>
-                      {description}
-                    </p>
-                    {isLongText && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          setShowPopup(true)
-                        }}
-                        className="font-semibold text-blue-600 hover:underline mt-1 z-20 relative"
-                      >
-                        Read more
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <p className="italic text-gray-400">No description provided.</p>
-                )}
+        {/* --- ข้อมูลกลุ่ม --- */}
+        <div className="flex-1 flex flex-col">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-2xl font-bold text-gray-800">{name}</h3>
+              <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-full text-sm font-medium text-blue-600">
+                <Users className="w-4 h-4" />
+                <span>{members.length} Members</span>
               </div>
             </div>
 
-            {/* --- ส่วนแสดงสมาชิก --- */}
-            <div className="mt-auto flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="flex -space-x-2">
-                  {members.slice(0, 5).map((member) => (
-                    <div
-                      key={member.id}
-                      className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white"
+            <div className="text-sm text-gray-600 mt-3 mb-2 break-all min-h-[40px]">
+              {hasDescription ? (
+                <>
+                  <p className={`whitespace-pre-wrap break-words ${isLongText ? "line-clamp-3" : ""}`}>
+                    {description}
+                  </p>
+                  {isLongText && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setShowPopup(true)
+                      }}
+                      className="font-semibold text-blue-600 hover:underline mt-1 z-20 relative"
                     >
-                      <img
-                        src={member.avatar || getPlaceholderUrl(member.name, member.id)}
-                        alt={member.name || "member"}
-                        className="object-cover w-full h-full"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = getPlaceholderUrl(member.name, member.id)
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-                {members.length > 3 && (
-                  <div className="ml-2 text-sm text-gray-500">+{members.length - 5} others</div>
-                )}
-              </div>
+                      Read more
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="italic text-gray-400">No description provided.</p>
+              )}
+            </div>
+          </div>
 
+          {/* --- ส่วนแสดงสมาชิก --- */}
+          <div className="mt-auto flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="flex -space-x-2">
+                {members.slice(0, 5).map((member) => (
+                  <div
+                    key={member.id}
+                    className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white"
+                  >
+                    <img
+                      src={member.avatar || getPlaceholderUrl(member.name, member.id)}
+                      alt={member.name || "member"}
+                      className="object-cover w-full h-full"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getPlaceholderUrl(member.name, member.id)
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              {members.length > 5 && (
+                <div className="ml-2 text-sm text-gray-500">+{members.length - 5} others</div>
+              )}
+            </div>
+
+            {/* --- ปุ่ม Join / View --- */}
+            {isMember ? (
               <button
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  onJoinGroup(name)
+                  onViewGroup?.(id)
                 }}
-                className="flex items-center gap-2 bg-blue-300 hover:bg-blue-400 text-white font-semibold px-6 py-2 rounded-lg transition-colors z-20"
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+              >
+                View
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onJoinGroup(id, name)
+                }}
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
               >
                 Join
               </button>
-            </div>
+            )}
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* Popup Modal */}
       <AnimatePresence>

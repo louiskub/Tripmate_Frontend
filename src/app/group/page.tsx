@@ -8,10 +8,12 @@ import Toast from "@/components/ui/toast"
 import DefaultPage from "@/components/layout/default-layout"
 import GroupCard from "@/components/group/group-card"
 import { endpoints } from "@/config/endpoints.config"
+import { useRouter } from "next/navigation"
 
 // --- Interfaces ---
 interface Member {
   id: string
+  name: string
   avatar?: string
 }
 interface Group {
@@ -25,161 +27,198 @@ interface Group {
   isFavorite: boolean
 }
 
-// ✅ helper อ่าน token จาก cookie
-const getToken = () => {
-  if (typeof document === "undefined") return ""
-  const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/)
-  return match ? match[1] : ""
+// --- Decode JWT and get user info ---
+function getUserFromToken() {
+  try {
+    const token = document.cookie.split("; ").find(r => r.startsWith("token="))?.split("=")[1]
+    if (!token) throw new Error("Token not found")
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    const userId = payload.sub
+    const username = payload.username || ""
+    return { userId, username }
+  } catch (err) {
+    console.error("[getUserFromToken] Failed to decode:", err)
+    return { userId: null, username: "" }
+  }
+}
+
+// --- Placeholder generator ---
+function genPlaceholder(name: string) {
+  const initials = name ? name.charAt(0).toUpperCase() : "U"
+  const colors = ["3B82F6", "8B5CF6", "F59E0B", "10B981", "EF4444", "EC4899"]
+  const randomColor = colors[Math.floor(Math.random() * colors.length)]
+  return `https://placehold.co/128x128/${randomColor}/FFFFFF?text=${initials}`
 }
 
 export default function BookingHistory() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [groups, setGroups] = useState<Group[]>([])
-
   const [searchTerm, setSearchTerm] = useState("")
   const [searchedGroupId, setSearchedGroupId] = useState<string | null>(null)
-
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
   const [toastType, setToastType] = useState<"success" | "error">("success")
 
-  // --- 🧠 Fetch groups from backend ---
+  // --- Fetch groups from backend ---
   useEffect(() => {
     const fetchGroups = async () => {
-      console.log("[FetchGroups] Start fetching groups...")
-
+      console.log("[FetchGroups] Fetching groups...")
       try {
-        const token = getToken()
-        console.log("[FetchGroups] Token found:", token)
-
+        const token = document.cookie.split("; ").find(r => r.startsWith("token="))?.split("=")[1]
         const res = await axios.get(endpoints.group.all, {
           headers: { Authorization: `Bearer ${token}` },
         })
-
         const data = Array.isArray(res.data) ? res.data : [res.data]
 
-        const mappedGroups = data.map((g: any, index: number) => {
-          return {
-            id: g.id,
-            code: g.id,
-            name: g.groupName,
-            description: g.description || "No description",
-            imageUrl: g.groupImg,
-            hostName: g.ownerId || "Unknown",
-            members: (g.members || []).map((m: any, i: number) => ({
-              id: m.userId,
-              name: m.user?.username || `User ${i + 1}`,
-              avatar: m.user?.profileImg || `https://placehold.co/128x128/${Math.floor(Math.random() * 16777215).toString(16)}/FFFFFF?text=${(m.user?.username?.slice(0,2) || "U").toUpperCase()}`,
-            })),
-            isFavorite: false,
-          }
-        })
-
-        console.log("[FetchGroups] Mapped groups:", mappedGroups)
+        const mappedGroups = data.map((g: any, index: number) => ({
+          id: g.id,
+          code: g.id,
+          name: g.groupName,
+          description: g.description || "No description",
+          imageUrl: g.groupImg,
+          hostName: g.ownerId || "Unknown",
+          members: (g.members || []).map((m: any, i: number) => ({
+            id: m.userId,
+            name: m.user?.fname || m.user?.username || `User ${i + 1}`,
+            avatar: m.user?.profileImg || genPlaceholder(m.user?.fname || "U"),
+          })),
+          isFavorite: false,
+        }))
         setGroups(mappedGroups)
-        console.log("[FetchGroups] Groups set successfully.")
+        console.log("[FetchGroups] Done:", mappedGroups)
       } catch (err) {
-        console.error("[FetchGroups] Error fetching groups:", err)
+        console.error("[FetchGroups] Error:", err)
       }
     }
-
     fetchGroups()
   }, [])
 
-  // --- ✅ Create group function ---
+  // --- Create group ---
   const handleCreateGroup = async (data: { name: string; description: string; image?: File }) => {
     try {
-      const token = getToken()
-      if (!token) {
-        setToastMessage("No token found. Please log in again.")
-        setToastType("error")
-        setShowToast(true)
-        return
-      }
+      const token = document.cookie.split("; ").find(r => r.startsWith("token="))?.split("=")[1]
+      if (!token) throw new Error("Token missing")
 
-      // 1️⃣ ดึงข้อมูล user ปัจจุบัน
-      const userRes = await axios.get("http://161.246.5.236:8800/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const { userId, username } = getUserFromToken()
+      if (!userId) throw new Error("Cannot extract userId from token")
 
-      const currentUser = userRes.data.data?.[0]
-      const ownerId = currentUser?.id
-      if (!ownerId) throw new Error("Cannot get user ID")
+      console.log("[CreateGroup] Creating group for:", userId)
 
-      // 2️⃣ เตรียม FormData
       const formData = new FormData()
-      formData.append("ownerId", ownerId)
+      formData.append("ownerId", userId)
       formData.append("groupName", data.name)
-      formData.append("description", data.description)
+      formData.append("description", data.description || "")
       formData.append("status", "active")
       if (data.image) formData.append("groupImg", data.image)
 
-      console.log("[CreateGroup] Sending payload:", Object.fromEntries(formData.entries()))
-
-      // 3️⃣ ยิง POST /group
       const res = await axios.post(endpoints.group.all, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
+      const created = res.data
 
-      console.log("[CreateGroup] Response:", res.data)
-
-      // 4️⃣ เพิ่ม group ใหม่ใน state
-      const newGroup = {
-        id: res.data.id,
-        code: res.data.id,
-        name: res.data.groupName,
-        description: res.data.description || "No description",
-        imageUrl: res.data.groupImg,
-        hostName: res.data.ownerId || "Unknown",
-        members: [],
+      const fname = username.split("@")[0]
+      const newGroup: Group = {
+        id: created.id,
+        code: created.id,
+        name: created.groupName,
+        description: created.description || "No description",
+        imageUrl: created.groupImg,
+        hostName: fname,
+        members: [
+          {
+            id: userId,
+            name: fname,
+            avatar: genPlaceholder(fname),
+          },
+        ],
         isFavorite: false,
       }
 
-      setGroups((prev) => [...prev, newGroup])
+      setGroups(prev => [...prev, newGroup])
       setToastMessage("Group created successfully!")
       setToastType("success")
       setShowToast(true)
     } catch (err: any) {
-      console.error("[CreateGroup] Error:", err.response?.data || err)
+      console.error("[CreateGroup] Error:", err)
       setToastMessage("Failed to create group.")
       setToastType("error")
       setShowToast(true)
     }
   }
 
+  // --- Join group ---
+  const handleJoinGroup = async (groupId: string, groupName: string) => {
+    try {
+      const token = document.cookie.split("; ").find(r => r.startsWith("token="))?.split("=")[1]
+      if (!token) throw new Error("Token not found")
+
+      const { userId } = getUserFromToken()
+      if (!userId) throw new Error("Invalid user token")
+
+      const payload = { userId }
+      console.log(`[JoinGroup] Sending POST to /group/${groupId}/join`, payload)
+
+      const res = await axios.post(`http://161.246.5.236:8800/group/${groupId}/join`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      console.log("[JoinGroup] Response:", res.data)
+
+      setToastMessage(`Joined "${groupName}" successfully!`)
+      setToastType("success")
+      setShowToast(true)
+    } catch (err) {
+      console.error("[JoinGroup] Error joining group:", err)
+      setToastMessage("Failed to join group.")
+      setToastType("error")
+      setShowToast(true)
+    }
+  }
+
+  const router = useRouter()
+
+  // ฟังก์ชันเปิดหน้า group โดยตรวจสอบ token ก่อน
+  const handleViewGroup = async (groupId: string) => {
+    try {
+      const token = document.cookie.split("; ").find(r => r.startsWith("token="))?.split("=")[1]
+      if (!token) throw new Error("Token not found")
+
+      const payload = JSON.parse(atob(token.split(".")[1]))
+      const userId = payload.sub
+      const res = await axios.get(`http://161.246.5.236:8800/group/${groupId}/details`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const members = res.data.members || []
+      const isMember = members.some((m: any) => m.userId === userId)
+      if (!isMember) {
+        alert("You are not a member of this group.")
+        return
+      }
+
+      router.push(`/group/${groupId}`)
+    } catch (err) {
+      console.error("[handleViewGroup] Error:", err)
+      alert("Failed to open group details.")
+    }
+  }
+
   // --- Favorite toggle ---
   const handleToggleFavorite = (groupId: string) => {
-    console.log("[ToggleFavorite] Group ID:", groupId)
-    setGroups((prev) =>
-      prev.map((group) =>
-        group.id === groupId ? { ...group, isFavorite: !group.isFavorite } : group
-      )
+    setGroups(prev =>
+      prev.map(group => (group.id === groupId ? { ...group, isFavorite: !group.isFavorite } : group))
     )
   }
 
-  // --- Join group handler ---
-  const handleJoinGroup = (groupName: string) => {
-    console.log("[JoinGroup] Joining group:", groupName)
-    setToastMessage(`Joined "${groupName}" successfully!`)
-    setToastType("success")
-    setShowToast(true)
-  }
-
-  // --- Search handler ---
+  // --- Search ---
   const handleSearch = () => {
     if (!searchTerm.trim()) {
       setSearchedGroupId(null)
       return
     }
-
-    const foundGroup = groups.find((group) => group.code === searchTerm.trim())
-    if (foundGroup) {
-      setSearchedGroupId(foundGroup.id)
-    } else {
-      setSearchedGroupId(null)
+    const found = groups.find(g => g.code === searchTerm.trim())
+    setSearchedGroupId(found ? found.id : null)
+    if (!found) {
       setToastMessage(`Group with code "${searchTerm}" not found.`)
       setToastType("error")
       setShowToast(true)
@@ -191,11 +230,10 @@ export default function BookingHistory() {
     if (e.target.value === "") setSearchedGroupId(null)
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") handleSearch()
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") handleSearch()
   }
 
-  // --- Sorting ---
   const sortedGroups = useMemo(() => {
     const sorted = [...groups].sort((a, b) => {
       if (searchedGroupId) {
@@ -204,14 +242,12 @@ export default function BookingHistory() {
       }
       return (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)
     })
-    console.log("[Sorting] Sorted groups:", sorted)
     return sorted
   }, [groups, searchedGroupId])
 
   return (
     <DefaultPage>
       <main className="flex-1">
-        {/* --- Header --- */}
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1">
@@ -233,59 +269,43 @@ export default function BookingHistory() {
           </div>
         </div>
 
-        {/* --- Filter Bar --- */}
         <div className="flex items-center justify-between px-6 py-4">
           <p className="text-gray-600 font-medium">Found {sortedGroups.length} groups</p>
-          <div className="flex items-center space-x-6">
-            <span className="text-gray-600 font-medium">Sort by favorite</span>
-            <span className="text-gray-600 font-medium">View</span>
-          </div>
         </div>
 
-        {/* --- Group List --- */}
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-16">
-            <div className="relative mb-4">
-              <Users className="w-48 h-48 text-gray-300" />
-              <div className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4">
-                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                  <Search className="h-8 w-8 text-white" />
-                </div>
-              </div>
-            </div>
-            <h3 className="mt-8 text-2xl font-bold text-gray-700 text-center">
-              No groups were found
-            </h3>
-            <p className="text-gray-500 mt-2">
-              Create a new group or search by code to get started!
-            </p>
+            <Users className="w-48 h-48 text-gray-300" />
+            <h3 className="mt-8 text-2xl font-bold text-gray-700">No groups were found</h3>
+            <p className="text-gray-500 mt-2">Create a new group or search by code to get started!</p>
           </div>
         ) : (
           <div className="px-6">
             <div className="flex flex-col gap-4">
-              {sortedGroups.map((group, index) => (
+              {sortedGroups.map((g, i) => (
                 <GroupCard
-                  key={`${group.id}-${index}`}
-                  id={group.id}
-                  name={group.name}
-                  description={group.description}
-                  imageUrl={group.imageUrl}
-                  members={group.members}
-                  isFavorite={group.isFavorite}
+                  key={g.id}
+                  id={g.id}
+                  name={g.name}
+                  description={g.description}
+                  imageUrl={g.imageUrl}
+                  members={g.members}
+                  isFavorite={g.isFavorite}
                   onToggleFavorite={handleToggleFavorite}
-                  onJoinGroup={handleJoinGroup}
+                  onJoinGroup={(groupId, groupName) => handleJoinGroup(groupId, groupName)}
+                  onViewGroup={handleViewGroup}  // ✅ เพิ่มบรรทัดนี้เข้าไป
                 />
               ))}
             </div>
           </div>
         )}
 
-        {/* --- Modals --- */}
         <CreateGroupModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleCreateGroup}
         />
+
         <Toast
           message={toastMessage}
           isVisible={showToast}
