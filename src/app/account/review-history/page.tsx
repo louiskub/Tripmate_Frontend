@@ -177,6 +177,16 @@ const ReviewCard = ({
   );
 };
 
+const RatingGroupByType = (type: string) => {
+  if (type === "hotel") return ["cleanliness", "comfort", "meal", "location", "service", "facilities"];
+  // if (type === "restaurant") return ["Food Quality", "Service", "Ambiance", "Value for Money"];
+  if (type === "attraction") return ["overall"];
+  if (type === "car") return ["overall"];
+  if (type === "guide") return ["knowledge", "communication", "punctuality", "safety", "route_planning", "local_insights"];
+  return [];
+};
+
+
 // ---------------- ReviewHistory ----------------
 export default function ReviewHistory() {
   const [viewOption, setViewOption] = useState("List");
@@ -204,8 +214,10 @@ export default function ReviewHistory() {
         console.log("data, ", reviewsList);
 
         // Helper function สำหรับแปลง score1, score2... เป็น Object
-        const mapScores = (reviewData: any): Record<string, number> => {
+        const mapScores = (reviewData: any, type: string): Record<string, number> => {
           const scores: Record<string, number> = {};
+          const metrics = RatingGroupByType(type);
+          console.log(metrics)
           for (let i = 1; i <= 6; i++) {
             if (
               reviewData[`score${i}`] !== null &&
@@ -213,9 +225,10 @@ export default function ReviewHistory() {
             ) {
               // ใช้ชื่อ generic ไปก่อน
               // คุณสามารถเปลี่ยนชื่อ 'Metric ${i}' เป็นชื่อที่เฉพาะเจาะจงได้
-              scores[`Metric ${i}`] = reviewData[`score${i}`];
+              scores[metrics[i-1]] = reviewData[`score${i}`];
             }
           }
+          console.log("score", scores)
           return scores;
         };
 
@@ -259,13 +272,14 @@ export default function ReviewHistory() {
                 ]
                   .filter(Boolean)
                   .join(", ");
+                console.log("print :", reviewData)
 
                 return {
                   id: reviewData.id,
                   review: reviewData.comment,
                   date: reviewData.createdAt,
                   img: reviewData.image,
-                  score: mapScores(reviewData),
+                  score: mapScores(reviewData, type),
                   service: serviceType, // "Hotel"
                   name: details.name, // `details.name` คือชื่อโรงแรม ถูกต้องแล้ว
                   coverImg:
@@ -300,7 +314,7 @@ export default function ReviewHistory() {
                   review: reviewData.comment,
                   date: reviewData.createdAt,
                   img: reviewData.image,
-                  score: mapScores(reviewData),
+                  score: mapScores(reviewData, "attraction"),
                   service: serviceType, // "Attraction"
                   name: details.name,
                   coverImg: details.coverImg,
@@ -354,13 +368,35 @@ export default function ReviewHistory() {
     setIsEditing(true);
   };
 
-  const handleDelete = (review: ReviewCardProps) => {
-    if (!confirm(`Delete review for ${review.name}?`)) return;
-    // --- [MODIFIED] ---
-    // ลบออกจากทั้ง allReviews และ remainReview
-    // (หมายเหตุ: นี่คือการลบใน state เท่านั้น ยังไม่ได้เรียก API ลบจริง)
-    setAllReviews((prev) => prev.filter((r) => r.id !== review.id));
-    setRemainReview((prev) => prev.filter((r) => r.id !== review.id));
+  // --- [MODIFIED] ---
+  // เชื่อมต่อ API Delete
+  const handleDelete = async (review: ReviewCardProps) => {
+    // 1. ลบ `confirm()` ออกตามข้อกำหนดของระบบ
+    //    คุณควรเพิ่ม Custom Modal ยืนยันการลบตรงนี้
+    //    เช่น if (!myCustomConfirm(`Delete review for ${review.name}?`)) return;
+
+    try {
+      // 2. เพิ่มการเรียก axios.delete
+      //    (ใส่ URL ของคุณแทนที่ 'YOUR_DELETE_API_ENDPOINT')
+      // const DELETE_URL = `YOUR_DELETE_API_ENDPOINT/${review.id}`;
+      
+      await axios.delete(
+        endpoints.review.delete(review.id),
+        // หรือ ถ้าคุณมี endpoint ใน config:
+        // endpoints.review.delete(review.id), 
+        authJsonHeader()
+      );
+
+      // 3. อัปเดต State *หลังจาก* ลบสำเร็จ
+      setAllReviews((prev) => prev.filter((r) => r.id !== review.id));
+      setRemainReview((prev) => prev.filter((r) => r.id !== review.id));
+
+      console.log(`Review ${review.id} deleted successfully`);
+
+    } catch (error) {
+      console.error(`Failed to delete review ${review.id}:`, error);
+      // คุณสามารถแสดง Toast notification หรือข้อความ error ตรงนี้
+    }
   };
 
   const filterRemainReview = (filter: string) => {
@@ -521,3 +557,4 @@ export default function ReviewHistory() {
     </DefaultPage>
   );
 }
+
