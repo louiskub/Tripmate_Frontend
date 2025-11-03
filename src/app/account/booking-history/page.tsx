@@ -42,7 +42,7 @@ function findRoom(rooms: Array<any>, roomId: string){
 
 
 async function getHotel(){
-    const res = await axios.get(endpoints.user.history.booking("hotel"), authJsonHeader()); // แก้เป็น endpoint จริง
+    const res = await axios.get(endpoints.history.booking("hotel"), authJsonHeader()); // แก้เป็น endpoint จริง
     const rawData = res.data;
     const mapped = rawData.map(async (item: any) => {
         const b = item.booking;
@@ -79,7 +79,7 @@ async function getHotel(){
 }
 
 async function getRental(){
-    const res = await axios.get(endpoints.user.history.booking("car_rental_center"), authJsonHeader()); // แก้เป็น endpoint จริง
+    const res = await axios.get(endpoints.history.booking("car_rental_center"), authJsonHeader()); // แก้เป็น endpoint จริง
     const rawData = res.data;
     const mapped = rawData.map(async (item: any) => {
         const b = item.booking;
@@ -115,7 +115,7 @@ async function getRental(){
 }
 
 async function getGuide(){
-    const res = await axios.get(endpoints.user.history.booking("guide"), authJsonHeader()); // แก้เป็น endpoint จริง
+    const res = await axios.get(endpoints.history.booking("guide"), authJsonHeader()); // แก้เป็น endpoint จริง
     const rawData = res.data;
     const mapped = rawData.map(async (item: any) => {
         const b = item.booking;
