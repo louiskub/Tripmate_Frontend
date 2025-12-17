@@ -22,7 +22,7 @@ const popDestination = [
     name: "ภูเก็ต"
   },
   {
-    img: "https://upload.wikimedia.org/wikipedia/commons/c/c6/At_the_Top.jpg",
+    img: "https://res.klook.com/image/upload/fl_lossy.progressive,q_60/Mobile/City/cswglxpstphljdourpfu.jpg",
     name: "เชียงใหม่"
   },
   {
